@@ -1,0 +1,154 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.sys_admin_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <div id="mail">
+
+            <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+            <div>
+
+                <form id="form1" action="@(Url.Action(action, controller))" method="post" enctype="multipart/form-data">
+
+                    <div style="float: right">
+
+                        <span>
+
+                            <input name="type" type="hidden" />
+                            <input name="status" value="@(ViewBag.status)" type="hidden" />
+                            <input name="sort" value="@(ViewBag.sort)" type="hidden" />
+                            <input type="text" name="kw" autocomplete="off" placeholder="請輸入搜尋相關" value="@(ViewBag.kw)"/>
+                            <input type="submit" value="查詢" class="btn btn-primary" />
+
+                            <input name="type" type="hidden" />
+                            <button type="button" onclick="Type('1')" class="btn">匯出</button>
+
+                        </span>
+
+
+
+                    </div>
+
+                    <div>
+
+                        <span>時間：
+                        <input name="sD" style="max-width: 10%" type="datetime" value="@(ViewBag.sD)" />
+                            ～
+                        <input name="eD" style="max-width: 10%" type="datetime" value="@(ViewBag.eD)" />
+                            &emsp;
+                        </span>
+                         @{
+                            var visible_dic = new Dictionary<int, string> { { 0, "全部" }, { 1, "啟用" }, { 2, "停用" } };
+                        }
+                        <span>啟用狀態：
+                             <select name="visible">
+                                 @foreach (var item in visible_dic)
+                                 { 
+                                     <option value="@(item.Key)" @(ViewBag.visible == item.Key ? "selected" : "")>@(item.Value)</option>
+                                 }
+                             </select>
+                        </span>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <br />
+
+            <div>
+                <div style="float: right">
+                </div>
+
+                <div>
+
+                    <a href="@Url.Action(action.Replace("List", "Add"), controller, new { id = 0 })" class="btn"><span class="icon-pencil"></span>新增</a>
+
+                    <a href="@Url.Action(action, controller, new { sort = 0 })" class="btn@(ViewBag.sort == 0 ? " btn-primary" : "")"><span class="icon-arrow-up"></span>ERP編號遞增</a>
+                    <a href="@Url.Action(action, controller, new { sort = 1 })" class="btn@(ViewBag.sort == 1 ? " btn-primary" : "")"><span class="icon-arrow-down"></span>ERP編號遞減</a>
+
+                    @*<button type="button" id="Import" class="btn btn-primary" onclick="$('input[name=Im]').click();">匯入商品</button>
+                    <input hidden="hidden" type="file" name="Im" value="" />
+
+                    <a href="~/Content/files/product/商品上傳範例.xlsx">
+                        <input class="btn" type="button" value="範例下載" /></a>*@
+
+                </div>
+            </div>
+
+        </div>
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax", Model)
+
+    </div>
+    <!--contentinner-->
+</div>
+
+<script>
+
+    $('input[name="Im"]').change(function () {
+
+        //格式
+        var re = /(\.xlsx)$/i;
+
+        var ext = $(this).val();
+
+        //判斷格式
+        if (!re.test(ext)) {
+
+            swal('請上傳.xlsx格式');
+
+            $('input[name="Im"]').val('');
+            return false;
+
+        } else {
+
+            swal({
+                title: "確定上傳 " + ext + " 嗎?",
+                text: "",
+                //type: "success",
+                showCancelButton: true,
+                //confirmButtonColor: "#DD6B55",
+                confirmButtonText: "是的，確定",
+                cancelButtonText: "再考慮看看",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                //imageUrl: "/images/in6/未命名.png"
+            }, function (isConfirm) {
+                if (isConfirm) {
+
+                    $('#form1').attr('action', '@(Url.Action("Import"))');
+                    $('#form1').submit();
+                } else {
+
+                    $('input[name="Im"]').val('');
+                    return false;
+                }
+            })
+        }
+    })
+
+</script>
+
+<script>
+    function Go(o) {
+
+        $('input[name="type"]').val('0');
+        $('input[name="status"]').val(o);
+        $('#form1').submit();
+    }
+
+    function Type(o) {
+
+        $('input[name="type"]').val(o);
+        $('#form1').submit();
+    }
+
+</script>

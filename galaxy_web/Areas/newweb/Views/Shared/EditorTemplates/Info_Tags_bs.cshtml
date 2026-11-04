@@ -1,0 +1,29 @@
+﻿@model String
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "span5");
+    htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+    htmlAttributes2.Add("rows", 4);
+
+    int maxlength = 255;
+    if (ViewData.ModelMetadata.AdditionalValues.ContainsKey("maxLength"))
+    {
+        maxlength = (int)ViewData.ModelMetadata.AdditionalValues["maxLength"];
+    }
+    htmlAttributes2.Add("maxlength", maxlength);
+    
+    string id = ViewData.ModelMetadata.PropertyName;
+    
+}
+<script type="text/javascript">$(function () { $("#@(id)").tagsinput({allowDuplicates: true }); })</script>
+
+<div class="control-group">
+    @Html.Label("",htmlAttributes)
+    <div class="controls">
+    @Html.TextBox("", ViewData.TemplateInfo.FormattedModelValue.ToString(), htmlAttributes2)
+    <span class="help-inline"></span>
+    </div>
+</div>

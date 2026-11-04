@@ -1,0 +1,67 @@
+﻿@model h365_web.Models.index_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.vid)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">首頁影片文字內容設定</h4>
+
+                @Html.EditorFor(model => model.url)
+
+                @Html.EditorFor(model => model.text_eng)
+
+                @Html.EditorFor(model => model.text_cht)
+
+                @Html.EditorFor(model => model.start_date)
+
+                @Html.EditorFor(model => model.end_date)
+
+                @Html.EditorFor(model => model.visible)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="button" onclick="location.href = '@Url.Action("IndexVideo")'" class="btn">回列表</button>
+                        @*<button type="reset" class="btn">取消</button>*@
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                url: "required",
+                text_eng: "required",
+                text_cht: "required",
+            },
+            messages: {
+                url: "影片連結，必需填寫！",
+                text_eng: "英文內容，必需填寫！",
+                text_cht: "中文內容，必需選擇！"
+
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>
+
+<script>
+    var content = "請輸入短網址後面字串。Ex.https://youtu.be/mxD7QEt85ms 則輸入mxD7QEt85ms";
+    $('#url').attr('placeholder', content);
+</script>
+

@@ -1,0 +1,129 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.order_bills>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var power_admin = NW.admin(NW.DESDeCode(User.Identity.Name));
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width5" />
+            <col class="width8" />
+            <col class="width8" />
+            <col />
+            <col class="width16" />
+            <col class="width8" />
+            <col class="width12" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">請款月份 </th>
+                <th class="center">處理狀態 </th>
+                <th class="center">請款人</th>
+                @if (ViewBag.flag != 3)
+                {
+                    <th class="center">請款日期 </th>
+                }
+                else
+                {
+                    <th class="center">匯款日期 </th>
+                }
+                <th class="center">請款金額 </th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+
+                        
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        @* 未請款才可作廢 或者是 管理者*@
+                        @if (item.flag == 0 || power_admin.power_id == 2)
+                        {
+                            <input type="checkbox" name="block_id" class="block_check" value="@(item.bills_id)"/>
+                        }
+                    </td>
+                    <td class="center">@(item.yymm)</td>
+                    <td class="center">
+                        @switch (item.flag)
+                        {
+                            case 0: 
+                            <span class="label" style="background-color: #d9534f;">@(NW.bills_flag(0))</span>
+                                break;
+                            case 1: 
+                            <span class="label" style="background-color: #337ab7;">@(NW.bills_flag(1))</span>
+                                break;
+                            case 2:                                  
+                            <span class="label" style="background-color: #337ab7;">@(NW.bills_flag(2))</span>
+                                break;
+                            case 3:                                  
+                            <span class="label label-success">@(NW.bills_flag(3))</span>
+                                break;
+                        }
+                    </td>
+                    <td class="center">
+                    @try
+                    {
+                        @(NW.admin2(item.company_id.ToString()).name_full)
+                    }
+                    catch
+                    { 
+                       
+                    }
+                    </td>
+                    <td class="center">
+                        @if (power_admin.power_id == 2 && item.flag == 3)
+                        {
+                            if (item.finish_datetime != null)
+                            {
+                            @(((DateTime)item.finish_datetime).ToString("yyyy/MM/dd"))
+                            }
+                        }
+                        else if (item.bills_datetime != null)
+                        {
+                            @(((DateTime)item.bills_datetime).ToString("yyyy/MM/dd"))
+                        }
+                    </td>
+                    <td class="center">$ @(item.total.ToString("N0"))</td>
+                    <td>
+                        @{
+                        string ac = "";
+                        //變換Action字串
+                        switch (action)
+                        {
+                            case "StayList":
+                                ac = "StayEdit";
+                                break;
+                            case "List":
+                                ac = "Edit";
+                                break;
+
+                        }
+                        }
+                        @Html.ActionLink("編輯", ac, new { id = item.bills_id, cid = item.company_id }) | 
+                        @Html.ActionLink("匯出", "BillsExport", new { id = item.bills_id })
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("yymm", ViewBag.yymm)
+            .AlwaysAddFirstPageNumber().AddRouteValue("flag", ViewBag.flag))
+    </div>
+</div>
+<!--pagination-->

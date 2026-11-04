@@ -1,0 +1,10 @@
+﻿@model string
+
+@if (Model != null && Model != "")
+{ 
+    <div class="popoversample">
+        <a data-content="<img src='@Url.Content("~/Content/images/adv/" + Model)' />" data-placement="left" data-rel="popover" class="btn btn-primary btn-circle" href="#">
+            <i class="icon-picture icon-white"></i>
+        </a>
+    </div>
+}

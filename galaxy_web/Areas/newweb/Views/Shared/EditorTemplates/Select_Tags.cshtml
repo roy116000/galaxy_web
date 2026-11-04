@@ -1,0 +1,120 @@
+﻿@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "span2");
+
+    string id = ViewData.ModelMetadata.PropertyName;
+    string val = ViewData.TemplateInfo.FormattedModelValue.ToString();
+
+    List<ListItem> ListItems = new List<ListItem>();
+
+    if (ViewData[id] != null) { ListItems = (List<ListItem>)ViewData[id]; }
+
+    var GameList = (Dictionary<int, string>)ViewData[id + "_s"];
+    string Strs = "";
+}
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <div class="field">
+        @if (ListItems.Count > 0)
+        {
+            @Html.SelectList(id, ListItems, htmlAttributes2)
+        }
+        <span class="help-inline"></span>
+    </div>
+</div>
+
+
+@*選擇選項時*@
+<script>
+
+    $('#@(id)').change(function () {
+        var o = $(this).val(); //當下選取的
+        if (o != "") {
+
+            $('#@(id) :selected').text(); //選擇的字眼
+
+            function sortNumber(a, b) //排序函数
+            {
+                return a - b
+            }
+
+            var q = $('#@(id)_s').val(); //目前有的
+
+            if (!($.contains(q, ',' + o))) //沒有才新增
+            {
+
+                //框框內新增選擇的顯示值
+                $('#' + '@(id)' + '_tags').append('<span onclick="@(id)_(' + $(this).val() + ')" class="tag" id="@(id)_' + $(this).val() + '"> ' + $('#@(id) :selected').text() + ' </span>')
+
+                //新增選擇的值
+                $('#@(id)_s').val(function (n, c) {
+                    var str = c + ',' + o
+                    str = str.split(',').sort(sortNumber);
+                    return str;
+                });
+            }
+        }
+
+        $("#@(id)").find(":selected").remove(); //刪除選擇的選項
+
+        if ($('#@(id) option').val() != "") //新增一個請選擇置頂
+        {
+            $('#@(id) option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+        }
+
+    });
+</script>
+
+<div class="control-group">
+
+    @Html.Label("", htmlAttributes)
+
+    <div class="tagsinput" id="@(id)_tags" style="width: 456px;">
+
+        @if (GameList != null)
+        {
+            foreach (var item in GameList)
+            {                        
+            <span onclick="@(id)_('@(item.Key)')" class="tag" id="@(id)_@(item.Key)">@(item.Value)</span>
+                            
+                Strs = Strs + "," + item.Key;
+                
+            }
+        }
+
+        <input id="@(id)_s" name="@(id)_s" value="@(Strs)" type="hidden"/>
+
+
+        @*選項點擊時*@
+        <script>
+            function @(id)_(o) {
+                //tags = 選項的顯示值
+                var tag_info = $('#@(id)_' + o).html();
+
+                $("#@(id)").append($("<option></option>").attr("value", o).text(tag_info)); //將刪除的選項,加回選單中
+
+                if ($('#@(id) option').val() != "") //新增一個請選擇置頂
+                {
+                    $('#@(id) option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+                }
+
+                $('#@(id)_' + o).remove();  //刪除選項
+
+                $('#@(id)_s').val(function (n, c) //刪除選項的值
+                {
+
+                    var str = c;
+
+                    return str.replace(',' + o, '');
+
+                });
+            }
+        </script>
+
+    </div>
+
+</div>

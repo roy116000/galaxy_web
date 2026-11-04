@@ -1,0 +1,45 @@
+﻿@using MvcPaging;
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    
+
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            @*<ul class="nav nav-pills">
+                <li @NW.echoBool(ViewBag.gid == null, "class=active", "")>@Html.ActionLink("全部", action)</li>
+
+            </ul>*@
+
+            @*@Html.Partial("template_select")*@
+
+            <form action="@(Url.Action(action, controller))" method="post">
+
+                <div>
+
+                    @*<span style="text-align: left">分類選單： @Html.SelectList("gid", gData, htmlAttributes)</span>*@
+                    <span style="float: right">
+                        <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial("List_ajax")
+
+    </div>
+    <!--contentinner-->
+</div>

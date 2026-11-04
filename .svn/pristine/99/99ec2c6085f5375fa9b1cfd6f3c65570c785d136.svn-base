@@ -1,0 +1,222 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class member_group
+    {
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [DisplayName("parent_id")]
+        public int parent_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public virtual ICollection<member_data> member_data { get; set; }
+    }
+
+    public class member_data
+    {
+        [Key]
+        public int member_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("藥局id")]
+        public int drugstore_id { get; set; }
+
+        [DisplayName("會員姓名")]
+        public string name { get; set; }
+
+        [DisplayName("密碼")]
+        public string password { get; set; }
+
+        [DisplayName("聯絡電話")]
+        public string phone { get; set; }
+
+        [DisplayName("帳號(電子信箱)")]
+        public string mail { get; set; }
+
+        [DisplayName("出生日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]             
+        public DateTime birthday { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("性別")]
+        public string sex { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("郵遞區號")]
+        public int zip { get; set; }
+
+        [DisplayName("聯絡地址")]
+        public string address { get; set; }
+
+        [DisplayName("分店代碼")]
+        public string sn { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public virtual member_group member_group { get; set; }
+        public virtual zip_data zip_data { get; set; }
+
+        public virtual ICollection<order_data> order_date { get; set; }
+
+        //public virtual ICollection<order_list> order_list { get; set; }
+    }
+
+    public class member_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("member_id")]
+        public int member_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+    }
+
+    public class member_bonus
+    {
+        [Key]
+        [DisplayName("bonus_id")]
+        public int bonus_id { get; set; }
+
+        [DisplayName("member_id")]
+        public int member_id { get; set; }
+
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("order_total")]
+        public int order_total { get; set; }
+
+        [DisplayName("money")]
+        public int money { get; set; }
+
+        [DisplayName("start_date")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("end_date")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("flag")]
+        public int flag { get; set; }
+    }
+
+    public class member_login
+    {
+        [Key]
+        [DisplayName("login_id")]
+        public int login_id { get; set; }
+
+        [DisplayName("member_id")]
+        public int member_id { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("ip")]
+        public string ip { get; set; }
+
+        [DisplayName("note")]
+        public string note { get; set; }
+    }
+
+    public class member_real
+    {
+        [Key]
+        public string card_no { get; set; }
+
+        [DisplayName("姓名")]
+        public string name { get; set; }
+
+        [DisplayName("電話")]
+        public string phone { get; set; }
+
+        [DisplayName("分店代碼")]
+        public string sn { get; set; }
+
+        [DisplayName("分店名稱")]
+        public string market { get; set; }
+
+        [DisplayName("會員信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("新店代碼")]
+        public string new_sn { get; set; }
+
+        [DisplayName("新店名稱")]
+        public string new_market { get; set; }
+
+        [NotMapped]
+        [UIHint("File")]
+        [DisplayName("Excel檔")]
+        public string file_name { get; set; }
+
+
+    }
+}

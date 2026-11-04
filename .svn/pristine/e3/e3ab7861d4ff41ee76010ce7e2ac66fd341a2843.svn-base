@@ -1,0 +1,11 @@
+﻿@{
+    string controller = ViewBag.controller;     
+    string action = ViewBag.action;
+    string controllerName = ViewBag.controllerName;
+    string actionName = ViewBag.actionName;  
+}
+
+<ul class="breadcrumb">
+    <li><a href="@Url.Action(action, controller)">@controllerName</a> <span class="divider">/</span></li>
+    <li class="active">@actionName</li>
+</ul>

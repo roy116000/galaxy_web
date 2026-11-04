@@ -1,0 +1,1278 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+using h365_web.Models;
+using MvcPaging;
+
+using ClosedXML.Excel;
+using NPOI.XSSF.UserModel;
+using NPOI.SS.UserModel;
+using System.IO;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwDrugOrderController : _BaseController
+    {
+        //
+        // GET: /newweb/NwOrder/
+        #region "訂單列表"
+        public ActionResult List(string kw, int? flag, bool? pay_visible, DateTime? start_date, DateTime? end_date, int? pay_id)
+        {
+            int currentPageIndex = 0;
+
+            //Export("303,304,305");
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.pay_id == 4);
+
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+     
+
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.send_name.Contains(kw) || m.send_tel.Contains(kw));
+            }
+
+            if (flag.HasValue)
+            {
+                Linq = Linq.Where(m => m.flag == flag);
+            }
+
+            if (pay_visible.HasValue)
+            {
+                Linq = Linq.Where(m => m.pay_visible == pay_visible);
+            }
+
+            if (pay_id.HasValue)
+            {
+                Linq = Linq.Where(m => m.pay_id == pay_id);
+            }
+
+            if (!start_date.HasValue) { start_date = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); };
+            if (!end_date.HasValue) { end_date = DateTime.Today; }
+
+            DateTime linq_eD = end_date.Value.AddDays(1);
+
+            Linq = Linq.Where(m => m.order_datetime >= start_date && m.order_datetime < linq_eD);
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+
+
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+            //IPagedList data = Linq.ToPagedList(currentPageIndex, 2);
+
+            List<ListItem> ListItems_falg = new List<ListItem> { };
+            ListItems_falg.Add(new ListItem("", "全部", false));
+            for (int i = 0; i <= 5; i++)
+            {
+                ListItems_falg.Add(new ListItem(i.ToString(), NW.flagName(i), flag.HasValue ? flag.Value == i : false));
+            }
+            ViewData["flag"] = ListItems_falg;
+
+
+            List<ListItem> ListItems_pay_visible = new List<ListItem> { };
+            ListItems_pay_visible.Add(new ListItem("", "全部", false));
+            ListItems_pay_visible.Add(new ListItem("false", "未付款", pay_visible.HasValue ? pay_visible.Value : false));
+            ListItems_pay_visible.Add(new ListItem("true", "已付款", pay_visible.HasValue ? pay_visible.Value : false));
+            ViewData["pay_visible"] = ListItems_pay_visible;
+
+            List<ListItem> ListItems_pay_id = new List<ListItem> { };
+            ListItems_pay_id.Add(new ListItem("", "全部", false));
+            ListItems_pay_id.Add(new ListItem("3", "信用卡", pay_id.HasValue ? pay_id == 3 : false));
+            ListItems_pay_id.Add(new ListItem("4", "貨到付款", pay_id.HasValue ? pay_id == 4 : false));
+            
+            ViewData["pay_id"] = ListItems_pay_id;
+
+
+            ViewBag.kw = kw;
+            ViewBag.vflag = flag;
+            ViewBag.vpay_visible = pay_visible;
+            ViewBag.start_date = start_date.Value.ToString("yyyy/MM/dd"); ViewBag.end_date = end_date.Value.ToString("yyyy/MM/dd");
+            ViewBag.vpay_id = pay_id;
+
+            var data2 = Linq.ToList();
+            int total = 0;
+            foreach (var item in data2)
+            {
+                total += item.order_sub2.Sum(m => m.num * m.price) + item.freight;
+            }
+            ViewBag.total = "總筆數： " + data.TotalItemCount.ToString() + " 筆、總金額：" + total.ToString("N0") + " 元";
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+
+
+            return View(data);
+        }
+
+        public ActionResult List_ajax(string kw, int? flag, bool? pay_visible, DateTime? start_date, DateTime? end_date, int? page, int? pay_id)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.pay_id == 4);
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.sys_admin_data.Where(m => m.admin_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.send_name.Contains(kw) || m.send_tel.Contains(kw));
+            }
+
+            if (flag.HasValue)
+            {
+                Linq = Linq.Where(m => m.flag == flag);
+            }
+
+            if (pay_visible.HasValue)
+            {
+                Linq = Linq.Where(m => m.pay_visible == pay_visible);
+            }
+
+            if (pay_id.HasValue)
+            {
+                Linq = Linq.Where(m => m.pay_id == pay_id);
+            }
+
+            if (!start_date.HasValue) { start_date = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); };
+            if (!end_date.HasValue) { end_date = DateTime.Today; }
+
+            Linq = Linq.Where(m => m.order_datetime >= start_date && m.order_datetime <= end_date);
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+            //IPagedList data = Linq.ToPagedList(currentPageIndex, 2);
+
+            List<ListItem> ListItems_falg = new List<ListItem> { };
+            ListItems_falg.Add(new ListItem("", "全部", false));
+            for (int i = 0; i <= 5; i++)
+            {
+                ListItems_falg.Add(new ListItem(i.ToString(), NW.flagName(i), flag.HasValue ? flag.Value == i : false));
+            }
+            ViewData["flag"] = ListItems_falg;
+
+
+            List<ListItem> ListItems_pay_visible = new List<ListItem> { };
+            ListItems_pay_visible.Add(new ListItem("", "全部", false));
+            ListItems_pay_visible.Add(new ListItem("false", "未付款", pay_visible.HasValue ? pay_visible.Value : false));
+            ListItems_pay_visible.Add(new ListItem("true", "已付款", pay_visible.HasValue ? pay_visible.Value : false));
+            ViewData["pay_visible"] = ListItems_pay_visible;
+
+
+            ViewBag.kw = kw;
+            ViewBag.vflag = flag;
+            ViewBag.vpay_visible = pay_visible;
+            ViewBag.start_date = start_date.Value.ToString("yyyy/MM/dd"); ViewBag.end_date = end_date.Value.ToString("yyyy/MM/dd");
+            ViewBag.vpay_id = pay_id;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            var data2 = Linq.ToList();
+            int total = 0;
+            foreach (var item in data2)
+            {
+                total += item.order_sub2.Sum(m => m.num * m.price) + item.freight;
+            }
+            ViewBag.total = "總筆數： " + data.TotalItemCount.ToString() + " 筆、總金額：" + total.ToString("N0") + " 元";
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var data = this._DB.order_data2.Find(id);
+
+            var mdata = this._DB.pharmacist_data.Find(data.member_id);
+            ViewData["sys_admin_data"] = mdata;
+
+            var pdata = this._DB.order_pay2.Where(m => m.pay_visible == true && m.pay_id == 4).OrderBy(m => m.pay_id).ToList();
+            List<ListItem> ListItems_pay_id = new List<ListItem> { };
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in pdata)
+            {
+                ListItems_pay_id.Add(new ListItem(item.pay_id.ToString(), item.pay_name, item.pay_id == data.pay_id));
+            }
+            ViewData["pay_id"] = ListItems_pay_id;
+
+            List<ListItem> ListItems_pay_visible = new List<ListItem> { };
+            ListItems_pay_visible.Add(new ListItem("false", "未付款", data.pay_visible));
+            ListItems_pay_visible.Add(new ListItem("true", "已付款", data.pay_visible));
+            ViewData["pay_visible"] = ListItems_pay_visible;
+
+            List<ListItem> ListItems_freight_name = new List<ListItem> { };
+            ListItems_freight_name.Add(new ListItem("", "請選擇", false));
+            foreach (var item in NW.FreightName)
+            {
+                ListItems_freight_name.Add(new ListItem(item, item, item == data.freight_name));
+            }
+            ViewData["freight_name"] = ListItems_freight_name;
+
+            var fdata = this._DB.order_goods2.Where(m => m.order_id == id).OrderBy(m => m.goods_datetime).Select(m => new NW.order_goods_tmp { name = m.name, sn = m.sn, goods_datetime = m.goods_datetime }).Distinct().ToList();
+            ViewData["order_goods_tmp"] = fdata;
+
+            var cdata = this._DB.order_charge2.Where(m => m.order_id == id).OrderBy(m => m.freight_id).ToList();
+            ViewData["order_charge_tmp"] = cdata;
+
+            var idata = this._DB.order_druginvoice.Where(m => m.order_id == id).OrderBy(m => m.invoice_datetime).Select(m => new NW.order_invoice_tmp { invoice = m.invoice, tax = m.tax, invoice_datetime = m.invoice_datetime }).Distinct().ToList();
+            ViewData["order_invoice_tmp"] = idata;
+   
+
+            #region"發票資訊"
+
+            data.invoice_datetime = data.invoice_datetime == null ? DateTime.Now : data.invoice_datetime;
+
+            #endregion
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View(data);
+        }
+
+        [HttpPost]
+        public ActionResult EditSave(order_data2 order_data, int index)
+        {
+            var data = this._DB.order_data2.Find(order_data.order_id);
+
+            switch (index)
+            {
+                case 0:    //金流資料
+                    data.pay_id = order_data.pay_id;
+                    data.pay_visible = order_data.pay_visible;
+                    data.pay_note = order_data.pay_note;
+                    if (order_data.pay_visible) { if (data.pay_datetime == null) { data.pay_datetime = DateTime.Now; } } else { data.pay_datetime = null; }
+                    data.flag = order_data.pay_visible ? 1 : 0;
+                    this._DB.SaveChanges();
+                    TempData["jgrowl"] = "金流資訊儲存成功!!";
+                    break;
+                case 1:    //物流資料
+
+                    if (data.pay_visible)
+                    {
+
+                        data.freight_name = order_data.freight_name;
+                        data.freight_no = order_data.freight_no;
+                        data.freight_datetime = order_data.freight_datetime;                    
+
+                        if (!string.IsNullOrEmpty(data.freight_name)) { data.flag = 2; }
+
+                        var checkfdata = this._DB.order_goods2.Where(m => m.order_id == data.order_id).ToList();
+                        var subdata = this._DB.order_sub2.Where(m => m.order_id == data.order_id).ToList();
+
+                        if (checkfdata.Count() == 0)
+                        {
+                            foreach (var item in subdata)
+                            {
+                                var fdata = new order_goods2();
+                                fdata.order_id = item.order_id;
+                                fdata.sn = data.freight_no;
+                                fdata.sub_id = item.sub_id;
+                                fdata.name = data.freight_name;
+                                fdata.num = item.num;
+                                fdata.goods_datetime = DateTime.Now;
+                                fdata.create_user = "1";
+                                fdata.create_datetime = DateTime.Now;
+                                this._DB.order_goods2.Add(fdata);
+                                this._DB.SaveChanges();
+
+                            }
+                        }
+                        else {
+
+                            foreach (var item in checkfdata)
+                            {
+
+                                item.name = data.freight_name;
+                                item.sn = data.freight_no;
+                                item.goods_datetime = DateTime.Now;
+                                item.create_user = "1";
+                                item.create_datetime = DateTime.Now;
+                                this._DB.SaveChanges();
+                            }
+
+                        }
+
+
+                        this._DB.SaveChanges();
+                        TempData["jgrowl"] = "物流資訊儲存成功!!";
+                    }
+                    else
+                    {
+                        TempData["jgrowl"] = "請先確定付款完成，在處理物流資料";
+                    }
+
+                    break;
+                case 3: //發票資料
+                    if (data.pay_visible)
+                    {
+                        data.invoice_datetime = order_data.invoice_datetime;
+                        data.invoice_no = order_data.invoice_no;
+                        data.invoice_note = order_data.invoice_note;
+                        if (!string.IsNullOrEmpty(data.invoice_no)) { data.flag = 5; }
+                        this._DB.SaveChanges();
+                        TempData["jgrowl"] = "發票資訊儲存成功!!";
+                    }
+                    else
+                    {
+                        TempData["jgrowl"] = "請先確定付款完成，在處理發票資料";
+                    }
+
+                    break;
+            }
+
+            return RedirectToAction("Edit", new { @id = order_data.order_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢", "回復", "作廢" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update order_data2 set visible = 1 Where order_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update order_data2 set visible = 0 Where order_id in (" + cb_id + ")";
+                    break;
+                case 4: //停用 得來速訂單
+                    sql = "Update order_data2 set visible = 0 Where order_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From order_data2 Where order_id in (" + cb_id + ")";
+                    if (_DB.Database.ExecuteSqlCommand(sql) > 0)
+                    {
+                        sql = " Delete From order_sub2 Where order_id in (" + cb_id + ")";
+                    }
+                    else
+                    {
+                        sql = "";
+                    }
+
+                    break;
+                case 3:
+
+                    backExport(cb_id);
+                    TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+                    return RedirectToAction("InvoiceList");
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+
+            if (cb_flag == 4)
+            {
+                return RedirectToAction("Drivethru" + RouteData.Values["action"].ToString().Replace("Del", ""));
+            }
+
+            if (cb_flag != 2)
+            {
+                return RedirectToAction("Visible" + RouteData.Values["action"].ToString().Replace("Del", ""));
+            }
+            else
+            {
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+            }
+        }
+
+        //回復成匯出訂單
+        private void backExport(string cb_id)
+        {
+            if (!string.IsNullOrEmpty(cb_id))
+            {
+                string sql = "Update order_data2 set export_datetime=null, export_info='重置：" + DateTime.Now.ToString() + "' Where order_id in (" + cb_id + ")";
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+        }
+
+        //作廢列表
+        public ActionResult VisibleList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == false && m.pay_id == 4);
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.visible_info.Contains(kw));
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return View(data);
+        }
+
+        public ActionResult VisibleList_ajax(int? gid, int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == false && m.pay_id == 4);
+
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult VisibleEdit(int id)
+        {
+            return RedirectToAction("Edit", new { @id = id });
+        }
+
+        //待匯出列表
+        public ActionResult ExportList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime == null && (m.flag == 1 || (m.flag == 0 && m.pay_id == 4)) && !string.IsNullOrEmpty(m.sn));
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return View(data);
+        }
+
+        public ActionResult ExportList_ajax(int? gid, int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            //var Linq = this._DB.order_data.Where(m => m.visible == true && m.flag == 1 && m.export_datetime == null);
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime == null && (m.flag == 1 || (m.flag == 0 && m.pay_id == 4)) && !string.IsNullOrEmpty(m.sn));
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        [HttpPost]
+        public ActionResult ExportListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "選擇匯出", "全部匯出", "作廢" };
+            string msg = "匯出失敗，請洽系統工程師，謝謝!!";
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+            string sql = "";
+
+            string FileName = Export(cb_id);
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                sql = "Update order_data2 set export_datetime = getDate(), export_info='網站匯入：" + this.User.Identity.Name + "' Where visible=1 and export_datetime is null  and (flag=1 or (flag=0 and pay_id=4))";
+                //1為全部匯出
+                if (cb_flag != 1) { sql += " And order_id in (" + cb_id + ")"; }
+
+                if (sql != "")
+                {
+                    _DB.Database.ExecuteSqlCommand(sql);
+                }
+                return File(FileName, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Today.ToString("yyyyMMdd") + "待出貨訂單列表.xlsx"));
+            }
+            else
+            {
+                return Content(msg);
+            }
+
+            //TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        }
+
+        private string Export(string id)
+        {
+            string value = "";
+            string[] cols = "".Split(',');
+            List<order_data2> data;
+
+            cols = "轉單日期,最晚出貨日,交易序號,訂購人,收件人姓名,店家商品料號,商品名稱,商品規格,數量,金額小計,購物車備註,買家確認日,收件人地址,收件人電話(日),收件人電話(夜),收件人行動電話,發票寄送地址,付款別,物流設定,收件人郵遞區號,商品編號,訂單編號,店家出貨日,商品類型,訂單狀態,入帳日,會員編號,會員信箱,原售價,含稅成本,發票統編,發票抬頭,收貨時段備註,店別".Split(',');
+            var Linq1 = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime == null && (m.flag == 1 || (m.flag == 0 && m.pay_id == 4)) && !string.IsNullOrEmpty(m.sn));
+            //測試用
+            //var Linq1 = this._DB.order_data.Where(m => m.order_id>0);
+            if (!string.IsNullOrEmpty(id))
+            {
+                //文字陣列轉數字陣列
+                int[] arrID = id.Split(',').Select((string s) => { int i; int.TryParse(s, out i); return i; }).ToArray();
+                Linq1 = Linq1.Where(m => arrID.Contains(m.order_id));
+            }
+            Linq1 = Linq1.OrderBy(m => m.order_id);
+            data = Linq1.ToList();
+
+            //var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            string msn = "";
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("訂單列表");
+            int colIdx = 1;
+            int rowIdx = 2;
+
+
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            string p = "'";
+
+            foreach (var item in data)
+            {
+                var mData = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string name = mData.name;
+                string freight_flag_name = item.freight_flag_name;
+
+                if (!string.IsNullOrEmpty(freight_flag_name))
+                {
+                    foreach (string ss in freight_flag_name.Split(','))
+                    {
+                        var arr = ss.Split(':');
+                        int iFright_id = 0;
+                        string Fright_sn = "81006001";
+                        switch (arr[0])
+                        {
+                            case "冷藏運費": iFright_id = 1; Fright_sn = "81006005"; break;
+                            case "冷凍運費": iFright_id = 2; Fright_sn = "81006008"; break;
+                        }
+
+                        var idata = new order_sub2 { order_id = item.order_id };
+                        idata.item_name = arr[0];
+                        idata.item_no = Fright_sn;
+                        idata.price = Convert.ToInt32(arr[1]);
+                        idata.num = 1;
+                        idata.freight_id = iFright_id;
+                        idata.freight_visible = true;
+                        item.order_sub2.Add(idata);
+                    }
+                }
+
+                item.order_sub2 = item.order_sub2.OrderBy(m => m.freight_id).ToList();
+                foreach (var subitem in item.order_sub2)
+                {
+                    string ffname = "";
+                    int num = subitem.num;
+                    msn = !string.IsNullOrEmpty(item.sn) ? item.sn : "";
+
+                    //var market = marData.Where(m => m.sn == msn).FirstOrDefault();
+                    //string marname = market != null ? market.title.Replace(" ","") : "生鮮購";                    
+
+                    if (subitem.freight_id >= 0 && subitem.freight_id < 3) { ffname = NW.FFName[subitem.freight_id]; }
+                    if (item.pay_datetime.HasValue)
+                    {
+                        sheet.Cell(rowIdx, 1).Value = p + item.pay_datetime.Value.ToString("yyyy/MM/dd HH:mm");
+                        sheet.Cell(rowIdx, 2).Value = p + item.pay_datetime.Value.AddDays(3).ToString("yyyy/MM/dd HH:mm");
+                    }
+                    else
+                    {
+                        sheet.Cell(rowIdx, 1).Value = p + item.order_datetime.Value.ToString("yyyy/MM/dd HH:mm");
+                        sheet.Cell(rowIdx, 2).Value = p + item.order_datetime.Value.AddDays(3).ToString("yyyy/MM/dd HH:mm");
+                    }
+
+                    if (!string.IsNullOrEmpty(item.sn))
+                    {
+                        DateTime sdt1 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 8, 0, 0, 0, 0);
+                        DateTime edt1 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 17, 0, 0, 0, 0);
+
+                        DateTime sdt2 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 17, 0, 0, 0, 0);
+                        DateTime edt2 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.AddDays(1).Day, 8, 0, 0, 0, 0);
+                        // DateTime gd2 = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.AddDays(1).Day, 15, 0, 0);
+
+                        DateTime gd = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 21, 0, 0, 0, 0);
+
+                        if (item.order_datetime >= sdt1 && item.order_datetime < edt1)
+                        {
+                            sheet.Cell(rowIdx, 2).Value = p + gd.ToString("yyyy/MM/dd HH:mm");
+
+                        }
+                        else if (item.order_datetime >= sdt2 && item.order_datetime < edt2)
+                        {
+                            gd = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.AddDays(1).Day, 15, 0, 0, 0, 0);
+
+                        }
+                        else
+                        {
+                            gd = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 15, 0, 0, 0, 0);
+                        }
+
+                        sheet.Cell(rowIdx, 2).Value = p + gd.ToString("yyyy/MM/dd HH:mm");
+
+                    }
+
+                    if (!string.IsNullOrEmpty(item.sn))
+                    {
+                        sheet.Cell(rowIdx, 3).Value = p + "D" + item.order_id.ToString() + "-" + subitem.freight_id.ToString();
+                    }
+                    else
+                    {
+                        sheet.Cell(rowIdx, 3).Value = p + item.order_id.ToString() + "-" + subitem.freight_id.ToString();
+                    }
+
+
+                    sheet.Cell(rowIdx, 4).Value = p + name;
+                    sheet.Cell(rowIdx, 5).Value = p + item.send_name;
+
+                    //有-的處理 控制匯出匯入
+                    if (subitem.item_no.IndexOf("-") > -1)
+                    {
+                        string[] arrT = subitem.item_no.Split('-');
+                        subitem.item_no = arrT[0];
+                        num *= Convert.ToInt32(arrT[1]);
+                    }
+
+                    sheet.Cell(rowIdx, 6).Value = p + subitem.item_no;
+                    sheet.Cell(rowIdx, 7).Value = p + subitem.item_name;
+                    sheet.Cell(rowIdx, 8).Value = p + subitem.style_name;
+                    sheet.Cell(rowIdx, 9).Value = p + num;
+                    sheet.Cell(rowIdx, 10).Value = p + subitem.num * subitem.price;
+
+                    sheet.Cell(rowIdx, 11).Value = p + item.info;
+                    sheet.Cell(rowIdx, 12).Value = p;
+                    sheet.Cell(rowIdx, 13).Value = p + item.send_zip + item.send_city + item.send_canton + item.send_address;
+                    sheet.Cell(rowIdx, 14).Value = p;
+                    sheet.Cell(rowIdx, 15).Value = p;
+
+                    sheet.Cell(rowIdx, 16).Value = p + item.send_tel;
+                    //sheet.Cell(rowIdx, 17).Value = p + mData.zip + mData.zip_data.city + mData.zip_data.canton + mData.address;
+                    //sheet.Cell(rowIdx, 17).Value = p  + mData.address;
+                    sheet.Cell(rowIdx, 17).Value = p + "";
+                    sheet.Cell(rowIdx, 18).Value = p + NW.payName(item.pay_id);
+                    sheet.Cell(rowIdx, 19).Value = p + ffname;
+                    sheet.Cell(rowIdx, 20).Value = p + item.send_zip;
+
+                    sheet.Cell(rowIdx, 21).Value = p + subitem.item_no;
+                    sheet.Cell(rowIdx, 22).Value = p + item.order_id.ToString() + "-" + subitem.sub_id.ToString();
+                    sheet.Cell(rowIdx, 23).Value = p;
+                    sheet.Cell(rowIdx, 24).Value = p;
+                    sheet.Cell(rowIdx, 25).Value = p + "備貨中";
+
+                    sheet.Cell(rowIdx, 26).Value = p;
+                    sheet.Cell(rowIdx, 27).Value = p + mData.pharmacist_id.ToString();
+                    sheet.Cell(rowIdx, 28).Value = p + mData.mail;
+
+                    var pData = this._DB.product_data.Where(m => m.product_id == subitem.product_id).FirstOrDefault();
+                    if (pData != null)
+                    {
+                        sheet.Cell(rowIdx, 29).Value = p + (pData.sprice * subitem.num).ToString();
+                        sheet.Cell(rowIdx, 30).Value = p + (pData.cost * subitem.num).ToString();
+                    }
+
+                    //統編(發票統編)、發票抬頭、收貨時段備註
+                    sheet.Cell(rowIdx, 31).Value = p + item.inv_sn;
+                    sheet.Cell(rowIdx, 32).Value = p + item.inv_title;
+                    sheet.Cell(rowIdx, 33).Value = p + item.send_time + "," + item.send_time2;
+
+                    sheet.Cell(rowIdx, 34).Value = p + msn;
+
+                    rowIdx += 1;
+
+                }
+            }
+
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+            }
+
+            value = Server.MapPath("~/Content/files/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+            return value;
+        }
+
+        //待出貨列表
+        public ActionResult GoodsList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime != null && (m.flag == 1 || (m.flag == 0 && m.pay_id == 4)));
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return View(data);
+        }
+
+        public ActionResult GoodsList_ajax(int? gid, int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime != null && (m.flag == 1 || (m.flag == 0 && m.pay_id == 4)));
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        [HttpPost]
+        public ActionResult GoodsListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "回復待出貨" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    //sql = "Update driver_data set visible = 1 Where driver_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update order_data2 set export_datetime = null, export_info = null Where order_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    //sql = " Delete From driver_data Where driver_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        //匯入出貨單
+        [HttpPost]
+        public ActionResult GoodsAddSave(HttpPostedFileBase file_name)
+        {
+
+            if (file_name != null && file_name.ContentLength > 0 && NW.getFileType(file_name, 3))
+            {
+
+                //string water = NW.getImgWater();
+                //string tmpPath = Server.MapPath("~/Content/files/inport");
+                //if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); }
+
+                ////新的檔案名稱
+                //string strFileName = water + Path.GetExtension(file_name.FileName);
+                ////存放檔案路徑
+                //string strFilePath = tmpPath + "/" + strFileName;
+                ////檔案存放在Server
+                //file_name.SaveAs(strFilePath);
+
+                try
+                {
+                    // 建立一個工作簿 Office 2007 flag = 0 訂單資料
+
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name.InputStream);
+
+                    ////2007
+                    //XSSFWorkbook workbook = new XSSFWorkbook(FileUpload1.FileContent);
+                    ////2003
+                    //HSSFWorkbook workbook = new HSSFWorkbook(FileUpload1.FileContent);
+
+
+                    //XSSFWorkbook excel = new XSSFWorkbook(file_name.InputStream);
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+                    DateTime create_datetime = DateTime.Now;
+                    List<int> arrOrder_id = new List<int>(new[] { 0 });
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+                        if (sheet.GetRow(row) != null) // 驗證是不是空白列
+                        {
+                            //test
+                            int aa = sheet.GetRow(row).LastCellNum;
+
+                            //出貨資料
+                            if (sheet.GetRow(row).LastCellNum == 5)
+                            {
+                                if (sheet.GetRow(row).GetCell(0) != null)
+                                {
+                                    int order_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[0]);
+                                    int sub_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[1]);
+                                    if (order_id > 0 && sub_id > 0)
+                                    {
+                                        if (!arrOrder_id.Contains(order_id)) { arrOrder_id.Add(order_id); }
+
+                                        string name = (sheet.GetRow(row).GetCell(1) != null) ? sheet.GetRow(row).GetCell(1).ToString() : "";
+                                        string sn = (sheet.GetRow(row).GetCell(2) != null) ? sheet.GetRow(row).GetCell(2).ToString() : "";
+                                        DateTime? goods_datetime;
+                                        int num = Convert.ToInt32(sheet.GetRow(row).GetCell(4).NumericCellValue);
+                                        var data = this._DB.order_goods2.Where(m => m.order_id == order_id && m.sub_id == sub_id).FirstOrDefault();
+                                        if (data == null)
+                                        {
+                                            //正常出貨:出貨日不為空值，出貨數不為0
+                                            //取消出貨:出貨日不為空，出貨數量為0
+                                            //延後出貨:出貨日為空值，出貨數量不為0
+                                            if ((sheet.GetRow(row).GetCell(3) != null))
+                                            {
+                                                goods_datetime = Convert.ToDateTime(sheet.GetRow(row).GetCell(3).ToString());
+                                                data = new order_goods2 { order_id = order_id, sub_id = sub_id, name = name, sn = sn, num = num, goods_datetime = goods_datetime, create_user = this.User.Identity.Name, create_datetime = create_datetime };
+                                                this._DB.order_goods2.Add(data);
+                                                this._DB.SaveChanges();
+                                            }
+                                            else
+                                            {
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            //for (int c = 0; c <= sheet.GetRow(row).LastCellNum; c++) // 使用For 走訪資料欄
+                            //{
+                            //    if (sheet.GetRow(row).GetCell(c) != null)
+                            //    {
+                            //        string x2 = sheet.GetRow(row).GetCell(c).ToString();
+
+                            //    }
+                            //}
+                        }
+                    }
+                    //更新訂單主黨
+                    foreach (int oid in arrOrder_id)
+                    {
+                        if (oid > 0)
+                        {
+                            var linq = from m in this._DB.order_sub2
+                                       join n in this._DB.order_goods2
+                                       on m.sub_id equals n.sub_id into mm
+                                       from n in mm.DefaultIfEmpty()
+                                       where m.order_id == oid
+                                       select new
+                                       {
+                                           m.sub_id,
+                                           m.product_id,
+                                           m.item_name,
+                                           GoodsNum = n.num.ToString() ?? "NA"
+                                       };
+                            var data2 = linq.ToList().Where(m => m.GoodsNum == null).FirstOrDefault();
+                            if (data2 == null)
+                            {
+                                var data3 = this._DB.order_data2.Where(m => m.order_id == oid).FirstOrDefault();
+                                if (data3 != null)
+                                {
+                                    var data4 = this._DB.order_goods2.Where(m => m.order_id == oid).Max(m => m.goods_datetime);
+                                    if (data4.HasValue)
+                                    {
+                                        data3.flag = 2;
+                                        data3.goods_datetime = data4.Value;
+                                        data3.goods_info = this.User.Identity.Name;
+                                        this._DB.SaveChanges();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+            return RedirectToAction("GoodsList");
+        }
+
+        //匯入費用單
+        [HttpPost]
+        public ActionResult GoodsAdd2Save(HttpPostedFileBase file_name2)
+        {
+
+            if (file_name2 != null && file_name2.ContentLength > 0 && NW.getFileType(file_name2, 3))
+            {
+
+                try
+                {
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name2.InputStream);
+
+                    //XSSFWorkbook excel = new XSSFWorkbook(file_name.InputStream);
+
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+                    DateTime create_datetime = DateTime.Now;
+                    List<int> arrOrder_id = new List<int>(new[] { 0 });
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+                        if (sheet.GetRow(row) != null) // 驗證是不是空白列
+                        {
+                            //費用資料
+                            if (sheet.GetRow(row).LastCellNum == 5)
+                            {
+                                if (sheet.GetRow(row).GetCell(0) != null)
+                                {
+                                    int order_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[0]);
+                                    int freight_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[1]);
+                                    if (order_id > 0)
+                                    {
+                                        if (!arrOrder_id.Contains(order_id)) { arrOrder_id.Add(order_id); }
+
+                                        string name = (sheet.GetRow(row).GetCell(1) != null) ? sheet.GetRow(row).GetCell(1).ToString() : "";
+                                        string sn = (sheet.GetRow(row).GetCell(2) != null) ? sheet.GetRow(row).GetCell(2).ToString() : "";
+                                        DateTime charge_datetime = DateTime.Today;
+                                        int num = Convert.ToInt32(sheet.GetRow(row).GetCell(3).NumericCellValue);
+                                        double total = Convert.ToDouble(sheet.GetRow(row).GetCell(4).NumericCellValue);
+                                        var data = this._DB.order_charge2.Where(m => m.order_id == order_id && m.freight_id == freight_id && m.item_sn == sn).FirstOrDefault();
+                                        if (data == null)
+                                        {
+                                            data = new order_charge2 { order_id = order_id, freight_id = freight_id, charge_name = name, item_sn = sn, num = num, total = total, charge_datetime = charge_datetime, create_user = this.User.Identity.Name, create_datetime = create_datetime };
+                                            this._DB.order_charge2.Add(data);
+                                            this._DB.SaveChanges();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+            return RedirectToAction("GoodsList");
+        }
+
+        //待開發票列表
+        public ActionResult InvoiceList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime != null && m.flag == 2 && m.pay_id == 4);
+
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return View(data);
+        }
+
+        public ActionResult InvoiceList_ajax(int? gid, int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.export_datetime != null && m.flag == 2  && m.pay_id == 4);
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        //匯入發票
+        [HttpPost]
+        public ActionResult InvoiceAddSave(HttpPostedFileBase file_name)
+        {
+
+            if (file_name != null && file_name.ContentLength > 0 && NW.getFileType(file_name, 3))
+            {
+
+                try
+                {
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name.InputStream);
+
+                    //XSSFWorkbook excel = new XSSFWorkbook(file_name.InputStream);
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+                    DateTime create_datetime = DateTime.Now;
+                    List<int> arrOrder_id = new List<int>(new[] { 0 });
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+                        if (sheet.GetRow(row) != null) // 驗證是不是空白列
+                        {
+                            //出貨資料
+                            if (sheet.GetRow(row).LastCellNum == 4)
+                            {
+                                if (sheet.GetRow(row).GetCell(0) != null)
+                                {
+                                    int order_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[0]);
+                                    int sub_id = Convert.ToInt32(sheet.GetRow(row).GetCell(0).ToString().Split('-')[1]);
+                                    if (order_id > 0 && sub_id > 0)
+                                    {
+                                        if (!arrOrder_id.Contains(order_id)) { arrOrder_id.Add(order_id); }
+
+                                        DateTime invoice_datetime = Convert.ToDateTime(sheet.GetRow(row).GetCell(1).ToString()); ;
+                                        string invoice = (sheet.GetRow(row).GetCell(1) != null) ? sheet.GetRow(row).GetCell(2).ToString() : "";
+                                        string tax = (sheet.GetRow(row).GetCell(2) != null) ? sheet.GetRow(row).GetCell(3).ToString() : "";
+                                        var data = this._DB.order_druginvoice.Where(m => m.order_id == order_id && m.sub_id == sub_id).FirstOrDefault();
+                                        if (data == null)
+                                        {
+                                            data = new order_druginvoice { order_id = order_id, sub_id = sub_id, invoice = invoice, tax = tax, invoice_datetime = invoice_datetime, create_user = this.User.Identity.Name, create_datetime = create_datetime };
+                                            this._DB.order_druginvoice.Add(data);
+                                            this._DB.SaveChanges();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //更新訂單主黨
+                    foreach (int oid in arrOrder_id)
+                    {
+                        if (oid > 0)
+                        {
+                            var linq = from m in this._DB.order_sub2
+                                       join n in this._DB.order_druginvoice
+                                       on m.sub_id equals n.sub_id into mm
+                                       from n in mm.DefaultIfEmpty()
+                                       where m.order_id == oid
+                                       select new
+                                       {
+                                           m.sub_id,
+                                           m.product_id,
+                                           m.item_name,
+                                           invoice = n.invoice.ToString() ?? "NA"
+                                       };
+                            var data2 = linq.ToList().Where(m => m.invoice == null).FirstOrDefault();
+                            if (data2 == null)
+                            {
+                                var data3 = this._DB.order_data2.Where(m => m.order_id == oid).FirstOrDefault();
+                                if (data3 != null)
+                                {
+                                    var data4 = this._DB.order_druginvoice.Where(m => m.order_id == oid).Max(m => m.invoice_datetime);
+                                    if (data4.HasValue)
+                                    {
+                                        data3.flag = 5;
+                                        data3.invoice_datetime = data4.Value;
+                                        data3.invoice_note = this.User.Identity.Name;
+                                        //貨到付款
+                                        if (data3.pay_id == 4)
+                                        {
+                                            data3.pay_visible = true;
+                                            data3.pay_note = "交易成功!!出貨日：" + data3.goods_datetime.Value.ToString("yyyy-MM-dd HH:ss");
+                                        }
+                                        this._DB.SaveChanges();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+            return RedirectToAction("InvoiceList");
+        }
+
+
+        //已完成訂單列表
+        public ActionResult FinishList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.flag == 5 && m.pay_id == 4);
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return View(data);
+        }
+
+        public ActionResult FinishList_ajax(int? gid, int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_data2.Where(m => m.visible == true && m.flag == 5 && m.pay_id == 4);
+
+            foreach (var item in Linq.ToList())
+            {
+                var data22 = this._DB.pharmacist_data.Where(m => m.pharmacist_id == item.member_id).FirstOrDefault();
+                string aa = data22.name;
+                item.sn = aa;
+            }
+
+
+            Linq = Linq.OrderByDescending(m => m.order_id);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+
+            var marData = this._DB.news4_data.Where(m => m.visible).ToList();
+            ViewData["marData"] = marData;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        #endregion
+
+
+      
+
+
+
+    }
+}

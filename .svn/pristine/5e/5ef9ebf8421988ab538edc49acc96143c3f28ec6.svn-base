@@ -1,0 +1,80 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.tag_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                    //var G = (List<h365_web.Models.health_symptom_group>)ViewData["G"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+
+            <col class="width4" />
+            <col />
+            <col />
+            <col />
+            <col />
+
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().tag_name))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().inx))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.tag_id)" /></td>
+                    <td>@Html.DisplayFor(m => item.tag_name)</td>
+                    <td class="center">@Html.DisplayFor(m => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.tag_id }, new { @class = "title", target = "_blank" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+        .MaxNrOfPages(15)
+        .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+        .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+
+            )
+
+        @*        <form method="post" action="@(Url.Action("List", "NwHealth"))">
+            <input id="kw" name="kw" value="@(ViewBag.kw)" />
+            <input id="gid" name="gid" value="@(ViewBag.gid)" />
+            <input id="page" name="page" placeholder="可輸入頁數" value="" />
+            <button  id ="Summ">跳轉</button>
+        </form>*@
+
+
+    </div>
+
+</div>
+
+<script>
+
+    @*    var page = $('#page').val();
+    var kw = $('#kw').val();
+    var gid = $('#gid').val();
+
+    $('#Summ').click(function () {
+        $.post('@(Url.Action("List", "NwHealth"))', { page: page }, function (result) {
+
+        })
+    })*@
+
+</script>

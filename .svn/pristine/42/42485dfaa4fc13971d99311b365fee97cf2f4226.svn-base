@@ -1,0 +1,5 @@
+﻿@model h365_web.Models.product_ingredient
+
+@Html.EditorFor(m => m.ingredient_visible)
+
+@(Html.EditorFor(m => m.summary_table))

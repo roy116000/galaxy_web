@@ -1,0 +1,108 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<ListItem> G = (List<ListItem>)ViewData["G"];
+    var Company = (List<ListItem>)ViewData["Company"];
+
+    //bool isC = true;
+    //isC = ViewBag.isC ?? false;
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+
+        <div id="mail">
+            <form id="form1" action="@(Url.Action(action, controller))" method="post" enctype="multipart/form-data">
+
+                <div>
+                    
+
+                    <div>
+
+
+
+                        @if (ViewBag.power_id == 2)
+                        {
+                                                      
+                            <span style="padding-right: 10px">廠商：
+                        @Html.SelectList("cid", Company)
+                            </span>
+                        }
+
+
+                        下單日期：
+                        <input name="sD" style="max-width: 10%" type="datetime" value="@(ViewBag.sD)" />
+                        ～
+                        <input name="eD" style="max-width: 10%" type="datetime" value="@(ViewBag.eD)" />
+                        &emsp;
+
+                        <input type="text" name="kw" autocomplete="off" placeholder="搜尋姓名、電話或商品" value="@(ViewBag.kw)"/>
+
+                         <input type="submit" value="查詢" class="btn btn-primary" />
+                    </div>
+
+                    @*<input type="hidden" value="@(ViewBag.inv_type)" name="inv_type">*@
+
+                          @*  <input name="nation" value="@(ViewBag.nation)" type="hidden" />
+                            <input name="status" value="@(ViewBag.status)" type="hidden" />
+                            <input name="sort" value="@(ViewBag.sort)" type="hidden" />*@
+                         @*   <input type="text" name="kw" autocomplete="off" placeholder="搜尋相關..." value="@(ViewBag.kw)"/>*@
+                           
+
+                 @*           <input name="type" type="hidden" />
+                            <button type="button" onclick="if(confirm('匯出欄位需要縮減嗎？')){Type('2');}else{Type('1');}" class="btn">匯出</button>*@
+
+
+                </div>
+                <br />
+
+            </form>
+
+            <div>
+                <div style="float: right">
+
+                    @*<button type="button" class="btn btn-primary" onclick="$('input[name=Im]').click();">匯入訂單</button>
+
+
+                    <a href="~/Content/files/order/訂單匯入範例.xlsx">
+                        <input class="btn" type="button" value="範例下載" /></a>*@
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="List_ajax">
+            @Html.Partial(action + "_ajax")
+        </div>
+    </div>
+</div>
+
+
+@*<script>
+
+    function Go(o) {
+
+        if (o == 50) {
+            $('input[name="inv_type"]').val(1);
+            $('input[name="status"]').val(5);
+        } else {
+            //$('input[name="type"]').val('0');
+            $('input[name="inv_type"]').val(0);
+            $('input[name="status"]').val(o);
+        }
+        $('#form1').submit();
+    }
+
+    function Type(o) {
+
+        $('input[name="type"]').val(o);
+        $('#form1').submit();
+
+        $('input[name="type"]').val('0');
+    }
+</script>*@

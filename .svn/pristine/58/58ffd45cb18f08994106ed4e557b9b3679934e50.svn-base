@@ -1,0 +1,332 @@
+﻿@model h365_web.Models.product_data2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+   
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.product_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料 <span class="pull-right"><a href="~/Shop_PreView.html?id=@(id)" target="_blank">前台預覽</a> </span></h4>
+
+                @Html.EditorFor(model => model.group_id)
+
+@*                <div class="control-group" id="group_id2" name="group_id2">
+                 </div>*@
+
+                 <div class="control-group" id="model" name="model">
+                 </div>
+
+
+                @Html.EditorFor(model => model.item_no)
+
+                @Html.EditorFor(model => model.item_name)
+
+                @Html.EditorFor(model => model.web_name)
+
+                @Html.EditorFor(model => model.tax_flag)
+
+                <div class="abgne_tab">
+                    <ul class="tabs">
+                        <li><a href="#tab1">產品價格</a></li>
+                        <li><a href="#tab2">產品資訊</a></li>
+                        <li><a href="#tab3">產品設定</a></li>
+                        <li><a href="#tab4">產品圖檔</a></li>
+                    </ul>
+                    <div>
+                        <div id="tab1" class="tab_content">
+                            @Html.EditorFor(model => model.price)
+
+                            @Html.EditorFor(model => model.sprice)
+
+                            @Html.EditorFor(model => model.piece)
+
+                            @Html.EditorFor(model => model.cost)
+
+                            <div class="control-group">
+                                <label for="" class="control-label">毛利額 / 毛利率</label>
+                                <span class="field">
+                                    <span class="label label-important" style="font-size: 150%;" id="profit">0 元 / 0.00 %</span>
+                                </span>
+                            </div>
+
+                            @Html.EditorFor(model => model.place_origin)
+
+                            @Html.EditorFor(model => model.barcode)
+
+                            @Html.EditorFor(model => model.drug_company)
+
+@*                            @Html.EditorFor(model => model.freight_id)
+
+                            @Html.EditorFor(model => model.freight_visible)
+
+                            @Html.EditorFor(model => model.order_style)
+
+                            @Html.EditorFor(model => model.isdrive)*@
+
+                        </div>
+                        <div id="tab2" class="tab_content">
+                            @Html.EditorFor(model => model.style_name)
+
+                            @Html.EditorFor(model => model.info)
+
+                            @Html.EditorFor(model => model.introduce)
+                        </div>
+                        <div id="tab3" class="tab_content">
+
+
+
+                            <div class="control-group" id="set">
+                            </div>
+
+                            @*@Html.EditorFor(model => model.iconmark)*@
+
+                            @Html.EditorFor(model => model.inx)
+
+                            @Html.EditorFor(model => model.visible)
+
+                            @Html.EditorFor(model => model.limit)
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <span class="field">
+                                    <span class="label label-important">目前最大可購量為50</span>
+                                </span>
+                            </div>
+
+                            @Html.EditorFor(model => model.stock_visible)
+
+                            @Html.EditorFor(model => model.stock)
+
+                            @Html.EditorFor(model => model.visible_index)
+
+                        </div>
+                        <div id="tab4" class="tab_content">
+                            @Html.EditorFor(model => model.uploadimage2)
+                        </div>
+                    </div>
+                </div>
+
+
+                <input id="grouptag" name="grouptag" style="display: none" value="">
+                 <input id="group_id4" name="group_id4" style="display: none" value="@(Model.group_id)">
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary" onclick="checkthis()">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            ignore: "",
+            rules: {
+                group_id_chained: "required",
+                group_id: "required",
+                item_name: "required"
+            },
+            messages: {
+                group_id_chained: "分區，必需選擇",
+                group_id: "分類標題，必需選擇！",
+                item_name: "品名，必需填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>
+<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>
+<script type="text/javascript">
+    $(function () {
+        profit();
+        $('#sprice').change(profit);
+        $('#cost').change(profit);
+    })
+    function profit() {
+        var sprice = $('#sprice').val().replace(/[,]+/g, '');
+        var cost = $('#cost').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost, 2);
+        if (sprice != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit').html('0 元 / 0.00 %');
+        }
+    }
+
+    function formatFloat(num, pos) {
+        var size = Math.pow(10, pos);
+        return Math.round(num * size) / size;
+    }
+</script>
+
+@*<script>
+    $(function () {
+        var val = '@(Model.group_id)';
+        $.post('@Url.Action("iconmarkajax", "NwDrugProduct")', { gid: val, pid: '@(Model.product_id)' }, function (data) {
+
+            $('#set').html(data.tag);
+        });
+
+    })
+
+</script>
+
+
+<script>
+    $('#group_id_chained').change(function () {
+        $('#set').html('');
+    });
+
+
+
+    $('#group_id').change(function () {
+
+        var val = $(this).val();
+        $.post('@Url.Action("iconmarkajax", "NwDrugProduct")', { gid: val, pid: '@(Model.product_id)' }, function (data) {
+
+                                        $('#set').html(data.tag);
+                                    });
+
+                                });
+</script>
+
+<script>
+    function gocheck(o) {
+        if ($('#set').find('span').eq(o).attr('class') == 'checked') {
+            $('#set').find('span').eq(o).removeClass('checked');
+            $('#set').find('span').eq(o).find('input').removeClass('checked')
+        }
+        else {
+            $('#set').find('span').eq(o).addClass('checked');
+            $('#set').find('span').eq(o).find('input').addClass('checked')
+        }
+    }
+
+</script>
+
+
+<script>
+
+    function checkthis() {
+        var myqe = '';
+        var block = $('#set span');
+        var block2 = '';
+        var block3 = '';
+        var goval = '';
+
+        for (var key in block) {
+
+
+            block2 = block.eq(key).find('input').attr('class');
+
+
+            if (block2 == 'checked') {
+                block3 += block.eq(key).find('input').attr('value') + ',';
+            }
+
+            if (isNaN(key) == true) {
+                break;
+            }
+        }
+        $('#grouptag').attr('value', block3);
+
+
+
+
+    }
+
+
+</script>*@
+
+
+<script>
+    $(function()
+    {
+        $.post('@Url.Action("getmanygroup2", "NwDrugProduct")', { group_id: '@(Model.group_id)'}, function (data) {
+
+            $('#model').html(data.test);
+        });
+
+
+    })
+
+    </script>
+
+<script>
+
+    $('#group_id').change(function () {
+
+        var val = $(this).val();
+
+        $.post('@Url.Action("getmanygroup", "NwDrugProduct")', { group_id: val, flag: 3 }, function (data) {
+
+            $('#group_id2').html(data.test);
+            $('#group_id3').html('');
+        });
+    });
+
+    </script>
+
+
+<script>
+
+
+
+    function test(tt) {
+
+        $.post('@Url.Action("getmanygroup", "NwDrugProduct")', { group_id: tt, flag: 4 }, function (data) {
+
+            $('#group_id3').html(data.test);
+        });
+
+    }
+
+
+    </script>
+
+
+
+<script>
+    function set(gid) {
+       
+        $('#group_id4').attr('value', gid);
+    }
+
+    </script>

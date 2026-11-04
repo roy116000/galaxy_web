@@ -1,0 +1,194 @@
+﻿@{
+    var Product = (List<KeyValuePair<galaxy_web.Models.product_status_flag, List<galaxy_web.Models.product_data>>>)ViewData["Product"];
+    var Order = (List<KeyValuePair<galaxy_web.Models.order_status_flag, List<galaxy_web.Models.order_data>>>)ViewData["Order"];
+    var News = (List<galaxy_web.Models.news_data>)ViewData["News"];
+
+    bool Alert = ViewBag.Alert;
+    //Alert = true;
+}
+
+@if (Alert)
+{
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" class="modal animate4 flipInY" id="myModal">
+        <div class="modal-header">
+            <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+            <h3>最新公告</h3>
+        </div>
+        <div class="modal-body">
+            <div class="accordion">
+
+                @foreach (var item in News)
+                {
+                            
+                    <h3><a href="#">@(item.title)</a></h3>
+                    <div>
+                        @(Html.Raw(item.cont))
+                    </div>
+                }
+
+            </div>
+        </div>
+
+    </div>
+    
+    
+    
+    <script>
+        $('#myModal').modal();
+    </script>
+    
+}
+
+<div class="maincontent animate4 fadeInUp">
+    <div class="contentinner content-elements">
+
+        <div class="row-fluid">
+            <div class="widgetcontent">
+                <div class="span12">
+                    <ul class="widgeticons row-fluid">
+
+                        <li class="one_fifth">
+                            <a href="@(Url.Action("List", "NwOrder"))">
+                                <img src="~/Areas/newweb/images/ICON/04.png" /><span>訂單專區</span></a>
+                            @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單資訊</span></a>*@
+                        </li>
+
+                        <li class="one_fifth">
+                            <a href="@(Url.Action("List", "NwProduct"))">
+                                <img src="~/Areas/newweb/images/ICON/03.png" /><span>商品專區</span></a>
+                            @*<img src="~/Areas/newweb/images/gemicon/notify.png" /><span>商品資訊</span></a>*@
+                        </li>
+
+                        <li class="one_fifth">
+                            <a href="@(Url.Action("List", "NwPort"))">
+                                <img src="~/Areas/newweb/images/ICON/02.png" /><span>匯入檔案</span></a>
+                            @*<img src="~/Areas/newweb/images/gemicon/archive.png" /><span>報表資訊</span></a>*@
+                        </li>
+
+                        <li class="one_fifth">
+                            <a href="@(Url.Action("Month", "NwReport"))">
+                                <img src="~/Areas/newweb/images/ICON/05.png" /><span>報表資訊</span></a>
+                            @*<img src="~/Areas/newweb/images/gemicon/archive.png" /><span>報表資訊</span></a>*@
+                        </li>
+
+
+
+
+                    </ul>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row-fluid">
+
+
+
+            <div class="widgetcontent">
+
+                <div class="span12">
+
+                    <div id="#tabs" class="abgne_tab">
+                        <ul class="tabs">
+                            <li><a href="#tabs-3">最新公告</a></li>
+                            <li><a href="#tabs-1">商品專區</a></li>
+                            <li><a href="#tabs-2">訂單專區</a></li>
+                        </ul>
+
+                        <div id="tabs-3">
+                            @*<h3 class="widgettitle nomargin shadowed" style="font-weight: bold; color: #000">最新公告</h3>*@
+
+                            <div class="accordion">
+
+                                @foreach (var item in News)
+                                {                      
+                                    <h3><a href="#">@(item.title)</a></h3>
+                                    <div>
+                                        @(Html.Raw(item.cont))
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                        <div id="tabs-1">
+                            <h3 class="widgettitle nomargin shadowed" style="font-weight: bold; color: #000">商品專區（@(Product.Sum(m => m.Value.Count()))）<a href="@(Url.Action("List", "NwProduct"))" style="padding:5px 10px" class="showhide">GO</a></h3>
+                            <div class="accordion">
+
+                                @foreach (var item in Product)
+                                {
+                                    var Status = item.Key;
+                                    var Products = item.Value.OrderByDescending(m => m.product_id).Take(5).ToList();
+                            
+                                    <h3><a href="#">@(Status.name)（@(item.Value.Count())）</a>@*<span style="" class="show">GO</span>*@</h3>
+                                    <div>
+                                        <dl class="dl-horizontal">
+
+                                            @foreach (var item2 in Products)
+                                            {
+                                                <dt>@(item2.item_no)</dt>
+                                                <dd><a href="@(Url.Action("Edit", "NwProduct", new { id = item2.product_id }))">@(item2.web_name) - @(item2.item_name)</a></dd>
+                                        
+                                            }
+
+                                        </dl>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+
+                        <div id="tabs-2">
+                            <h3 class="widgettitle nomargin shadowed" style="font-weight: bold; color: #000">訂單專區（@(Order.Sum(m => m.Value.Count()))）<a href="@(Url.Action("List", "NwOrder"))" style="padding:5px 10px" class="showhide">GO</a></h3>
+                            <div class="accordion">
+
+                                @foreach (var item in Order)
+                                {
+                                    var Status = item.Key;
+                                    var Products = item.Value.OrderByDescending(m => m.order_id).Take(5).ToList();
+                            
+                                    <h3><a href="#">@(Status.name)（@(item.Value.Count())）</a>@*<span style="" class="show">GO</span>*@</h3>
+                                    <div>
+                                        <dl class="dl-horizontal">
+
+                                            @foreach (var item2 in Products)
+                                            {
+                                                <dt>@(item2.order_sn)</dt>
+                                                <dd><a href="@(Url.Action("Edit", "NwOrder", new { id = item2.order_id }))">
+                                                    @(item2.order_name) - @(item2.create_user)</a></dd>
+                                        
+                                            }
+
+                                        </dl>
+
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <!--contentinner-->
+</div>
+
+<script>
+    jQuery('#tabs').tabs();
+    jQuery('.accordion').accordion({
+        heightStyle: "100%"
+    });
+
+
+</script>

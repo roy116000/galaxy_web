@@ -1,0 +1,96 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Rank = (List<galaxy_web.Areas.newweb.Controllers.NwReportController._Ranking>)ViewData["Rank"];
+    
+}
+<div style="height: auto; overflow: auto">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width15" />
+            <col />
+            <col class="width10" />
+            <col class="width6" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">#</th>
+                <th class="center">供應商</th>
+                <th class="center">商品名稱</th>
+                <th class="center">商品貨號</th>
+                <th class="center">數量</th>
+                <th class="center">商城售價</th>
+                <th class="center">成本</th>
+                <th class="center">ERP成本</th>
+                <th class="center">營收毛利</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Rank != null)
+            {
+                var R = Rank.Select(m => m.item_no).ToArray();
+                foreach (var item in Rank)
+                {
+                    int i = Array.IndexOf(R, item.item_no) + 1;
+                    decimal total = (item.erp_cost - item.cost) * item.num;
+                    
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="right">@(i)</td>
+                    <td>@(item.company_name)</td>
+                    <td>@(item.item_name)</td>
+                    <td>@(item.item_no)</td>
+                    <td class="right">@(item.num)</td>
+                    <td class="right">@(item.price.ToString(NW.point))</td>
+                    <td class="right">@(item.cost.ToString(NW.point))</td>
+                    <td class="right">@(item.erp_cost.ToString(NW.point))</td>
+                    <td class="right">@(total.ToString(NW.point))</td>
+                </tr>
+                
+                }
+            }
+            
+            
+@*@if (item2.Value != null)
+                {
+                    foreach (var item in item2.Value)
+                    {
+
+                        int i = Array.IndexOf(item2.Value.Select(m => m.order_data.order_id).ToArray(), item.order_data.order_id) + 1;
+                        decimal cost = item.order_sub.cost + item.order_sub.freight;
+                        decimal total = cost * item.order_sub.num;
+
+                        num = num + 1; //筆數
+                        total_all += total; //總計
+                        
+                        
+                    
+                    <tr class="@NW.echoBool(true, "unread", "visible")">
+                        <td class="right">@(i)</td>
+                        <td>@(item.company.name)</td>
+                        <td>@(NW.getDate(item.order_data.order_datetime))</td>
+                        <td>@(item.order_data.send_name)</td>
+                        <td>@(item.order_sub.item_name)</td>
+                        <td>@(item.order_sub.item_no)</td>
+                        <td class="right">@(item.order_sub.num)</td>
+                        <td class="right">@(cost.ToString(NW.point))</td>
+                        <td class="right">@(total.ToString(NW.point))</td>
+                    </tr>
+                    }
+
+                    All.Add(item2.Key, new KeyValuePair<int, decimal>(num, total_all));
+
+                    num = 0;
+                    total_all = 0;
+                }*@
+
+        </tbody>
+    </table>
+
+</div>

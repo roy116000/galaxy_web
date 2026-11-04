@@ -1,0 +1,314 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; 
+
+namespace h365_web.Models
+{
+    //此為簡式表  
+
+    public class sys_admin_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("admin_id")]
+        public int admin_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+    }
+
+    [DisplayName("管理員")]
+    public class sys_admin_data
+    {
+        [Key]
+        [DisplayName("admin_id")]
+        public int admin_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("權限名稱")]
+        public int? power_id { get; set; }        
+
+        [DisplayName("登入帳號")]
+        public string uid { get; set; }
+
+        [DisplayName("登入密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("起始日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("結束日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("姓名")]        
+        public string name { get; set; }
+
+        [DisplayName("電話")]
+        public string tel { get; set; }
+
+        [UIHint("phone")]
+        [DisplayName("手機")]
+        public string phone { get; set; }
+
+        [DisplayName("信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("地址")]
+        public string address { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("備註")]
+        public string info { get; set; }
+
+        [DisplayName("最後登入時間")]
+        public DateTime? last_login { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("公司名稱")]
+        public int company_id { get; set; }
+
+        public int drugstore_id { get; set; }
+
+        public string pharmacist_sn { get; set; }
+
+        public Boolean msg_visible { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("商品主圖")]
+        public string uploadimage { get; set; }
+
+        public virtual sys_power_data sys_power_data { get; set; }
+
+        public virtual company_data company_data { get; set; }
+
+    }
+
+    [DisplayName("管理員")]
+    public class sys_admin_data2
+    {
+        [Key]
+        [DisplayName("admin_id")]
+        public int admin_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("權限名稱")]
+        public int? power_id { get; set; }
+
+        [DisplayName("登入帳號")]
+        public string uid { get; set; }
+
+        [DisplayName("登入密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("登入密碼")]
+        public string pwd_md5 { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("起始日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("結束日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("姓名")]
+        public string name { get; set; }
+
+        [DisplayName("電話")]
+        public string tel { get; set; }
+
+        [UIHint("phone")]
+        [DisplayName("手機")]
+        public string phone { get; set; }
+
+        [DisplayName("信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("地址")]
+        public string address { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("備註")]
+        public string info { get; set; }
+
+        [DisplayName("最後登入時間")]
+        public DateTime? last_login { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("公司名稱")]
+        public int company_id { get; set; }
+
+        public int drugstore_id { get; set; }
+
+        //public string pharmacist_sn { get; set; }
+
+        //public Boolean msg_visible { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("商品主圖")]
+        public string uploadimage { get; set; }
+
+
+
+        public virtual sys_power_data2 sys_power_data { get; set; }
+
+        public virtual company_data company_data { get; set; }
+
+    }
+
+    public class company_data {
+
+        [Key]
+        [DisplayName("company_id")]
+        public int company_id { get; set; }
+
+        [DisplayName("廠商名稱")]
+        public string name { get; set; }
+
+        [DisplayName("Boss")]
+        public string boss { get; set; }
+
+        [DisplayName("電話")]
+        public string tel { get; set; }
+
+        [DisplayName("地址")]
+        public string address { get; set; }
+
+        [DisplayName("窗口信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("web")]
+        public string web { get; set; }
+
+        [DisplayName("聯絡窗口")]
+        public string contact { get; set; }
+
+        [DisplayName("窗口電話")]
+        public string contact_tel { get; set; }
+
+        [DisplayName("廠商編號")]
+        public string inv_sn { get; set; }
+
+        [DisplayName("傳真")]
+        public string fax { get; set; }
+
+        [DisplayName("所需運費")]
+        public int freight { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("請款日")]
+        public int bills_flag { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("請款起始日")]
+        public DateTime? bills_datetime { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("公司Logo")]
+        public string uploadimage { get; set; }
+
+        public virtual ICollection<sys_admin_data> sys_admin_data { get; set; }
+
+        public virtual ICollection<product_data> product_data { get; set; }
+
+        public virtual ICollection<company_image> company_image { get; set; }
+
+        public virtual ICollection<order_data> order_data { get; set; }
+    }
+
+    public class company_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("product_id")]
+        public int company_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+        public virtual company_data company_data { get; set; }
+
+    }
+}

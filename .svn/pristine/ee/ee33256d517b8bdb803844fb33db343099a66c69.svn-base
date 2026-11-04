@@ -1,0 +1,351 @@
+﻿@using MvcPaging;
+
+@model h365_web.Models.medicines_main
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    h365_web.Models.medicines_data data2 = (h365_web.Models.medicines_data)ViewData["data2"];
+    h365_web.Models.medicines_approve data3 = (h365_web.Models.medicines_approve)ViewData["data3"];
+
+    //h365_web.Models.medicines_check data4 = (h365_web.Models.medicines_check)ViewData["data4"];
+    //h365_web.Models.medicines_check data5 = (h365_web.Models.medicines_check)ViewData["data5"];
+
+
+    //sick換行 
+    string introduce = data3.introduce;
+    string[] introduces = introduce.Split(new string[] { ";;" }, StringSplitOptions.RemoveEmptyEntries);
+
+    string img = "";
+
+    if (data2.img_url != null)
+    {
+        img = NW.WEB_URL + "Content/images/medicines/" + data2.img_url;
+    }
+    else
+    {
+        img = NW.WEB_URL + "images/im1.jpg";
+    };
+    
+    
+    
+    
+}
+<div class="maincontent">
+    <div class="contentinner stdform">
+
+
+        <div class="widgetcontent">
+            <h4 class="widgettitle">基本資料 <span class="pull-right"></span></h4>
+
+            @*中文名稱*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @Model.name
+                </div>
+            </div>
+
+            @*英文名稱*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.name_en)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @Model.name_en
+                </div>
+            </div>
+
+            @*許可證字號*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.atc_code)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @Model.atc_code
+                </div>
+            </div>
+
+            @*sn*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.sn)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @Model.sn
+                </div>
+            </div>
+
+            <div class="abgne_tab">
+                <ul class="tabs">
+                    <li><a href="#tab1">藥劑與外觀</a></li>
+                    <li><a href="#tab2">主成分略述</a></li>
+                    <li><a href="#tab3">核淮適應症</a></li>
+                    <li><a href="#tab4">主要副作用</a></li>
+                    <li><a href="#tab5">應注意事項</a></li>
+                </ul>
+                <div>
+
+                    @*藥劑與外觀*@
+                    <div id="tab1" class="tab_content">
+
+                        <div class="control-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => data2.shape)</label>
+                            <div class="field" style="padding: 5px 5px;">@(ViewBag.shape)</div>
+
+                            <label class="control-label">@Html.DisplayNameFor(model => data2.color)</label>
+                            <div class="field" style="padding: 5px 5px;">@(ViewBag.color)</div>
+
+                            @*劑量*@
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.barcode)</label>
+                            <div class="field" style="padding: 5px 5px;">@(ViewBag.barcode) </div>
+
+                            <label class="control-label">藥品圖</label>
+                            <div class="field">
+
+                                <img width="155" src="@(img)" />
+
+                                <span class="help-inline"></span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div id="tab2" class="tab_content">
+
+                        @*主成分略述*@
+                        <div class="control-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.introduce)</label>
+                            <div class="field" style="padding: 5px 5px;">
+
+                                @foreach (var item in introduces)
+                                {
+                                    string show_introduce = item;
+                                    <div>@(show_introduce);;</div>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+
+                    @*核准適應症*@
+                    <div id="tab3" class="tab_content">
+                        <div class="control-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.sick)</label>
+                            <div class="field" style="padding: 5px 5px;">
+                                @(data3.sick)
+                            </div>
+
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.sick_pharmacist)</label>
+                            <div class="field" style="padding: 5px 5px;">
+
+                                @(ViewBag.pharmacist)
+                            </div>
+
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.sick_people)</label>
+                            <div class="field" style="padding: 5px 5px;">
+
+                                @(ViewBag.people)
+
+                            </div>
+                        </div>
+                    </div>
+
+                    @*主要副作用*@
+                    <div id="tab4" class="tab_content">
+                        <label class="control-label">@Html.DisplayNameFor(model => data3.side_effect)</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @*@(ViewBag.side_effect)*@
+                            @(ViewBag.side_effect)
+
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+
+                    @*應注意事項*@
+                    <div id="tab5" class="tab_content">
+
+                        <label class="control-label">@Html.DisplayNameFor(model => data3.notes)</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @*@(ViewBag.notes)*@
+                            @(ViewBag.notes)
+                        </div>
+                        <span class="help-inline"></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.main_id)
+
+            <div class="widgetcontent">
+                <h4 class="widgettitle">送審資料 </h4>
+
+                <div class="abgne_tab">
+
+
+                    
+
+                    <span class="help-inline"></span>
+                    <div>
+                        <div class="control-group">
+                            <label for="data2_shape" class="control-label">@Html.DisplayNameFor(model => data2.shape)</label>
+                            <div class="controls">
+                                <input type="text" value="" placeholder="" name="shape" maxlength="50" id="shape" class="span5">
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+
+
+                        <div class="control-group">
+                            <label for="data2_color" class="control-label">@Html.DisplayNameFor(model => data2.color)</label>
+                            <div class="controls">
+                                <input type="text" value="" placeholder="" name="color" maxlength="50" id="color" class="span5">
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+
+                        @Html.EditorFor(model => data2.uploadimage)
+
+
+                        @*核准適應症*@
+                        <div class="control-group">
+                            <label for="data4.sick_Pharmacist" class="control-label">@Html.DisplayNameFor(model => data3.sick_pharmacist)</label>
+
+                            <div class="controls">
+                                <textarea rows="4" placeholder="" name="pharmacist" maxlength="255" id="pharmacist" cols="20" class="span5 valid" style="height: 97px;"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+
+                            @* <div class="controls">
+                                <input type="text" value="" placeholder="" name="pharmacist" maxlength="50" id="pharmacist" class="span5">
+                                <span class="help-inline"></span>
+                            </div>*@
+                        </div>
+
+
+                        <div class="control-group">
+                            <label for="data5.sick_people" class="control-label">@Html.DisplayNameFor(model => data3.sick_people)</label>
+                           
+                             <div class="controls">
+                                <textarea rows="4" placeholder="" name="people" maxlength="255" id="people" cols="20" class="span5 valid" style="height: 97px;"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+                            
+                           @*  <div class="controls">
+                                <input type="text" value="" placeholder="" name="people" maxlength="50" id="people" class="span5">
+                                <span class="help-inline"></span>
+                            </div>*@
+                        </div>
+
+
+                        @*主要副作用*@
+                        <div class="control-group">
+                            <label for="data3_side_effect" class="control-label">@Html.DisplayNameFor(model => data3.side_effect)</label>
+
+                            <div class="controls">
+                                <textarea rows="4" placeholder="" name="side_effect" maxlength="255" id="side_effect" cols="20" class="span5 valid" style="height: 97px;"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+
+                        </div>
+
+                        @*應注意事項*@
+                        <div class="control-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => data3.notes)</label>
+
+
+                            <div class="controls">
+                                <textarea rows="4" placeholder="" name="notes" maxlength="255" id="notes" cols="20" class="span5 valid" style="height: 97px;"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+
+                        </div>
+
+                        @*參考文獻*@
+                        <div class="control-group">
+                            <label for="data2_shape" class="control-label">參考文獻</label>
+                           
+                            <div class="controls">
+                                <textarea rows="4" placeholder="" name="literature" maxlength="255" id="literature" cols="20" class="span5 valid" style="height: 97px;"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+                            
+                           @*  <div class="controls">
+                                <input type="text" value="" placeholder="" name="literature" maxlength="50" id="literature" class="span5">
+                                <span class="help-inline"></span>
+                            </div>*@
+                        </div>
+
+                        <input id="img_s" name="img_s" value="@(data2.img_url)" style="display:none" />
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">送審</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@*分隔書籤用*@
+<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>
+
+@*設定必填*@
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+
+
+        $("#form1").validate({
+
+            rules: {
+                literature: "required",
+
+            },
+            messages: {
+                literature: "文獻來源，必需填寫！",
+
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+
+
+
+
+        });
+
+    })
+</script>

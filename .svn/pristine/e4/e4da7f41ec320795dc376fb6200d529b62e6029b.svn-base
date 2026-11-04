@@ -1,0 +1,267 @@
+﻿@model h365_web.Models.order_data2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    string List_pay_id = "pay_id";
+    List<ListItem> ListItems_pay_id = new List<ListItem>();
+
+    if (ViewData[List_pay_id] != null) { ListItems_pay_id = (List<ListItem>)ViewData[List_pay_id]; }
+
+    string List_pay_visible = "pay_visible";
+    List<ListItem> ListItems_pay_visible = new List<ListItem>();
+
+    if (ViewData[List_pay_visible] != null) { ListItems_pay_visible = (List<ListItem>)ViewData[List_pay_visible]; }
+
+    string List_freight_name = "freight_name";
+    List<ListItem> ListItems_freight_name = new List<ListItem>();
+
+    if (ViewData[List_freight_name] != null) { ListItems_freight_name = (List<ListItem>)ViewData[List_freight_name]; }
+    
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "span6");
+
+    int sTotal = 0;
+
+    h365_web.Models.pharmacist_data sys_admin_data = (h365_web.Models.pharmacist_data)ViewData["sys_admin_data"];
+
+    List<NW.order_goods_tmp> order_goods_tmp = (List<NW.order_goods_tmp>)ViewData["order_goods_tmp"];
+    List<NW.order_invoice_tmp> order_invoice_tmp = (List<NW.order_invoice_tmp>)ViewData["order_invoice_tmp"];
+
+    List<h365_web.Models.order_charge2> order_charge_tmp = (List<h365_web.Models.order_charge2>)ViewData["order_charge_tmp"];
+
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "editprofileform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.order_id)
+            <input type="hidden" id="index" name="index" value="0" />
+            <div class="widgetcontent">
+                <div class="row-fluid">
+                  <div class="span4">
+                    <h4 class="widgettitle nomargin" style="margin-bottom:0px;">訂單資訊</h4>
+                    <div class="widgetcontent bordered">
+                    <p><label>訂單單號：</label><span class="label label-info">@(Model.order_id)</span></p>
+                    <p><label>前台單號：</label>@(Model.order_sn)</p>
+                    <p><label>訂購時間：</label>@(Model.order_datetime)</p>
+                    <p><label>訂單狀態：</label><span class="label label-@(Model.flag>0?"success":"default")">@NW.flagName(Model.flag)</span></p>
+                    </div>
+                  </div>
+                  <div class="span4">
+                    <h4 class="widgettitle nomargin" style="margin-bottom:0px;">訂購人資訊</h4>
+                    <div class="widgetcontent bordered">
+                    <p><label>訂購人姓名：</label>@(sys_admin_data.name)</p>
+                    <p><label>訂購人電話：</label>@(sys_admin_data.phone)</p>
+                   @* <p><label>訂購人地址：</label>@(sys_admin_data.zip!=0 ? member_data.zip.ToString() : "未填郵遞區號-")@(member_data.zip_data!=null ? member_data.zip_data.city + member_data.zip_data.canton : "縣市地區未填-")@(sys_admin_data.address)</p>*@
+                   <p><label>訂購人地址：</label>@(Model.send_address)</p>
+                         <p><label>訂購人信箱：</label>@(sys_admin_data.mail)</p>
+                      </div>
+                  </div>
+                  <div class="span4">
+                    <h4 class="widgettitle nomargin" style="margin-bottom:0px;">收件人資訊</h4>
+                    <div class="widgetcontent bordered">
+                    <p><label>收件人姓名：</label>@(Model.send_name)</p>
+                    <p><label>收件人電話：</label>@(Model.send_tel)</p>
+                    <p><label>收件人地址：</label>@(Model.send_zip!=0 ? Model.send_zip.ToString() : "未填郵遞區號-" )@(!string.IsNullOrEmpty(Model.send_city)? Model.send_city : "未填縣市-" )@(!string.IsNullOrEmpty(Model.send_canton) ? Model.send_canton : "地區未填-")@(Model.send_address)</p>
+                    <p>收件日期：@(Model.send_time)／收件時段：@(Model.send_time2)</p>
+                    </div>
+                  </div>
+              </div>
+              <div class="row-fluid">
+ @*                 <div class="span4">
+                    <h4 class="widgettitle nomargin" style="margin-bottom:0px;">金流資訊</h4>
+                    <div class="widgetcontent bordered">
+                    <p><label>付款方式：</label>@Html.SelectList(List_pay_id, ListItems_pay_id, htmlAttributes)</p>
+                    <p><label>付款成功：</label>@Html.SelectList(List_pay_visible,ListItems_pay_visible, htmlAttributes)</p>
+                    <p><label>交易訊息：</label><textarea name="pay_note" id="pay_note" class="span8" rows="4">@(Model.pay_note)</textarea></p>
+                    <p><label>交易說明：</label>@(Model.pay_id==3?"授權碼":"虛擬帳號") @(Model.pay_approvecode) </p>
+                    <p><label> </label>
+                    <div class="stdformbutton">
+                        <a class="btn btn-primary" onclick="submit(0);">儲存金流資訊</a>
+                    </div>
+                    </p>
+                    </div>
+                  </div>*@
+  @*物流資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">物流資訊</h4>
+                        <div class="widgetcontent bordered">
+                            @*<p>
+                                <label>運費：</label>@(Model.freight_flag_name)&nbsp;
+                            </p>*@
+                            <p>
+                                <label>物流狀態：</label><span class="label label-warning">@((Model.goods_datetime != null ? "已出貨" : "未出貨"))</span>&nbsp;
+                            </p>
+                            @Html.EditorFor(model => model.freight_datetime)
+                            @Html.EditorFor(model => model.freight_name)
+                            @Html.EditorFor(model => model.freight_no)
+
+                            <div style="max-width: 300px; word-wrap: break-word; word-break: normal; background-color: blue; color: white">宅配單號設定說明:填入一組宅配單號後輸入Enter建即可在輸入第二組宅配單號請勿以任何符號分隔宅配單號</div>
+
+                            <div>
+                                <label>&nbsp;</label>
+                                <table class="table table-bordered mailinbox">
+                                    <colgroup>
+                                        <col class="width30" />
+                                        <col class="width30" />
+                                        <col />
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>貨運日期</th>
+                                            <th>貨運公司</th>
+                                            <th>貨運號碼</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in order_goods_tmp)
+                                        {
+                                            <tr>
+                                                <td>@(NW.getDate(item.goods_datetime))</td>
+                                                <td>@(item.name)</td>
+                                                <td>@(item.sn)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (Model.pay_id == 5)
+                            {
+                                                                                     
+                                <div class="stdformbutton" style="text-align: center;">
+                                    &nbsp;
+                                    <a class="btn btn-primary" onclick="submit(1);">儲存物流資訊</a>
+                                </div>                                
+                            }
+
+                        </div>
+                    </div>
+@*                        <div class="span4">
+                            <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">發票資訊</h4>
+                            <div class="widgetcontent bordered">
+                                @Html.EditorFor(model => model.invoice_no)
+
+                                @Html.EditorFor(m => m.invoice_datetime)
+
+                                @if (Model.pay_datetime != null )
+                                { 
+                                    <div class="stdformbutton" style="text-align: center;">
+                                        &nbsp;
+                                    <a class="btn btn-primary" onclick="submit(3);">儲存發票資訊</a>
+                                    </div>
+                                }
+
+                            </div>
+                        </div>*@
+               </div>       
+              <div class="row-fluid">
+                <div class="span4">
+                    <h4 class="widgettitle nomargin" style="margin-bottom:0px;">備註說明</h4>
+                    <div class="widgetcontent bordered">
+                    <p>@(Model.info) </p>
+
+                    </div>
+                  </div>
+
+              </div>        
+               <div class="row-fluid">
+                 <div class="span12 editprofileform">
+                     <h4 class="widgettitle">訂購內容</h4>
+                      <div class="">
+                        <div id="List_ajax">
+                          <table class="table table-striped">
+                            <colgroup>
+                              <col class="width12" />
+                              <col />
+                              <col class="width15" />
+                              <col class="width12" />
+                              <col class="width12" />
+                              <col class="width12" />
+                            </colgroup>
+                            <thead>
+                              <tr>
+                                <th>貨號</th>
+                                <th>品名</th>
+                                <th>樣式</th>
+                                <th class="right">價格</th>
+                                <th class="right">數量</th>
+                                <th class="right">小計</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @foreach (var item in Model.order_sub2) {
+                                sTotal += item.num * item.price;
+                                <tr>
+                                  <td>@(item.item_no)</td>
+                                  <td>@(item.item_name)</td>
+                                  <td>@(item.style_name)</td>
+                                  <td class="right">@(item.price)</td>
+                                  <td class="right">@(item.num)</td>
+                                  <td class="right">@(item.num*item.price)</td>
+                                </tr>
+                              }
+                                <tr>
+                                  <td colspan="4"></td>
+                                  <td class="right">小計</td>
+                                  <td class="right">@(sTotal)</td>
+                                </tr>
+                                <tr>
+                                  <td colspan="4"></td>
+                                  <td class="right">運費</td>
+                                  <td class="right">@(Model.freight)</td>
+                                </tr>
+                               <tr>
+                                  <td colspan="4"></td>
+                                  <td class="right">總計</td>
+                                  <td class="right">NT @((sTotal+Model.freight).ToString("n0"))</td>
+                                </tr>
+
+                            </tbody>
+                          </table>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+             </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">$(function () { $("#freight_datetime").datepicker(); })</script>
+<script type="text/javascript">$(function () { $("#invoice_datetime").datepicker(); })</script>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        //$("#form1").validate();
+
+    })
+
+    function submit(o) {
+      $('#index').val(o);
+      $('#form1').submit();
+    }
+</script>
+
+
+
+
+<style>
+    #freight_datetime {
+        width: 100px;
+        height: 36px;
+    }
+
+    #freight_name {
+        width: 48.7179%;
+    }
+
+    #invoice_datetime {
+        width: 100px;
+        height: 36px;
+    }
+</style>

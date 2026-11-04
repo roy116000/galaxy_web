@@ -1,0 +1,32 @@
+﻿using System.Web.Mvc;
+
+namespace galaxy_web.Areas.newweb
+{
+    public class newwebAreaRegistration : AreaRegistration
+    {
+        public override string AreaName
+        {
+            get
+            {
+                return "newweb";
+            }
+        }
+
+        public override void RegisterArea(AreaRegistrationContext context)
+        {
+
+            context.MapRoute(
+                "newweb_default",
+                "newweb/{controller}/{action}/{id}",
+                new { action = "Index", id = UrlParameter.Optional }
+            );
+
+            context.MapRoute(
+                name: "newweb_default2",
+                url: "newweb/{controller}/{action}/{id}",
+                defaults: new { controller = "NwHome", action = "Index", id = UrlParameter.Optional }
+            );
+
+        }
+    }
+}

@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace h365_web.Models
+{
+
+    public class times_data
+    {
+
+        public int time_id { get; set; }
+        public int tdrugstore_id { get; set; }
+
+        [DisplayName("門診開始時間")]
+        public string sHM_hour { get; set; }
+
+        [DisplayName("門診開始時間")]
+        public string sHM_minute { get; set; }
+
+        [DisplayName("門診結束時間")]
+        public string eHM_hour { get; set; }
+
+        [DisplayName("門診結束時間")]
+        public string eHM_minute { get; set; }
+
+        [DisplayName("門診時段")]
+        public string time_interval { get; set; }
+
+        public int inx { get; set; }
+
+        [DisplayName("門診日期")]
+        public string day1 { get; set; }
+
+        [DisplayName("門診日期")]
+        public string day2 { get; set; }
+
+        [DisplayName("門診日期")]
+        public string day3 { get; set; }
+       
+
+    }
+
+    public class HosTime
+    {
+
+        private List<int> _time_id = new List<int>();
+        [Key]
+        public List<int> time_id { get { return this._time_id; } set { this._time_id = value; } }
+
+        private List<int> _tdrugstore_id = new List<int>();
+        public List<int> tdrugstore_id { get { return this._tdrugstore_id; } set { this._tdrugstore_id = value; } }
+
+        private List<string> _sHM_hour = new List<string>();
+        public List<string> sHM_hour { get { return this._sHM_hour; } set { this._sHM_hour = value; } }
+
+        private List<string> _sHM_minute = new List<string>();
+        public List<string> sHM_minute { get { return this._sHM_minute; } set { this._sHM_minute = value; } }
+
+        private List<string> _eHM_hour = new List<string>();
+        public List<string> eHM_hour { get { return this._eHM_hour; } set { this._eHM_hour = value; } }
+
+        private List<string> _eHM_minute = new List<string>();
+        public List<string> eHM_minute { get { return this._eHM_minute; } set { this._eHM_minute = value; } }
+
+        private List<string> _time_interval = new List<string>();
+        public List<string> time_interval { get { return this._time_interval; } set { this._time_interval = value; } }
+
+        private List<int> _inx = new List<int>();
+        public List<int> inx { get { return this._inx; } set { this._inx = value; } }
+
+        private List<string> _day1 = new List<string>();
+        public List<string> day1 { get { return this._day1; } set { this._day1 = value; } }
+
+        private List<string> _day2 = new List<string>();
+        public List<string> day2 { get { return this._day2; } set { this._day2 = value; } }
+
+        private List<string> _day3 = new List<string>();
+        public List<string> day3 { get { return this._day3; } set { this._day3 = value; } }    
+
+
+    }
+
+
+}

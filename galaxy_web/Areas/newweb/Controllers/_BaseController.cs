@@ -1,0 +1,242 @@
+﻿using galaxy_web.Models;
+using galaxy_web.Models2;
+using System;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+
+
+namespace galaxy_web.Areas.newweb.Controllers
+{
+    [NWAuthorize]
+    //[NWCustomError(ExceptionType = typeof(System.Data.DataException), View = "NwError")]
+    public class _BaseController : Controller
+    {
+
+        private _dbContext _db_;
+        protected _dbContext _DB
+        {
+            get
+            {
+                if (_db_ == null)
+                {
+                    _db_ = new _dbContext();
+                }
+                return _db_;
+            }
+        }
+
+        private _dbContext2 _db2_;
+        protected _dbContext2 _DB2
+        {
+            get
+            {
+                if (_db2_ == null)
+                {
+                    _db2_ = new _dbContext2();
+                }
+                return _db2_;
+            }
+        }
+
+        protected override void HandleUnknownAction(string actionName)
+        {
+
+            try
+            {
+
+                this.View(actionName).ExecuteResult(this.ControllerContext);
+
+            }
+            catch (InvalidOperationException ieox)
+            {
+
+                ViewData["error"] = "Unknown Action: \"" + Server.HtmlEncode(actionName) + "\"";
+
+                ViewData["exMessage"] = ieox.Message;
+
+                this.View("Error").ExecuteResult(this.ControllerContext);
+
+            }
+
+        }
+
+
+    }
+
+
+    //using System.IO;
+    //using iTextSharp.text;
+    //using iTextSharp.text.pdf;
+    //產出PDF
+    //public ActionResult PDF() {
+    //    var doc1 = new Document(PageSize.A4, 50, 50, 80, 50);
+    //    MemoryStream Memory = new MemoryStream();
+    //    PdfWriter PdfWriter = PdfWriter.GetInstance(doc1, Memory);
+
+
+
+    //    string ttf = Server.MapPath("~/Areas/newweb/Content/pdffont/")+"KAIU.TTF";
+    //    BaseFont bfchinese = BaseFont.CreateFont(ttf,BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+    //    Font chFont = new Font(bfchinese, 12);
+
+    //    doc1.Open();
+    //    doc1.Add(new Paragraph(10f,"Hello 大家好",chFont));
+    //    doc1.Close();
+
+
+    //    return File(Memory.GetBuffer(),"application/pdf","my.pdf");
+    //}
+
+
+
+}
+
+
+
+public class NWAuthorizeAttribute : AuthorizeAttribute
+{
+
+    public override void OnAuthorization(AuthorizationContext filterContext)
+    {
+        base.OnAuthorization(filterContext);
+
+        //確認已通過驗證
+        if (HttpContext.Current.User.Identity.IsAuthenticated)
+        {
+            String account = HttpContext.Current.User.Identity.Name.ToString();
+            String action = HttpContext.Current.Request.RequestContext.RouteData.Values["action"].ToString();
+            action = NW.getActionID(action); //轉換公司簡介
+            String controller = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+
+            HttpContext.Current.Session["Controller"] = controller;
+
+            int admin_id = 0;
+
+            try
+            {
+                admin_id = Convert.ToInt32(NW.DESDeCode(account));
+
+                HttpContext.Current.Session["Id"] = HttpContext.Current.Request.RequestContext.RouteData.Values["id"].ToString();
+
+            }
+            catch
+            {
+
+            }
+
+
+            _dbContext _DB = new _dbContext();
+
+            var data = _DB.sys_admin_data.Where(m => m.admin_id == admin_id).FirstOrDefault();
+            if (data == null)
+            {
+                filterContext.Result = new RedirectToRouteResult("newweb_default", new RouteValueDictionary
+                      {
+                      { "controller", "NwHome" },
+                      { "action", "notAllow" },
+                      { "id", UrlParameter.Optional }
+                      });
+
+            }
+            else
+            {
+                int power_id = 0;
+                if (data != null) { power_id = (int)data.power_id; };
+
+                var data2 = _DB.sys_power_list.Where(m => m.action == action && m.controll == controller && m.power_id == power_id).FirstOrDefault();
+                if (data2 == null)
+                {
+                    filterContext.Result = new RedirectToRouteResult("newweb_default", new RouteValueDictionary
+                      {
+                      { "controller", "NwHome" },
+                      { "action", "notAllow" },
+                      { "id", UrlParameter.Optional }
+                      });
+
+                }
+            }
+
+
+
+        }
+        else
+        {
+            // 未登入，轉至登入頁面 webconfig 控制 <authentication mode="Forms"> <forms loginUrl="~/newweb/" timeout="600" />
+            filterContext.Result = new RedirectToRouteResult("newweb_default", new RouteValueDictionary
+                      {
+                      { "controller", "NwHome" },
+                      { "action", "index" },
+                      { "id", UrlParameter.Optional }
+                      });
+        }
+    }
+
+    //protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+    //{
+    //    filterContext.Result = new RedirectToRouteResult("newweb_default", new RouteValueDictionary
+    //                  {
+    //                  { "controller", "NwHome" },
+    //                  { "action", "notAllow" },
+    //                  { "id", UrlParameter.Optional }
+    //                  });
+    //    return;
+    //}
+}
+
+public class NWCustomError : System.Web.Mvc.HandleErrorAttribute
+{
+    public override void OnException(System.Web.Mvc.ExceptionContext filterContext)
+    {
+        //If the exeption is already handled we do nothing
+        if (filterContext.ExceptionHandled)
+        {
+            return;
+        }
+        else
+        {
+            //紀錄log
+            NW.nwLog(filterContext);
+
+            //Determine the return type of the action
+            string actionName = filterContext.RouteData.Values["action"].ToString();
+            string controllerName = (string)filterContext.RouteData.Values["controller"];
+            Type controllerType = filterContext.Controller.GetType();
+            var method = controllerType.GetMethod(actionName);
+            var returnType = method.ReturnType;
+
+            //If the action that generated the exception returns JSON
+            if (returnType.Equals(typeof(JsonResult)))
+            {
+                filterContext.Result = new JsonResult()
+                {
+                    Data = "Return data here"
+                };
+            }
+
+            //If the action that generated the exception returns a view
+            //Thank you Sumesh for the comment
+            if (returnType.Equals(typeof(ActionResult))
+            || (returnType).IsSubclassOf(typeof(ActionResult)))
+            {
+
+                HandleErrorInfo model = new HandleErrorInfo(filterContext.Exception, controllerName, actionName);
+
+                filterContext.Result = new ViewResult
+                {
+                    ViewName = View,
+                    ViewData = new ViewDataDictionary<HandleErrorInfo>(model),
+                    TempData = filterContext.Controller.TempData
+                };
+
+            }
+
+
+        }
+
+        //Make sure that we mark the exception as handled
+        filterContext.ExceptionHandled = true;
+    }
+}

@@ -1,0 +1,45 @@
+﻿@model String
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "ckeditor");
+    //htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+
+    // int maxlength = 50;
+    // if (ViewData.ModelMetadata.AdditionalValues.ContainsKey("maxLenght"))
+    // {
+    //     maxlength = (int)ViewData.ModelMetadata.AdditionalValues["maxLenght"];
+    // }
+    //htmlAttributes2.Add("maxlength", maxlength);
+
+    //string id = ViewData.ModelMetadata.PropertyName;
+
+    string xx = Request.Url.AbsoluteUri.Replace(Request.Url.AbsolutePath, "");
+
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+        //if (controller == "NwProduct") { NW.controller_name = "NwProduct"; } else { NW.controller_name = ""; }
+        //if (action == "Edit") { NW.controller_name = "NwProduct"; } else { NW.controller_name = ""; }
+    NW.controller = controller;
+    
+    
+    NW.id =  ViewContext.RouteData.Values["id"].ToString();
+   
+}
+
+<div class="control-group">
+    <label class="control-label"></label>
+    <div class="field" style="padding: 5px 5px;">
+        <span class="label label-important" style="">內文圖片上傳，寬最多800px</span>
+    </div>
+</div>
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <div class="field">
+        @Html.TextArea("", ViewData.TemplateInfo.FormattedModelValue.ToString(), htmlAttributes2)
+        <span class="help-inline"></span>
+    </div>
+</div>

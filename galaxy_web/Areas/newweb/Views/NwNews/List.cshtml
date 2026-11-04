@@ -1,0 +1,61 @@
+﻿@{
+    var G = (List<ListItem>)ViewData["G"];
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+
+        <form method="post">
+
+
+            <div class="row-fluid">
+
+                <div class="span3">
+                    <select name="gid" class="span12">
+                        @foreach (var item in G)
+                        {
+                            <option value="@(item.Value)">@(item.DisplayText)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="span3">
+                    <input name="sD" class="span12" type="datetime" placeholder="起始時間" value="@(ViewBag.sD)" />
+                </div>
+
+                <div class="span3">
+                    <input name="eD" class="span12" type="datetime" placeholder="結束時間" value="@(ViewBag.eD)" />
+                </div>
+
+                <div class="span3 pull-right">
+                    <input class="span9" type="text"  name="kw" autocomplete="off" placeholder="請輸入搜尋相關" value="@(ViewBag.kw)"/>
+                    <input class="btn btn-primary span3" type="submit" value="查詢" />
+                </div>
+
+            </div>
+
+            <br />
+
+            <div class="row-fluid">
+
+                <div class="span3">
+                    <a href="@Url.Action(action.Replace("List", "Add"), controller, new { id = 0 })" class="btn"><span class="icon-pencil"></span>新增</a>
+                </div>
+
+            </div>
+
+        </form>
+
+        <div id="List_ajax">
+            @Html.Partial(action + "_ajax")
+        </div>
+
+        <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+        @Html.Partial("template_list_fix")
+
+    </div>
+</div>

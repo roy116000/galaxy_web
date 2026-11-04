@@ -1,0 +1,58 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.zz_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    }
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="con1 width4" />
+            <col class="con0 width8" />
+            <col class="con1 width10" />
+            <col class="con0" />
+            <col class="con1 width10" />
+            <col class="con0 width10" />
+            <col class="con1 width10" />
+            <col class="con0 width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="head1 aligncenter">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="head0">@Html.DisplayNameFor(model => model.First().text) </th>
+                <th class="head1">@Html.DisplayNameFor(model => model.First().text_max) </th>
+                <th class="head0">@Html.DisplayNameFor(model => model.First().text_num)</th>
+                <th class="head1">@Html.DisplayNameFor(model => model.First().checkbox)</th>
+                <th class="head0">@Html.DisplayNameFor(model => model.First().text_phone)</th>
+                <th class="head1">@Html.DisplayNameFor(model => model.First().change_datetime)</th>
+                <th class="head0">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+               
+                <tr class="unread">
+                    <td class="aligncenter">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.zz_id" /></td>
+                    <td>@Html.DisplayFor(modelItem => item.text)</td>
+                    <td>@Html.DisplayFor(modelItem => item.text_max)</td>
+                    <td>@Html.DisplayFor(modelItem => item.text_num)</td>
+                    <td class="star">@Html.DisplayFor(modelItem => item.checkbox)</td>
+                    <td class="star">@Html.DisplayFor(modelItem => item.text_phone)</td>
+                    <td class="star">@Html.DisplayFor(modelItem => item.change_datetime)</td>
+                    <td>@Html.ActionLink("編輯", action.Replace("List","Edit").Replace("_ajax",""), new { id = item.zz_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax","")+"_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div> 
+</div>
+<!--pagination-->

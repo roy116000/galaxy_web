@@ -1,0 +1,307 @@
+﻿@model galaxy_web.Models.product_data
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta name="Author" content="Skyclub">
+
+    <!-- include file="_adminx/about/skin/config.asp"-->
+
+    <meta content="width=device-width; initial-scale=1.0" name="viewport">
+
+    <link href="~/Areas/newweb/Content/css/Preview/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/css/Preview/jquery.mmenu.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/css/Preview/jquery.sidr.dark.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/css/Preview/jquery.sidr.light.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/css/Preview/style.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/css/Preview/style2.css" rel="stylesheet" />
+    <link rel="icon" href="~/Areas/newweb/images/icon.png">
+
+    <script src="~/Areas/newweb/Content/js/Preview/jquery-1.9.0.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/Preview/bootstrap.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/Preview/jquery.mmenu.min.all.js"></script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            getWidth();
+            $(window).resize(getWidth);
+        })
+
+        function getWidth() {
+            var html = '';
+            html = '總寬：' + $(window).width() + ' &lt;br /&gt;Left:' + $('.w1').width() + ' &lt;br /&gt;Right:' + $('.w2').width();
+            html += '&lt;br /&gt;' + $('').width();
+            html += '&lt;br /&gt;' + $('').css('');
+            $('#msg').html(html);
+
+        }
+
+    </script>
+
+
+    <script type="text/javascript">
+        $(function () {
+            $(".img_over").hover(function () {
+                var src = $(this).attr("src"), n = src.lastIndexOf(".");
+                var s1 = src.substring(src, n), s2 = src.replace(s1, "");
+                $(this).attr("src", s1 + "_over" + s2);
+            }, function () {
+                var src = $(this).attr("src");
+                $(this).attr("src", src.replace("_over", ""));
+            });
+        })
+    </script>
+
+    <title>Galaxy</title>
+</head>
+
+<body cz-shortcut-listen="true">
+
+    <div class="z3">
+        <div class="y1">
+            <img src="~/images/sp/lg.png"><span>商品詳細介紹</span>
+        </div>
+    </div>
+    <!--中間區域-->
+    <!--上半段-->
+    <div class="z1">
+        <!--商品介紹區-->
+        <div class="a14">
+            <!--左半邊--商品其他圖片選擇-->
+            <div class="b17">
+
+                @if (Model.Img != null)
+                {
+                    foreach (var item in Model.Img.Skip(1))
+                    {
+                    <div class="im6">
+                        <a href="#">
+                            <img src="@(item)"></a>
+                    </div>
+                    }
+                }
+
+
+            </div>
+            <!--中間--商品主圖-->
+            <div class="im7">
+
+                @if (Model.Img != null)
+                {
+                    foreach (var item in Model.Img.Take(1))
+                    {
+                    <img src="@(item)">
+                    }
+                }
+
+
+            </div>
+            <!--右半邊--商品簡介區-->
+            <div class="b18">
+                <!--功能按鈕-->
+                <div class="c10">
+                    <div class="bt10">
+
+                        <a href="#">熱銷</a>
+
+                        <a href="#">熱銷</a>
+
+                        <a href="#">熱銷</a>
+
+                        <a href="#">熱銷</a>
+
+                        <a href="#">熱銷</a>
+
+                    </div>
+                    <div class="bt12">
+                        <a href="#">0</a>
+                        <span></span>
+                        <div class="pop">收藏數 </div>
+                    </div>
+                    <div class="bt11"><a href="#">0</a> </div>
+                    <div class="ic2">0</div>
+                </div>
+                <!--商品標題-->
+                <div class="t24">@(Model.web_name) - @(Model.item_name)</div>
+                <!--數量+價格-->
+                <div class="c11">
+                    <div class="bt13"><a href="#">-</a> </div>
+                    <input name="" placeholder="1" type="text">
+                    <div class="bt13"><a href="#">+</a> </div>
+                    <div class="t25">
+                        最後
+         
+                        <span>@(Model.Stock)</span>
+                        件
+                    </div>
+                    <div class="t27">
+                        NT$
+         
+                        <span>@((Model.price + Model.freight).ToString(NW.point))</span>
+                    </div>
+                    <div class="t26">
+                        原價$
+         
+                        <span>@((Model.sprice + Model.freight).ToString(NW.point))</span>
+                    </div>
+                </div>
+
+                <!--樣式-->
+                @if (!string.IsNullOrEmpty(Model.style))
+                {
+                    //樣式格式   ex.黃色,紅色,藍色
+                    var style_arr = Model.style.Split(',');
+                    <div class="ls12">
+                        <div class="t28">
+                            <img src="~/images/sp/ic4.png">商品樣式
+                        </div>
+                        <div class="t29">
+                            <select name="style" id="style" class="in1">
+
+                                @foreach (var item in style_arr)
+                                { 
+                                    <option value="@(item)">@(item)</option>
+                                }
+
+                            </select>
+
+                        </div>
+                    </div>
+                }
+                <!--運費-->
+                <div class="ls12">
+                    <div class="t28">
+                        <img src="~/images/sp/ic4.png">運費計算
+                    </div>
+                    <div class="t29">免運</div>
+                </div>
+                <!--付款方式 -->
+                <div class="ls12">
+                    <div class="t28">
+                        <img src="~/images/sp/ic5.png">付款方式
+                    </div>
+                    <div class="t29">
+                        <img src="~/images/sp/ic8.png"><img src="~/images/sp/ic9.png"><img src="~/images/sp/ic10.png"><img src="~/images/sp/ic11.png">信用卡或ATM轉帳
+                    </div>
+                </div>
+                <!--寄送方式-->
+                <div class="ls12">
+                    <div class="t28">
+                        <img src="~/images/sp/ic6.png">寄送方式
+                    </div>
+                    <div class="t29">郵局、貨運/宅配、超商取貨 (於購物需知中詳述)</div>
+                </div>
+                <!--購物回饋-->
+                @*<div class="ls12">
+                    <div class="t28">
+                        <img src="~/images/sp/ic17.png">回饋紅利
+                    </div>
+                    <div class="t29">
+                        <span>50</span>
+                        點紅利
+                    </div>
+                </div>*@
+                <!--已販售-->
+                <div class="c12">
+                    <img src="~/images/sp/ic13.png">已販售
+       
+                    <span>0</span>
+                    份
+                </div>
+                <!--貨到通知按鈕-->
+                <div class="c13">
+                    <div class="bt14"><a href="#">貨到通知</a> </div>
+                    <div class="bt15"><a href="#">加入慾望良品</a> </div>
+                    <div class="bt16"><a href="#">立即購買</a> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--下半段-->
+    <div class="z2">
+        <!--左半邊-->
+        <div class="a15">
+            <!--頁籤-->
+            <div class="mn3"><a href="#" class="active">商品描述</a> <a href="#">紅利說明</a> <a href="#">購物需知</a> @*<a href="#">商品問答&nbsp;56</a> <a href="#">評價留言&nbsp;179</a> <a href="#">開箱分享&nbsp;28</a>*@ </div>
+            <!--詳細介紹文案區-->
+            <div class="c14">
+                @(Html.Raw(Model.info))
+                @Html.Raw(Model.introduce)
+            </div>
+        </div>
+        <!--右半邊-->
+        <div class="a16">
+            <img src="~/images/sp/im4.jpg">
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+<style>
+    .z3 {
+        background: rgba(0, 0, 0, 0) url("/images/sp/bg1.jpg") no-repeat scroll center top / cover;
+        height: 150px;
+        margin: 0 0 30px;
+        width: 100%;
+    }
+
+    .z1 .a14 .b18 .c10 .ic2 {
+        background: #fbfbfb url("/images/sp/ic1.png") no-repeat scroll 10px 4px / auto 15px;
+        border: 1px solid #ddd;
+        color: #aaa;
+        float: right;
+        font: 13px/22px verdana,"微軟正黑體";
+        height: 23px;
+        padding: 0 0 0 23px;
+        text-align: center;
+        width: 80px;
+    }
+
+    .z1 .a14 .b18 .c10 .bt11 a {
+        -moz-border-bottom-colors: none;
+        -moz-border-left-colors: none;
+        -moz-border-right-colors: none;
+        -moz-border-top-colors: none;
+        background: #fbfbfb url("/images/sp/ic2.png") no-repeat scroll 10px 4px / auto 15px;
+        border-color: #ddd #ddd #ddd currentcolor;
+        border-image: none;
+        border-style: solid solid solid none;
+        border-width: 1px 1px 1px 0;
+        color: #aaa;
+        display: inline-block;
+        font: 13px/23px verdana,"微軟正黑體";
+        height: 23px;
+        padding: 0 0 0 13px;
+        text-align: center;
+        width: 90px;
+    }
+
+    .z1 .a14 .b18 .c10 .bt12 a {
+        -moz-border-bottom-colors: none;
+        -moz-border-left-colors: none;
+        -moz-border-right-colors: none;
+        -moz-border-top-colors: none;
+        background: #fbfbfb url("/images/sp/ic3.png") no-repeat scroll 10px 4px / auto 15px;
+        border-color: #ddd #ddd #ddd currentcolor;
+        border-image: none;
+        border-style: solid solid solid none;
+        border-width: 1px 1px 1px 0;
+        color: #aaa;
+        display: inline-block;
+        font: 13px/23px verdana,"微軟正黑體";
+        height: 23px;
+        padding: 0 0 0 13px;
+        text-align: center;
+        width: 90px;
+    }
+</style>

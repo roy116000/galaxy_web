@@ -1,0 +1,475 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+using h365_web.Models;
+using MvcPaging;
+using ClosedXML.Excel;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwBillsController : _BaseController
+    {
+        //
+        // GET: /newweb/NwBills/
+
+        #region"新"
+
+        public static string Temp = "";
+        public static List<_Bill> Bill_Temp;
+        public static string[] Bill_flag = { "尚未請款", "請款中", "已撥款", "異常訂單" };
+
+        public class _Bill
+        {
+            public string c_name { get; set; }
+
+            public order_bill bill { get; set; }
+
+            public List<order_data> order { get; set; }
+        }
+
+        public List<_Bill> Bill()
+        {
+            var data = new List<_Bill>() { };
+
+            string Action = RouteData.Values["action"].ToString();
+            if (Temp != null && Temp == Action && Bill_Temp != null) { data = Bill_Temp; }
+            else
+            {
+
+
+                var aData = NW.admin(User.Identity.Name);
+                if (aData.power_id < 3 || aData.power_id == 4) //廠商 或 管理者以上
+                {
+
+
+                    //訂單啟用的
+                    var O = this._DB.order_data.Where(m => m.visible);
+
+                    //廠商自己 
+                    if (aData.power_id > 2)
+                    {
+                        O = O.Where(m => m.company_id == aData.company_id);
+                    }
+
+                    #region"撈取每月訂單"
+
+                    int[] month = Enumerable.Range(1, 12).ToArray();
+                    foreach (var item in month)
+                    {
+                        //月份進來
+                        DateTime sD = new DateTime(NW.Today.Year, item, 1);
+                        DateTime eD = new DateTime(sD.AddMonths(1).Year, sD.AddMonths(1).Month, 1);
+
+                        //當月的
+                        var linq = O.Where(m => (m.goods_datetime >= sD && m.goods_datetime < eD)).OrderBy(m => m.company_id);
+
+                        //這個月的廠商編號
+                        int[] c_id = linq.Select(m => m.company_id).Distinct().ToArray();
+
+                        var B = (from a in this._DB.company_data.Where(m => c_id.Contains(m.company_id) && m.visible)
+                                 join b in linq on a.company_id equals b.company_id into mm
+                                 select new
+                                 {
+                                     c = a,
+                                     order = mm.OrderBy(m => m.bill_flag).ThenBy(m => m.order_id).ToList(),
+
+                                 }).ToList();
+
+                        #region"計算金額"
+
+                        //跑申請金額
+                        foreach (var item2 in B)
+                        {
+                            //已經撥款的
+                            var o = item2.order.ToLookup(m => m.bill_flag == 2);
+
+                            //申請
+                            var Bill = this._DB.order_bill.Where(m => m.company_id == item2.c.company_id && m.date == sD).FirstOrDefault();
+                            Bill = Bill != null ? Bill : new order_bill() { };
+
+                            Bill.company_id = item2.c.company_id;
+                            Bill.date = sD;
+                            //Bill.bill_datetime = DateTime.Today; //暫時
+                            Bill.bill_num = item2.order.Count();
+                            Bill.bill_money = Convert.ToDecimal(item2.order.Select(m => m.cost_total).DefaultIfEmpty(0).Sum());
+                            Bill.yes_num = o[true].Count();
+                            Bill.yes_money = Convert.ToDecimal(o[true].Select(m => m.cost_total).DefaultIfEmpty(0).Sum());
+                            Bill.no_num = o[false].Count();
+                            Bill.no_money = Convert.ToDecimal(o[false].Select(m => m.cost_total).DefaultIfEmpty(0).Sum());
+
+                            //表示新增
+                            if (Bill.bill_id == 0)
+                            {
+                                Bill.create_user = User.Identity.Name;
+                                Bill.create_datetime = DateTime.Now;
+
+                                this._DB.order_bill.Add(Bill);
+                            }
+                            else
+                            {
+                                Bill.change_user = User.Identity.Name;
+                                Bill.change_datetime = DateTime.Now;
+                            }
+
+                            this._DB.SaveChanges();
+
+                            //轉為待請款
+                            var q = O.ToList().Where(m => item2.order.Select(x => x.order_id).ToArray().Contains(m.order_id) && m.bill_flag < 2).ToList();
+                            q.ForEach(m => { m.bill_id = Bill.bill_id; m.bill_flag = 1; this._DB.SaveChanges(); });
+
+
+                            var P = new _Bill() { };
+
+                            P.bill = Bill;
+                            P.c_name = item2.c.name;
+                            P.order = item2.order;
+
+                            data.Add(P);
+
+                        }
+
+                        #endregion
+
+
+                    }
+
+                    #endregion
+                }
+
+                switch (Action)
+                {
+
+                    case "List":
+
+                        data = data.Where(m => m.bill.invoice_datetime != null && m.bill.pay_datetime == null).ToList();
+
+                        break;
+
+                    case "FinishList":
+
+                        data = data.Where(m => m.bill.invoice_datetime != null && m.bill.pay_datetime != null).ToList();
+
+                        break;
+
+                    default:
+
+                        data = data.Where(m => m.bill.invoice_datetime == null).ToList();
+
+                        break;
+                }
+
+                Bill_Temp = data;
+                Temp = Action;
+
+            }
+
+
+
+
+            return data;
+        }
+
+
+        public ActionResult List(int? page, string kw)
+        {
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            //var linq = new List<_Bill>() { };
+
+            //linq = Bill_Temp != null ? Bill_Temp : Bill();
+
+            string k = Session["kw"] != null ? Session["kw"].ToString() : null;
+            if (kw != k)
+            {
+                Bill_Temp = null;
+            }
+
+            var linq = Bill();
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                Session["kw"] = kw;
+                kw = kw.ToLower();
+
+                linq = linq.Where(m => m.c_name.Contains(kw)).ToList();
+            }
+
+            IPagedList data = linq.OrderByDescending(m => m.bill.date).ToPagedList(currentPageIndex, 20);
+
+            if (page.HasValue)
+            {
+                return PartialView("List_ajax", data);
+            }
+            else
+            {
+                Bill_Temp = linq;
+                return View(data);
+            }
+
+        }
+
+        //待請款
+        public ActionResult StayList(int? page, string kw)
+        {
+
+            return List(page, kw);
+        }
+
+        //請款完成
+        public ActionResult FinishList(int? page, string kw)
+        {
+
+            return List(page, kw);
+        }
+
+        private _Bill Add_Data(int id)
+        {
+            var aData = NW.admin(User.Identity.Name);
+            ViewBag.power_id = aData.power_id;
+
+            var linq = (from a in this._DB.order_bill.Where(m => m.bill_id == id)
+                        join b in this._DB.order_data on a.bill_id equals b.bill_id into mm
+                        join c in this._DB.company_data on a.company_id equals c.company_id into mm2
+                        select new _Bill()
+                        {
+                            bill = a,
+                            c_name = mm2.FirstOrDefault().name,
+                            order = mm.OrderBy(m => m.bill_flag).ThenBy(m => m.order_id).ToList()
+                        });
+
+            if (aData.power_id > 2)
+            {
+                linq = linq.Where(m => m.bill.company_id == aData.company_id);
+            }
+            var data = linq.FirstOrDefault();
+
+            return data;
+        }
+
+        public ActionResult Add(int id)
+        {
+
+
+            var data = Add_Data(id);
+            if (data != null)
+            {
+                return View(data);
+            }
+            else
+            {
+                TempData["jgrowl"] = "查無資料";
+                return RedirectToAction("List");
+            }
+
+
+        }
+
+        public ActionResult Edit(int id)
+        {
+            return Add(id);
+        }
+
+        [HttpPost]
+        public ActionResult EditSave(order_bill Get)
+        {
+            var aData = NW.admin(User.Identity.Name);
+
+            var linq = this._DB.order_bill.Where(m => m.bill_id == Get.bill_id);
+
+            if (aData.power_id > 2)
+            {
+                linq = linq.Where(m => m.company_id == aData.company_id);
+            }
+
+            var data = linq.FirstOrDefault();
+            if (data == null) { TempData["jgrowl"] = "查無資料"; return RedirectToAction("List"); }
+            else
+            {
+                var o = this._DB.order_data.Where(m => m.visible && m.bill_id == data.bill_id && m.bill_flag != 2).ToList();
+
+                if ((aData.power_id == 4 || aData.power_id == 2))
+                {
+                    data.bill_datetime = DateTime.Now;
+                    data.invoice_datetime = Get.invoice_datetime;
+                    data.invoice_no = Get.invoice_no;
+
+                    o.ForEach(m => { m.bill_flag = 1; this._DB.SaveChanges(); });
+                }
+
+                if (aData.power_id == 2)
+                {
+                    data.pay_datetime = Get.pay_datetime;
+
+                    if (data.pay_datetime != null)
+                    {
+                        o.ForEach(m => { m.bill_flag = 2; this._DB.SaveChanges(); });
+                    }
+
+                }
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+
+                this._DB.SaveChanges();
+
+
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = data.bill_id });
+            }
+        }
+
+        public ActionResult BillsExport(int id)
+        {
+            string msg = "匯出失敗，請與管理員聯絡";
+            string value = "";
+            string T = "'";
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("訂單明細");
+            int colIdx = 1;
+            int rowIdx = 2;
+            //string[] cols = null;
+
+            var data = Add_Data(id);
+            if (data == null) { TempData["jgrowl"] = msg; return RedirectToAction("List"); }
+            else
+            {
+                sheet.Cell(1, 1).Value = "狀態：";
+                sheet.Cell(1, 2).Value = data.bill.no_num != 0 ? "請款中" : "撥款完成";
+
+                sheet.Cell(1, 4).Value = "商家：";
+                sheet.Cell(1, 5).Value = data.c_name;
+
+                sheet.Cell(1, 7).Value = "請款日：";
+                sheet.Cell(1, 8).Value = NW.getDate(data.bill.bill_datetime);
+
+
+                #region"明細"
+
+                rowIdx = rowIdx++ + 1;
+                colIdx = 10;
+
+                string[] col = { "請款總金額(台幣)" };
+                foreach (var item in col)
+                {
+                    //置中
+                    sheet.Cell(rowIdx, colIdx).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    sheet.Cell(rowIdx, colIdx++).Value = item;
+                }
+
+                rowIdx = rowIdx + 1; //行數
+                colIdx = 10; //欄位
+
+                col = new string[] { data.bill.bill_money.ToString("N0") };
+                foreach (string item in col)
+                {
+                    //置右
+                    sheet.Cell(rowIdx, colIdx).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                    sheet.Cell(rowIdx, colIdx++).Value = T + item;
+                }
+
+                colIdx = 1;
+                rowIdx = rowIdx + 2;
+
+                col = new string[] { "#", "訂單單號", "訂貨時間", "出貨時間", "品牌", "品名", "數量", "貨運公司", "宅配單號", "金額" };
+                foreach (string colName in col) //標頭
+                {
+                    sheet.Cell(rowIdx, colIdx++).Value = colName;
+                }
+
+                //組裝
+                foreach (var item in data.order)
+                {
+                    string[] N = 
+                    {
+                        (Array.IndexOf(data.order.ToArray(), item) + 1).ToString(),
+                        item.order_sn,
+                        NW.getDate(item.order_datetime),
+                        NW.getDate(item.goods_datetime),
+                        item.order_sub.FirstOrDefault().product_data.web_name,
+                        item.order_sub.FirstOrDefault().product_data.item_name,
+                        item.order_sub.FirstOrDefault().num.ToString(),
+                        item.freight_name.Split(':')[1],
+                        item.freight_no,
+                        item.cost_total.ToString("N0")
+
+                    };
+
+                    int num = 1;
+                    foreach (var item2 in N)
+                    {
+
+                        sheet.Cell(rowIdx + 1, num).Value = T + item2;
+                        
+
+                        if (new int[] { 3, 4 }.Contains(num))
+                        {
+                            //置中
+                            sheet.Cell(rowIdx + 1, num).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        }
+                        else if (new int[] { 7, 10 }.Contains(num))
+                        {
+                            //置右
+                            sheet.Cell(rowIdx + 1, num).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        }
+
+                        num++;
+                    }
+
+                    rowIdx++;
+                }
+
+                #endregion
+
+                #region"增添色彩~"
+
+                sheet.Rows("1").Style.Font.FontSize = 20;
+                sheet.Rows("3, 4, 6").Style.Font.FontSize = 14;
+                sheet.Rows("1, 3, 4, 6").Style.Font.Bold = true;
+
+                sheet.Rows("3,6").Style.Fill.BackgroundColor = XLColor.Yellow;
+                //sheet.Rows("3,5,8").Style.Fill.color = ConsoleColor.White;
+                sheet.Rows("3,6").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                sheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                #endregion
+
+                #region"自動伸縮欄寬"
+
+                for (int i = 1; i <= col.Length + 10; i++)
+                {
+
+                    sheet.Column(i).AdjustToContents();
+
+                    sheet.Columns("5, 6").Width = 20;
+
+                }
+
+                #endregion
+
+                value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+
+                workbook.SaveAs(value);
+                workbook.Dispose();
+
+                return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx"));
+
+            }
+
+        }
+
+
+        #endregion
+
+
+    }
+}

@@ -1,0 +1,73 @@
+﻿@model MvcPaging.IPagedList<h365_web.Areas.newweb.Controllers.NwReportController.rank_detail>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    //var salesall = (List<h365_web.Areas.newweb.Controllers.NwReportController.rank_detail>)ViewData["salesall"];
+
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        //flag=2 銷售排名報表用
+
+        $('#start').val($('input[name = start_date]').val());
+        $('#end').val($('input[name = end_date]').val());
+        $('#k').val($('input[name = kw]').val());
+        $('#cb_flag').val(flag);
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm("SalesrankListDel", controller, FormMethod.Post, new { @id = "frmCheckbox", @target = "_blank" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="start" name="start" value="0" />
+    <input type="hidden" id="end" name="end" value="0" />
+    <input type="hidden" id="k" name="k" value="0" />
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+        <!--widgetsource-->
+        <div id="mail">
+
+            @using (Html.BeginRouteForm("", FormMethod.Get))
+            {
+                
+                <a onclick="cbHandel(2);" href="#" class="btn">以Excel匯出</a>
+            }
+                <form action="@(Url.Action(action, controller))" method="post">
+
+
+
+                    <div style="text-align: right">
+
+                        <input type="text" value="@(ViewBag.start)" name="start_date" id="start_date" class="span2">
+                        ～
+                    <input type="text" value="@(ViewBag.end)" name="end_date" id="end_date" class="span2">
+                        <input type="text" name="kw" id="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </div>
+                </form>
+            
+
+
+        </div>
+        <!--#chat-->
+
+        @Html.Partial(action + "_ajax", Model)
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('#start_date').datepicker();
+        $('#end_date').datepicker();
+    })
+
+
+</script>

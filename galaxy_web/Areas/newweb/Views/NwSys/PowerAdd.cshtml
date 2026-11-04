@@ -1,0 +1,111 @@
+﻿@using galaxy_web.Models
+@model galaxy_web.Models.sys_power_data
+@{
+    int id = Convert.ToInt32(ViewContext.RouteData.Values["id"]);
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    _dbContext _DB = new _dbContext();
+    var gData = _DB.sys_function_sub.OrderBy(m => m.function_id).ToList();
+    }
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action+"Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1"}))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.power_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                    @Html.EditorFor(model => model.label) 
+
+                    @Html.EditorFor(model => model.controller) 
+
+                    @Html.EditorFor(model => model.action) 
+
+                    @Html.EditorFor(model => model.info) 
+
+                    @Html.EditorFor(model => model.visible) 
+
+                <h4 class="widgettitle">設定菜單</h4>
+
+                <table class="table table-bordered mailinbox">
+                    <colgroup>
+                        <col class="width15" />
+                        <col class="width4" />
+                        <col class="width20" />
+                        <col class="width20" />
+                        <col class="" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>功能名稱 </th>
+                            <th>啟用</th>
+                            <th>子功能名稱 </th>
+                            <th>action </th>
+                            <th>說明 </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+            int function_id = 0;
+                            }
+                     @foreach (var item in gData)
+                        {
+                            if (function_id != item.function_id) { 
+                           <tr class="unread">
+                                <td><span class="@(item.sys_function_data.icon)"></span> @(item.sys_function_data.label) [ @(item.sys_function_data.controll) ]</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>@(item.sys_function_data.label)</td>
+                            </tr>
+                         
+                                function_id = item.function_id;
+                            }
+                            
+                               //var data = _DB.sys_power_sub.Where(m=>m.power_id==id).Where(m=>m.function_sub_id==item.function_sub_id).FirstOrDefault();    
+                               bool blnC = false;
+                            <tr class="unread">
+                                <td class="right" style="text-align:right;">@if(item.show_visible){ <span class="icon-th-large"></span> }&nbsp;</td>
+                                <td class="center">
+                                    <input type="checkbox" name="block_id" class="block_check" @(blnC?"checked":"") value="@item.function_sub_id" /></td>
+                               <td>@(item.label)</td>
+                                 <td>@(item.action)</td>
+                                <td>@Html.DisplayFor(modelItem => item.info)&nbsp;</td>
+                            </tr>
+                           
+                        }
+                    </tbody>
+                </table>
+
+
+                <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    <button type="reset" class="btn">取消</button>
+                </div>
+               </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                label: "required"
+            },
+            messages: {
+                label: "[名稱]必填!!"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

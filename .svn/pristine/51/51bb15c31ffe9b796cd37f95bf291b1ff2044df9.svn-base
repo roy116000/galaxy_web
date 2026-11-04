@@ -1,0 +1,130 @@
+﻿@model h365_web.Models.order_invoice2
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<h365_web.Models.order_data> in_data = (List<h365_web.Models.order_data>)ViewData["in_data"];
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.invoice_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">發票資訊</h4>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_id)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_id)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.name)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.clearing_date)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.clearing_date)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.order_datetime)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.order_datetime.Value.ToShortDateString())&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*發票種類*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_type)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_type)&nbsp;                   
+                    </div>
+                </div>
+
+                @*稅籍單位*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.taxes)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.taxes)&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*發票號碼*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.uniform_numbers)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.uniform_numbers)&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*發票抬頭*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_title)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_title)&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*寄送發票地址*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_address)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_address)&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*寄送發票時間*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_datetime)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_datetime.Value.ToShortDateString())&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*藥局付款日*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.pay_datetime)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.pay_datetime.Value.ToShortDateString())&nbsp;
+                   
+                    </div>
+                </div>
+
+                @*藥局起訖日*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.return_datetime)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.return_datetime.Value.ToShortDateString())&nbsp;
+                   
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div style="display: none">@(ViewBag.ID = Model.invoice_id)</div>
+        @Html.Partial("template_Invoice", in_data)
+
+    </div>
+</div>
+
+

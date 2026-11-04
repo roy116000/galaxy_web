@@ -1,0 +1,29 @@
+﻿@model Decimal?
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "span2 input-spinner");
+    htmlAttributes2.Add("maxlength", "10");
+    htmlAttributes2.Add("style", "text-align:right"); 
+    htmlAttributes2.Add("type", "number"); //強制為數字
+    //htmlAttributes2.Add("step", "0"); //小數點幾位
+
+    string id = ViewData.ModelMetadata.PropertyName;
+}
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <span class="field">
+        @*@Html.TextBox("", Model, htmlAttributes2)*@
+        @Html.TextBox("", Model.HasValue ? decimal.Parse(Model.Value.ToString(NW.point)) : 0, htmlAttributes2)
+    </span>
+</div>
+
+<style>
+    input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+        margin: 0;
+    }
+</style>

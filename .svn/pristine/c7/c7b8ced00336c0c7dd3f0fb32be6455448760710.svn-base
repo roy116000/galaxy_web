@@ -1,0 +1,163 @@
+﻿using h365_web.Models;
+using MvcPaging;
+using System;
+using System.Linq;
+using System.Web.Mvc;
+
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwTagController : _BaseController
+    {
+        #region"關聯列表"
+
+
+        #region"列表"
+
+        public ActionResult List(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var linq = this._DB.tag_data.Where(m => m.tag_id > 0);
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                linq = linq.Where(m => m.tag_name.Contains(kw));
+            }
+
+            var data = linq.OrderByDescending(m => m.tag_id).ThenByDescending(m => m.change_datetime).ToPagedList(currentPageIndex, 50);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult AoE(int id)
+        {
+            var data = this._DB.tag_data.Where(m => m.tag_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new tag_data();
+                if (data.tag_id == 0)
+                {
+                    data.visible = true;
+                    data.inx = 0;
+                }
+
+                ViewBag.jgrowl = TempData["jgrowl"];
+                return View(data);
+            }
+
+        }
+
+        public ActionResult Add(int id)
+        {
+            return AoE(id);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            return AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(tag_data tag_data)
+        {
+            TempData["jgrowl"] = "查無相關資訊";
+
+            var data = this._DB.tag_data.Where(m => m.tag_id == tag_data.tag_id).FirstOrDefault();
+            if (tag_data.tag_id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "").Replace("Save", "") + "List"); }
+            else
+            {
+                        
+                data = data != null ? data : new tag_data();
+
+                //string Ret = data.tag_name; //判斷重複用
+
+                data.tag_name = tag_data.tag_name; //關聯名稱
+                data.visible = tag_data.visible;
+                data.inx = tag_data.inx;
+
+                if (data.tag_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+                    this._DB.tag_data.Add(data);
+
+                    TempData["jgrowl"] = "新增成功";
+                }
+                else 
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "修改成功";
+                }
+
+                this._DB.SaveChanges();
+
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "").Replace("Save", "") + "Edit", new { id = data.tag_id });
+            }
+
+        }
+
+        #endregion
+
+        #region"刪除"
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string DB = "tag_data";
+            string Id = "tag_id";
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update " + DB + " set visible = 1 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update " + DB + " set visible = 0 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    sql = " Delete From  " + DB + " Where " + Id + " in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+
+        #endregion
+
+    }
+}

@@ -1,0 +1,53 @@
+﻿@model List<galaxy_web.Models.port_data>
+
+
+<h4 class="widgettitle">紀錄<span class="pull-right"><a onclick="$('.table').toggle(300);">詳細資訊</a></span></h4>
+
+<table class="table table-bordered mailinbox">
+    <colgroup>
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col />
+
+    </colgroup>
+    <thead>
+        <tr>
+            <th class="center">日期</th>
+            <th class="center">時間</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().name))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().type))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().num))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().success_num))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().error_num))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().error_msg))</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr class="@NW.echoBool(true, "unread", "visible")">
+                <td class="center" title="@(item.create_datetime)">@(NW.getDate(item.create_datetime))</td>
+                <td class="center">@(NW.getDate(item.create_datetime, "HH:mm:ss"))</td>
+                <td class="center">@(item.name)</td>
+                <td class="center">@(item.type)</td>
+                <td class="center">@(item.num)</td>
+                <td class="center">@(item.success_num)</td>
+                <td class="center">@(item.error_num)</td>
+                <td>@(Html.Raw(item.error_msg))</td>
+
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+
+
+

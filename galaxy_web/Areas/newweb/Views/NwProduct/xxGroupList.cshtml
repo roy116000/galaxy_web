@@ -1,0 +1,60 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.product_group>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+
+            @Html.Partial("template_select")
+
+
+
+            <form action="@(Url.Action(action, controller))" method="post">
+
+                <div>
+
+                    <ul class="nav nav-pills">
+                        @*<li @NW.echoBool(ViewBag.flag == null, "class=active", "")>@Html.ActionLink("全部", action)</li>*@
+                        @*@foreach (var item in F)
+                        {
+                                                
+                            <li @(item.group_id == ViewBag.flag ? "class=active" : "")>
+                                <a href="@Url.Action(action, new { flag = item.group_id })">@item.name (@item.count)</a>
+                            </li>
+                        }*@
+                    </ul>
+
+                    @*<a class="btn" href="@(Url.Action(action.Replace("List", "Add"), new { id = 0 }))">新增</a>*@
+                    @*@if (aData.power_id > 2)
+                    {
+                        <a class="btn" href="@(Url.Action(action.Replace("List", "Add"), new { id = 0 }))">新增</a>
+                    }*@
+
+                    <input hidden="hidden" name="flag" value="@(ViewBag.flag)" />
+
+                    <span style="float: right">
+                        <input type="text" name="kw" autocomplete="off" placeholder="請輸入搜尋相關" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <br />
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax", Model)
+
+    </div>
+    <!--contentinner-->
+</div>

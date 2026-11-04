@@ -1,0 +1,102 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.news_data>
+@{
+    var G_name = (Dictionary<int, string>)ViewData["G_name"];
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width8" />
+            <col />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().group_id))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().title))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().cont))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().start_date))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().end_date))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model != null)
+            {
+
+                foreach (var item in Model)
+                {
+                    int num = Array.IndexOf(Model.Select(m => m.news_id).ToArray(), item.news_id);
+                    
+                    
+                     
+                <tr class="@(NW.echoBool(item.visible, "unread", "visible"))">
+
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.news_id)" /></td>
+                    <td class="center">@(G_name[item.group_id])</td>
+                    <td class="left">@(item.title)</td>
+                    <td class="center"><a href="#myModal_@(item.news_id)" data-toggle="modal">預覽</a></td>
+                    <td class="left">@(NW.getDate(item.start_date))</td>
+                    <td class="left">@(NW.getDate(item.end_date))</td>
+                    <td class="center">@(Html.DisplayFor(m => m.FirstOrDefault().visible))</td>
+                    <td class="center">
+
+                        <ul style="position: relative;">
+                            <li>
+                                <a data-toggle="dropdown">選擇設定</a>
+                                <ul class="dropdown-menu" style="min-width: 100%">
+                                    <li>@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.news_id })</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    </td>
+                </tr>
+                
+                
+                <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" class="modal hide fade" id="myModal_@(item.news_id)">
+                    <div class="modal-header">
+                        <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
+                        <h3 id="myModalLabel">@(item.title)</h3>
+                    </div>
+                    <div class="modal-body">
+                        @(Html.Raw(item.cont))
+                    </div>
+
+                </div>
+                }
+            }
+
+        </tbody>
+    </table>
+
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(15)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("gid", ViewBag.gid)
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("sD", ViewBag.sD)
+            .AddRouteValue("eD", ViewBag.eD)
+            )
+
+    </div>
+
+</div>
+
+

@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+
+namespace galaxy_web
+{
+    public class RouteConfig
+    {
+        public static void RegisterRoutes(RouteCollection routes)
+        {
+            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            routes.IgnoreRoute("Content/{*pathInfo}");
+            routes.IgnoreRoute("Images/{*pathInfo}");
+
+            //禁止被搜尋的
+            routes.IgnoreRoute("{resource}.txt/{*pathInfo}");
+
+            // routes.Add(new Route("Content/{*pathInfo}", new StopRoutingHandler()));
+
+            routes.RouteExistingFiles = true;
+
+
+            ////只要是Home的都不顯示出來
+            //routes.MapRoute(
+            //    name: "web31",
+            //    url: "{action}.html",
+            //    defaults: new { controller = "Home", action = "", id = UrlParameter.Optional },
+            //    constraints: new { controller = "Home" }
+            //);
+
+            //Home 同一層
+            routes.MapRoute(
+                name: "web9",
+                url: "{action}.html",
+                defaults: new { controller = "Member", action = "", id = UrlParameter.Optional },
+                constraints: new { action = "memberup" }
+            );
+
+            //Home 同一層
+            routes.MapRoute(
+                name: "web8",
+                url: "{action}.html",
+                defaults: new { controller = "Member", action = "", id = UrlParameter.Optional },
+                constraints: new { action = "memberup2" }
+            );
+
+            //Home 同一層
+            routes.MapRoute(
+                name: "web10",
+                url: "{action}.html",
+                defaults: new { controller = "Member", action = "", id = UrlParameter.Optional },
+                constraints: new { action = "memberup3" }
+            );
+
+            //Home 同一層
+            routes.MapRoute(
+                name: "web11",
+                url: "{action}.html",
+                defaults: new { controller = "Member", action = "", id = UrlParameter.Optional },
+                constraints: new { action = "memberupMsg" }
+            );
+
+            //第二層 內頁
+            routes.MapRoute(
+                name: "web6",
+                url: "Bottom-{id}.jpg",
+                defaults: new { controller = "Home", action = "Bottom", id = UrlParameter.Optional }
+            );
+
+
+            //第二層 內頁
+            routes.MapRoute(
+                name: "web2",
+                url: "{title}-{controller}-{id}.html",
+                defaults: new { controller = "", action = "Detail", id = UrlParameter.Optional }
+            );
+
+            //第二層 內頁
+            routes.MapRoute(
+                name: "web4",
+                url: "{title}-{id}.html",
+                defaults: new { controller = "Shop", action = "orderView", id = UrlParameter.Optional }
+            );
+
+
+            //if (DateTime.Now < NW.activitytiem)
+            //{
+            //    routes.MapRoute(
+            //        name: "web7",
+            //        url: "",
+            //        defaults: new { controller = "Home", action = "play" },
+            //        constraints: new { controller = @"Home", action = @"play" }
+
+            //        );
+            //}
+
+            //第二層 列表
+            routes.MapRoute(
+                name: "web3",
+                url: "{controller}_{action}.html",
+                defaults: new { controller = "", action = "Index", id = UrlParameter.Optional }
+            );
+
+            //Home 同一層
+            routes.MapRoute(
+                name: "web1",
+                url: "{action}.html",
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+            );
+
+            //預設
+            routes.MapRoute(
+                name: "Default",
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+            );
+        }
+    }
+}

@@ -1,0 +1,132 @@
+﻿@model h365_web.Models.pharmacist_activity
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        <div class="widgetcontent">
+
+            @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.activity_id)
+                <h4 class="widgettitle">@(ViewBag.T)</h4>
+
+@*@Html.EditorFor(model => model.activity_id)*@
+
+                @Html.EditorFor(model => model.title)
+
+                @Html.EditorFor(model => model.type)
+
+                @Html.EditorFor(m => m.type_img)
+
+                @Html.EditorFor(m => m.type_url)
+
+                @Html.EditorFor(m => m.type_url_img)
+              
+                @Html.EditorFor(model => model.gift)
+
+                @Html.EditorFor(model => model.gift_num)
+
+                @Html.EditorFor(model => model.info)
+
+                @Html.EditorFor(model => model.cont)
+
+                @Html.EditorFor(model => model.start_datetime)
+
+                @Html.EditorFor(model => model.end_datetime)
+
+                @Html.EditorFor(model => model.visible)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="button" onclick="location.href = '@Url.Action("List")'" class="btn">回列表</button>
+                    </div>
+                </div>
+            }
+
+            @if (Model.activity_id != 0)
+            {
+                <div class="abgne_tab">
+                    <ul class="tabs">
+                        <li><a href="#tab1">問卷</a></li>
+                    </ul>
+
+                    <div>
+
+                        <div id="tab1" class="tab_content">
+                            @{Html.RenderPartial("Add_Tab1");}
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+        <input  />
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                group_id: "required",
+                url: "required"
+            },
+            messages: {
+                group_id: "分類標題，必需選擇！",
+                url: "*"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+
+        var o = $('input:radio:checked[name="type"]').val();
+        Type(o);
+
+    })
+
+    $('input:radio[name="type"]').change(function () {
+        var o = $(this).val();
+
+
+        Type(o);
+        
+
+        //o == 0 ? $('#tpye_img').toggle() : $('#type_url').toggle();
+
+    })
+
+    function Type(o)
+    {
+        if (o == 0) {
+            $('label[for="type_img"]').parent('div').show();
+            $('#type_img_s').parents('.control-group').show();
+            //$('div').find('label[for="type_img"]').show();
+            $('#type_url').parents('.control-group').hide();
+            $('#type_url_img').parents('.control-group').hide();
+        } else {
+            $('label[for="type_img"]').parent('div').hide();
+            $('#type_img_s').parents('.control-group').hide();
+            //$('div').find('label[for="type_img"]').hide();
+            $('#type_url').parents('.control-group').show();
+            $('#type_url_img').parents('.control-group').show();
+        }
+    }
+
+</script>
+
+<script>
+
+    $(function () {
+        $('#title').attr('maxlength', '27').attr('placeholder', '限定27字以內');
+    })
+
+</script>

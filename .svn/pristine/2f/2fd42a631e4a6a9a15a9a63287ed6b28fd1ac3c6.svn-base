@@ -1,0 +1,109 @@
+﻿@model h365_web.Models.product_data
+
+
+@Html.EditorFor(model => model.price)
+
+@Html.EditorFor(model => model.sprice)
+
+@Html.EditorFor(model => model.cost)
+
+<div class="control-group">
+    <label for="" class="control-label">毛利額 / 毛利率</label>
+    <span class="field">
+        <span class="label label-important" style="font-size: 150%;" id="profit">0 元 / 0.00 %</span>
+    </span>
+</div>
+
+@Html.EditorFor(model => model.back_bonus)
+
+<div class="control-group">
+    <label for="" class="control-label">毛利額 / 毛利率(紅利回饋)</label>
+    <span class="field">
+        <span class="label label-important" style="font-size: 150%;" id="profit2">0 元 / 0.00 %</span>
+    </span>
+</div>
+
+@Html.EditorFor(model => model.sales_sD)
+
+@Html.EditorFor(model => model.sales_eD)
+
+@Html.EditorFor(model => model.sales_money)
+
+@Html.EditorFor(model => model.sales_cost)
+
+<div class="control-group">
+    <label for="" class="control-label">毛利額 / 毛利率(促銷)</label>
+    <span class="field">
+        <span class="label label-important" style="font-size: 150%;" id="profit3">0 元 / 0.00 %</span>
+    </span>
+</div>
+
+
+
+<script>
+
+    $(function () {
+
+        profit();
+        $('#sprice').change(profit);
+        $('#cost').change(profit);
+
+
+        profit2();
+        $('#sprice').change(profit2);
+        $('#cost').change(profit2);
+        $('#back_bonus').change(profit2);
+
+        profit3();
+        $('#sales_money').change(profit3);
+        $('#sales_cost').change(profit3);
+
+
+    });
+
+    function profit() {
+        var sprice = $('#sprice').val().replace(/[,]+/g, '');
+        var cost = $('#cost').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost, 2);
+        if (sprice != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit').html('0 元 / 0.00 %');
+        }
+    }
+
+    function profit2() {
+        var sprice = $('#sprice').val().replace(/[,]+/g, '');
+        var cost = $('#cost').val().replace(/[,]+/g, '');
+        var backBonus = $('#back_bonus').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost - backBonus, 2);
+        if (sprice != 0 && backBonus != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit2').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit2').html('0 元 / 0.00 %');
+        }
+    }
+
+    function profit3() {
+        var sprice = $('#sales_money').val().replace(/[,]+/g, '');
+        var cost = $('#sales_cost').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost, 2);
+        if (sprice != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit3').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit3').html('0 元 / 0.00 %');
+        }
+    }
+
+    function formatFloat(num, pos) {
+        var size = Math.pow(10, pos);
+        return Math.round(num * size) / size;
+    }
+
+</script>

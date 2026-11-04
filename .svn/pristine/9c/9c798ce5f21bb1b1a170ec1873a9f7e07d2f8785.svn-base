@@ -1,0 +1,32 @@
+﻿<script type="text/javascript">
+    jQuery(function () {
+        if (jQuery('.checkall').length > 0) {
+            jQuery('.checkall').click(function () {
+                var parentTable = jQuery(this).parents('table');
+                var ch = parentTable.find('tbody .block_check');
+                if (jQuery(this).is(':checked')) {
+
+                    //check all rows in table
+                    ch.each(function () {
+                        jQuery(this).attr('checked', true);
+                        jQuery(this).parent().addClass('checked');	//used for the custom checkbox style
+                        jQuery(this).parents('tr').addClass('selected'); // to highlight row as selected
+                    });
+                } else {
+                    //uncheck all rows in table
+                    ch.each(function () {
+                        jQuery(this).attr('checked', false);
+                        jQuery(this).parent().removeClass('checked');	//used for the custom checkbox style
+                        jQuery(this).parents('tr').removeClass('selected');
+                    });
+
+                }
+            });
+        }
+    });
+
+    function uniform() {
+        jQuery('input:checkbox, input:radio, select.uniformselect').uniform();
+    }
+
+</script>

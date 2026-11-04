@@ -1,0 +1,100 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.order_invoice2>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                    //List<h365_web.Models.news4_data> marData = (List<h365_web.Models.news4_data>)ViewData["marData"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width8" />
+            <col />
+            <col class="width10" />           
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                @*<th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>*@
+                <th class="center">@Html.DisplayNameFor(model => model.First().drug_uid) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().name) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().clearing_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().invoice_datetime) </th>     
+                <th class="center">@Html.DisplayNameFor(model => model.First().pay_datetime) </th>                      
+                <th class="center">@Html.DisplayNameFor(model => model.First().return_datetime)</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().price_total) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().price_cost) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().price_pay) </th>
+                <th class="center">&nbsp;</th>
+                @*<th class="center">@Html.DisplayNameFor(model => model.First().order_datetime) </th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                string invoice = "";
+                if (item.invoice_datetime != null) { invoice = item.invoice_datetime.Value.ToString("yyyy/MM月/dd日"); };
+                
+                <tr>
+                    <td class="center">@Html.DisplayFor(modelItem => item.drug_uid)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.name)</td>
+                     <td class="center">@Html.DisplayFor(modelItem => item.clearing_date)</td>
+                    @*<td class="center">@(item.order_datetime.Value.ToString("yyyy/MM月"))</td>*@
+                    <td class="center">@(item.invoice_datetime.Value.ToShortDateString())&nbsp;</td>
+                    <td class="center">@(item.pay_datetime.Value.ToShortDateString())</td>
+                    <td class="center">@(item.return_datetime.Value.ToShortDateString())</td>
+                    <td class="right">NT @item.price_total.ToString("N0")</td>
+                    <td class="right">NT @item.price_cost.ToString("N0")</td>
+                    <td class="right">NT @item.price_pay.ToString("N0")</td>
+                    <td class="center">@Html.ActionLink("編輯", "Edit", new { id = item.invoice_id }, new { @class = "title" })</td>
+                   
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div style="text-align: right">@ViewBag.total</div>
+
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("start_date", ViewBag.start_date)
+            .AddRouteValue("end_date", ViewBag.end_date)
+            .AddRouteValue("flag", ViewBag.vflag)
+            .AddRouteValue("pay_visible", ViewBag.vpay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("pay_id", ViewBag.vpay_id)
+            )
+    </div>
+</div>
+<!--pagination-->
+
+
+<style>
+    .label-default {
+        background-color: red;
+    }
+
+    .label-success1 {
+        background-color: seagreen;
+    }
+
+    .label-success2 {
+        background-color: green;
+    }
+
+    .label-success5 {
+        background-color: blue;
+    }
+</style>

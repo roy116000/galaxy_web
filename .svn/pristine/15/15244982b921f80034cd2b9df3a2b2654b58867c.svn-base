@@ -1,0 +1,95 @@
+﻿@model MvcPaging.IPagedList<h365_web.Areas.newweb.Controllers.NwReportController.drug_list>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        if ($("input[name='block_id']:checked").length == 0) { alert('請至少選擇一項'); return false; }
+        var name = '刪除';
+        switch (flag) { case 1: name = "啟用"; break; case 2: name = "停用"; break; }
+        if (confirm('確定要' + name + '？')) {
+            var arrVal = new Array();
+            $("input[name='block_id']:checked").each(function (i) {
+                arrVal[i] = this.value;
+            });
+        }
+        $('#cb_flag').val(flag);
+        $('#cb_id').val(arrVal.toString());
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="cb_id" name="cb_id" value="" />
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+        <!--widgetsource-->
+
+        <ul class="nav nav-pills">
+            <li @NW.echoBool(ViewBag.status != 1, "class=active", "")>@Html.ActionLink("全部", action)</li>
+            <li @NW.echoBool(ViewBag.status == 1, "class=active", "")>
+                <a href="@Url.Action(action, new { date = NW.getDate(DateTime.Today) })">今日開機數 (@(ViewBag.count))</a>
+            </li>
+
+        </ul>
+
+        <div id="mail">
+            <div class="msghead">
+                @using (Html.BeginRouteForm("", FormMethod.Get))
+                {
+                    
+                    <ul class="msghead_menu">
+                        <li>
+                            @if (Model.Count() == 0 && action == "List")
+                            {
+@*<a href="@Url.Action(action.Replace("List", "Add"), controller, new { id = 0 })" class="btn"><span class="icon-pencil"></span>新增</a>*@
+                            }
+                            <input type="text" id="kw" name="kw" class="filekeyword" placeholder="請輸入藥局名稱" value="@ViewBag.kw" />
+                            <input type="submit" value="查詢" class="btn btn-primary" />
+                            
+                        </li>
+                    </ul>
+                }
+                @using (Html.BeginForm("MEdit", controller, FormMethod.Post, new { @class = "stdform", @id = "form2", target = "_blank" }))
+                {                
+                    <input type="hidden" id="kw0" name="kw0" value="@ViewBag.kw" />
+                    <input type="hidden" id="status" name="status" value="@ViewBag.status" />
+                    <button type="button" class="btn" onclick="exp()">匯出</button>
+                }
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+
+            <br />
+
+        </div>
+        <!--#chat-->
+
+        @if (Model.Count() == 0)
+        {
+            <h2>查無藥局資料</h2>
+        }
+        else
+        {
+            @Html.Partial(action + "_ajax", Model)
+        }
+
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>
+<script type="text/javascript">
+    function exp() {
+        $('#form2').submit();
+    }
+</script>

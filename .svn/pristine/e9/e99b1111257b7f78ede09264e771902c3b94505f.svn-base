@@ -1,0 +1,138 @@
+﻿@using MvcPaging;
+
+@model h365_web.Models.medicines_main
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+
+    List<h365_web.Models.tag_data> tag = (List<h365_web.Models.tag_data>)ViewData["tag"];
+
+}
+<div class="maincontent">
+    <div class="contentinner stdform">
+
+        <div class="widgetcontent">
+            <h4 class="widgettitle">藥品資料 <span class="pull-right"></span></h4>
+
+            @*中文名稱*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @(Model.name)
+                </div>
+            </div>
+
+            @*英文名稱*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.name_en)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @(Model.name_en)
+                </div>
+            </div>
+
+            @*許可證字號*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.atc_code)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @(Model.atc_code)
+                </div>
+            </div>
+
+            @*sn*@
+            <div class="control-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.sn)</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @(Model.sn)
+                </div>
+            </div>
+
+            @*tag*@
+            <div class="control-group">
+                <label class="control-label">藥品目前關聯</label>
+                <div class="field" style="padding: 5px 5px;">
+                    @(ViewBag.tag_s)
+                </div>
+            </div>
+
+
+        </div>
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.main_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">藥品關聯區 </h4>
+
+                <div class="control-group">
+                    <div class="field">
+                        <a class="btn" href="@Url.Action("TagAdd", "NwMedicines", new { id = id })">新增Tag</a>
+                    </div>
+                </div>
+
+                @Html.EditorFor(model => model.tag)
+
+                <div style="width: 900px; text-align: left; margin: 0 auto 30px;">
+
+                    <button id="button_tag" type="button" class="btn btn-primary" style="margin-bottom: 20px">Tag選單</button>
+
+                    <div id="div_tag" style="display: none; text-align: justify; width: 900px">
+
+                        <a class="btn" onclick="id_tag('通用');">通用</a>
+
+                        @foreach (var item in tag)
+                        {
+            
+                            <a class="btn" onclick="id_tag('@(item.tag_name)');">@(item.tag_name)</a>
+                                     
+                        }
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">完成關聯</button>
+                        <button onclick="res_s('xx')" type="button" class="btn">重新關聯</button>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@*Tag選單-淡出淡入*@
+<script>
+    $(document).ready(function () {
+        $('#button_tag').click(function () {
+            $('#div_tag').fadeToggle();
+        });
+    });
+</script>
+
+@*點擊下方Tag輸入用*@
+<script>
+    function id_tag(o) {
+        //alert(o);           
+        var tag = $('#tag_tag').html();
+
+        $('#tag_tag').val(tag + o);
+
+        $('#tag_tagsinput').click();
+
+    }
+</script>
+
+@*重新關聯*@
+<script>
+    function res_s(o) {
+
+        //> span.tag ==只拿掉tag_tagsinput裡面的tag
+        $('#tag_tagsinput > span.tag').remove();
+        $('#tag').val('');        
+    }
+</script>

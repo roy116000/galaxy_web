@@ -1,0 +1,534 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwDrugstoreController : _BaseController
+    {
+        //
+        // GET: /newweb/NwNews/
+
+        #region "藥局列表"
+
+        public ActionResult List(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.drugstore_data
+                           where m.uid != null
+                           orderby m.inx, m.start_date descending
+                           select new zzdrugstore_data()
+                           {
+                               drugstore_id = m.drugstore_id,
+                               drugstore_sn = m.drugstore_sn,
+                               name = m.name,
+                               full_name = m.full_name,
+                               tel = m.tel,
+                               fax = m.fax,
+                               open_time = m.open_time,
+                               zip = m.zip,
+                               address = m.address,
+                               uid = m.uid,
+                               pwd = m.pwd,
+                               visible = m.visible,
+                               inx = m.inx,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               create_datetime = m.create_datetime,
+                               create_user = m.create_user,
+                               change_datetime = m.change_datetime,
+                               change_user = m.change_user
+                           });
+
+            //單純測試用-不分頁
+            //var tmpData = this._DB.drugstore_data.OrderBy(m => m.inx).ThenByDescending(m => m.start_date);
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) );
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.drugstore_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+           
+            //最單純測試用
+            //var data = tmpData.ToList();
+
+            var data2 = this._DB.news_group.OrderBy(m => m.inx)
+                        .Select(m => new data_group()
+                        {
+                            group_id = m.group_id,
+                            name = m.name,
+                            counts = m.news_data.Count()
+                        });
+
+            ViewData["news_group"] = data2;
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult List_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.drugstore_data
+                           where m.uid != null
+                           orderby m.inx, m.start_date descending
+                           select new zzdrugstore_data()
+                           {
+                               drugstore_id = m.drugstore_id,
+                               drugstore_sn = m.drugstore_sn,
+                               name = m.name,
+                               full_name = m.full_name,
+                               tel = m.tel,
+                               fax = m.fax,
+                               open_time = m.open_time,
+                               zip = m.zip,
+                               address = m.address,
+                               uid = m.uid,
+                               pwd = m.pwd,
+                               visible = m.visible,
+                               inx = m.inx,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               create_datetime = m.create_datetime,
+                               create_user = m.create_user,
+                               change_datetime = m.change_datetime,
+                               change_user = m.change_user
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.drugstore_id == gid.Value); }
+            ViewBag.gid = gid;
+
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+           
+            //最單純測試用
+            //var data = tmpData.ToList();
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var data = this._DB.drugstore_data.Find(id);
+            if (data == null)
+            {
+                //找不到就變成新增
+                drugstore_data data2 = new drugstore_data { };
+                data2.start_date = DateTime.Today;
+                data2.end_date = data2.start_date.Value.AddYears(3).AddDays(-1);
+                data = data2;
+            }
+
+            //取縣市
+            ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+            //取鄉鎮區
+            ViewData["zip"] = NW.zipData(2, data.zip);
+
+            //發票種類
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems = NW.sList(NW.Invoice_type, data.invoice_type);
+            ViewData["invoice_type"] = ListItems;
+                        
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(drugstore_data drugstore_data)
+        {
+            var data = this._DB.drugstore_data.Find(drugstore_data.drugstore_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+
+            int Invoice_Drug = Convert.ToInt32(drugstore_data.invoice_type);
+            drugstore_data.invoice_type = NW.Invoice_type[Invoice_Drug];
+
+            if (data == null)
+            {
+                drugstore_data.create_user = User.Identity.Name;
+                drugstore_data.create_datetime = DateTime.Now;
+                this._DB.drugstore_data.Add(drugstore_data);
+
+                //新增
+                TempData["jgrowl"] = "資料新增成功";
+            }
+            else
+            {
+                data.name = drugstore_data.name;
+                data.drugstore_sn = drugstore_data.drugstore_sn;
+                data.full_name = drugstore_data.full_name;
+                data.tel = drugstore_data.tel;
+                data.fax = drugstore_data.fax;
+                data.open_time = drugstore_data.open_time;
+                data.zip = drugstore_data.zip;
+                data.address = drugstore_data.address;
+                data.uid = drugstore_data.uid;
+                data.pwd = drugstore_data.pwd;
+
+                data.taxes = drugstore_data.taxes;
+                data.uniform_numbers = drugstore_data.uniform_numbers;
+                data.invoice_title = drugstore_data.invoice_title;
+                data.invoice_type = drugstore_data.invoice_type;
+                data.invoice_address = drugstore_data.invoice_address;
+
+                data.visible = drugstore_data.visible;
+                data.inx = drugstore_data.inx;
+
+                data.start_date = drugstore_data.start_date;
+                data.end_date = drugstore_data.end_date;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+
+                //更新
+                TempData["jgrowl"] = "資料更新成功";
+            }
+            this._DB.SaveChanges();
+         
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = drugstore_data.drugstore_id });
+        }
+
+        #region"原版"
+        //public ActionResult Edit(int id)
+        //{
+
+        //    var data = this._DB.drugstore_data.Find(id);
+
+        //    //取縣市
+        //    ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+        //    //取鄉鎮區
+        //    ViewData["zip"] = NW.zipData(2, data.zip);
+
+        //    ViewBag.jgrowl = TempData["jgrowl"];
+
+        //    return View(data);
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult EditSave(drugstore_data drugstore_data)
+        //{
+        //    var data = this._DB.drugstore_data.Find(drugstore_data.drugstore_id);
+        //    //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+
+        //    if (data == null)
+        //    {
+        //        ModelState.AddModelError("", "查無此筆資料");
+        //    }
+        //    else
+        //    {
+        //        data.name = drugstore_data.name;
+        //        data.drugstore_sn = drugstore_data.drugstore_sn;
+        //        data.full_name = drugstore_data.full_name;
+        //        data.tel = drugstore_data.tel;
+        //        data.fax = drugstore_data.fax;
+        //        data.open_time = drugstore_data.open_time;
+        //        data.zip = drugstore_data.zip;
+        //        data.address = drugstore_data.address;
+        //        data.uid = drugstore_data.uid;
+        //        data.pwd = drugstore_data.pwd;
+        //        data.visible = drugstore_data.visible;
+        //        data.inx = drugstore_data.inx;
+        //        data.start_date = drugstore_data.start_date;
+        //        data.end_date = drugstore_data.end_date;
+        //        data.create_datetime = DateTime.Now;
+        //        data.create_user = User.Identity.Name;
+        //        data.change_datetime = DateTime.Now.AddDays(10);
+        //        data.change_user = User.Identity.Name;
+
+        //        this._DB.SaveChanges();             
+        //    }
+
+        //    //更新
+        //    TempData["jgrowl"] = "資料更新成功";
+
+        //    return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = drugstore_data.drugstore_id });
+        //}
+        #endregion
+
+        public ActionResult Add(int id)
+        {
+            drugstore_data data = new drugstore_data();
+            data.inx = 0;
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+
+            //取縣市
+            ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+            //取鄉鎮區
+            ViewData["zip"] = NW.zipData(2, data.zip);
+
+
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult AddSave(drugstore_data drugstore_data)
+        {
+            //var data = this._DB.news_data.Find(news_data.news_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+            var data = new drugstore_data { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                data.name = drugstore_data.name;
+                data.drugstore_sn = drugstore_data.drugstore_sn;
+                data.full_name = drugstore_data.full_name;
+                data.tel = drugstore_data.tel;
+                data.fax = drugstore_data.fax;
+                data.open_time = drugstore_data.open_time;
+                data.zip = drugstore_data.zip;
+                data.address = drugstore_data.address;
+                data.uid = drugstore_data.uid;
+                data.pwd = drugstore_data.pwd;
+                data.visible = drugstore_data.visible;
+                data.inx = drugstore_data.inx;
+                data.start_date = drugstore_data.start_date;
+                data.end_date = drugstore_data.end_date;
+                data.create_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now.AddDays(10);
+                data.change_user = User.Identity.Name;
+
+                _DB.drugstore_data.Add(data);
+                this._DB.SaveChanges();
+
+                drugstore_data.drugstore_id = data.drugstore_id;
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = drugstore_data.drugstore_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update drugstore_data set visible = 1 Where drugstore_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update drugstore_data set visible = 0 Where drugstore_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    //sql = "Delete From news_image Where news_id in (" + cb_id + ")";
+                    //_DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From drugstore_data Where drugstore_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "分類列表"
+
+        public ActionResult GroupList(string kw)
+        {
+
+            int currentPageIndex = 0;
+            var tmpData = this._DB.news_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.news_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupList_ajax(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            var tmpData = this._DB.news_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.news_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult GroupEdit(int id)
+        {
+
+            var data = this._DB.news_group.Find(id);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupEditSave(news_group news_group)
+        {
+            var data = this._DB.news_group.Find(news_group.group_id);
+            //var data1 = this._DB.news_group.Where(m => m.zz_id.Equals(news_group.zz_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = news_group.group_id;
+                data.name = news_group.name;
+                data.inx = news_group.inx;
+                data.visible = news_group.visible;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+                //data.create_user = news_group.create_user;
+                //data.create_datetime = news_group.create_datetime;
+
+                this._DB.SaveChanges();
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = news_group.group_id });
+        }
+
+        public ActionResult GroupAdd(int id)
+        {
+            news_group data = new news_group();
+            data.inx = 0;
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupAddSave(news_group news_group, VmImage imgs)
+        {
+            //var data = this._DB.news_group.Find(news_group.zz_id);
+            //var data1 = this._DB.news_group.Where(m => m.zz_id.Equals(news_group.zz_id)).Select(m => m).SingleOrDefault();
+            var data = new news_group { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = news_group.group_id;
+                data.name = news_group.name;
+                data.inx = news_group.inx;
+                data.visible = news_group.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.news_group.Add(data);
+                this._DB.SaveChanges();
+
+                news_group.group_id = data.group_id;
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = news_group.group_id });
+        }
+
+        [HttpPost]
+        public ActionResult GroupListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update news_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update news_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From news_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+    }
+}

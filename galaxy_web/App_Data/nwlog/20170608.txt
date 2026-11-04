@@ -1,0 +1,298 @@
+現在時間：2017/6/8 上午 09:54:27，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newweb/qwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 上午 09:54:28，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/favicon.ico' 的控制器或是未實作 IController。
+現在時間：2017/6/8 上午 10:31:34，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:31:35，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:31:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:31:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:35:03，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:35:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:35:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:35:41，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:35:41，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:37:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:37:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:37:18，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:37:18，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 上午 10:49:07，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newweb/qwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 12:00:42，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:00:46，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:00:47，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:03:27，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:03:27，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:09:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:09:15，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:09:15，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:10:43，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:10:43，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:10:51，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:10:51，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:11:37，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:11:37，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:12:00，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:12:00，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:15:38，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:15:38，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:16:36，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:16:36，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:16:49，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:16:49，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:17:07，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:17:07，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:32:18，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:32:37，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:32:37，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:32:41，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:32:41，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:34:05，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:34:06，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:34:08，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 12:34:09，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:29，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:32，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:32，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:40，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:40，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:44，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:45，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:46，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:46，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:48，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:34:48，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:43:30，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:43:39，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:43:39，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:30，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:30，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:36，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:36，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:51，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:45:52，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:46:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:46:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:47:25，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:55，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:55，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:57，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:48:57，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:06，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:06，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:10，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:50，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:50，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:59，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:50:59，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:51:00，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:51:01，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:51:53，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:51:53，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:53:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:53:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:53:16，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:53:16，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:56:53，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:56:53，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:57:13，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:57:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:00，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:00，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:09，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:09，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:15，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:16，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 01:59:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:05:24，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:05:25，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:05:59，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:05:59，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:01，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:01，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:04，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:04，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:05，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:06:05，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:07:19，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:07:19，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:07:33，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:07:34，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:09:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:09:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+20170608 14:32:25	::1	Month	NwReport		An error occurred while executing the command definition. See the inner exception for details.	System.Data.Entity.Core.EntityCommandExecutionException: An error occurred while executing the command definition. See the inner exception for details. ---> System.Data.SqlClient.SqlException: 無效的資料行名稱 'freight'。||   於 System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)||   於 System.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)||   於 System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)||   於 System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)||   於 System.Data.SqlClient.SqlDataReader.TryConsumeMetaData()||   於 System.Data.SqlClient.SqlDataReader.get_MetaData()||   於 System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString)||   於 System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, SqlDataReader ds, Boolean describeParameterEncryptionRequest)||   於 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean asyncWrite)||   於 System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)||   於 System.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior, String method)||   於 System.Data.SqlClient.SqlCommand.ExecuteDbDataReader(CommandBehavior behavior)||   於 System.Data.Common.DbCommand.ExecuteReader(CommandBehavior behavior)||   於 System.Data.Entity.Infrastructure.Interception.DbCommandDispatcher.<Reader>b__c(DbCommand t, DbCommandInterceptionContext`1 c)||   於 System.Data.Entity.Infrastructure.Interception.InternalDispatcher`1.Dispatch[TTarget,TInterceptionContext,TResult](TTarget target, Func`3 operation, TInterceptionContext interceptionContext, Action`3 executing, Action`3 executed)||   於 System.Data.Entity.Infrastructure.Interception.DbCommandDispatcher.Reader(DbCommand command, DbCommandInterceptionContext interceptionContext)||   於 System.Data.Entity.Internal.InterceptableDbCommand.ExecuteDbDataReader(CommandBehavior behavior)||   於 System.Data.Common.DbCommand.ExecuteReader(CommandBehavior behavior)||   於 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior)||   --- 內部例外狀況堆疊追蹤的結尾 ---||   於 System.Data.Entity.Core.EntityClient.Internal.EntityCommandDefinition.ExecuteStoreCommands(EntityCommand entityCommand, CommandBehavior behavior)||   於 System.Data.Entity.Core.Objects.Internal.ObjectQueryExecutionPlan.Execute[TResultType](ObjectContext context, ObjectParameterCollection parameterValues)||   於 System.Data.Entity.Core.Objects.ObjectQuery`1.<>c__DisplayClass7.<GetResults>b__6()||   於 System.Data.Entity.Core.Objects.ObjectContext.ExecuteInTransaction[T](Func`1 func, IDbExecutionStrategy executionStrategy, Boolean startLocalTransaction, Boolean releaseConnectionOnSuccess)||   於 System.Data.Entity.Core.Objects.ObjectQuery`1.<>c__DisplayClass7.<GetResults>b__5()||   於 System.Data.Entity.SqlServer.DefaultSqlExecutionStrategy.Execute[TResult](Func`1 operation)||   於 System.Data.Entity.Core.Objects.ObjectQuery`1.GetResults(Nullable`1 forMergeOption)||   於 System.Data.Entity.Core.Objects.ObjectQuery`1.<System.Collections.Generic.IEnumerable<T>.GetEnumerator>b__0()||   於 System.Data.Entity.Internal.LazyEnumerator`1.MoveNext()||   於 System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source)||   於 System.Data.Entity.Core.Objects.ELinq.ObjectQueryProvider.<GetElementFunction>b__1[TResult](IEnumerable`1 sequence)||   於 System.Data.Entity.Core.Objects.ELinq.ObjectQueryProvider.ExecuteSingle[TResult](IEnumerable`1 query, Expression queryRoot)||   於 System.Data.Entity.Core.Objects.ELinq.ObjectQueryProvider.System.Linq.IQueryProvider.Execute[TResult](Expression expression)||   於 System.Data.Entity.Internal.Linq.DbQueryProvider.Execute[TResult](Expression expression)||   於 System.Linq.Queryable.FirstOrDefault[TSource](IQueryable`1 source)||   於 galaxy_web.Areas.newweb.Controllers.NwReportController.<Month>b__d(order_data a) 於 d:\vs2012\_galaxy\galaxy_web\galaxy_web\galaxy_web\Areas\newweb\Controllers\NwReportController.cs: 行 63||   於 System.Linq.Enumerable.<>c__DisplayClass7_0`3.<CombineSelectors>b__0(TSource x)||   於 System.Linq.Enumerable.WhereSelectListIterator`2.MoveNext()||   於 System.Linq.Enumerable.<DistinctIterator>d__63`1.MoveNext()||   於 System.Linq.Buffer`1..ctor(IEnumerable`1 source)||   於 System.Linq.Enumerable.ToArray[TSource](IEnumerable`1 source)||   於 galaxy_web.Areas.newweb.Controllers.NwReportController.Month(Nullable`1 year, Nullable`1 month, String kw, Nullable`1 cid, Int32 type) 於 d:\vs2012\_galaxy\galaxy_web\galaxy_web\galaxy_web\Areas\newweb\Controllers\NwReportController.cs: 行 82||   於 lambda_method(Closure , ControllerBase , Object[] )||   於 System.Web.Mvc.ActionMethodDispatcher.Execute(ControllerBase controller, Object[] parameters)||   於 System.Web.Mvc.ReflectedActionDescriptor.Execute(ControllerContext controllerContext, IDictionary`2 parameters)||   於 System.Web.Mvc.ControllerActionInvoker.InvokeActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary`2 parameters)||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass42.<BeginInvokeSynchronousActionMethod>b__41()||   於 System.Web.Mvc.Async.AsyncResultWrapper.<>c__DisplayClass8`1.<BeginSynchronous>b__7(IAsyncResult _)||   於 System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`1.End()||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethod(IAsyncResult asyncResult)||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass37.<>c__DisplayClass39.<BeginInvokeActionMethodWithFilters>b__33()||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass4f.<InvokeActionMethodFilterAsynchronously>b__49()||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass37.<BeginInvokeActionMethodWithFilters>b__36(IAsyncResult asyncResult)||   於 System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`1.End()||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethodWithFilters(IAsyncResult asyncResult)||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass25.<>c__DisplayClass2a.<BeginInvokeAction>b__20()||   於 System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass25.<BeginInvokeAction>b__22(IAsyncResult asyncResult)
+現在時間：2017/6/8 下午 02:32:26，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:32:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:32:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:35:45，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:35:45，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:36:05，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:36:05，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:36:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:36:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:37:36，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:37:37，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:39:23，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:39:23，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:39:31，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:39:31，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:44:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:44:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:46:19，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:46:19，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:51:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:51:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:53:04，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:53:04，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:55:54，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newweb/ewrf' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 02:56:26，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:56:26，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:59:55，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 02:59:55，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:05:28，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:05:29，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:05:33，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:05:33，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:08:09，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:08:09，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:08:23，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:08:23，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:10:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:10:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:10:42，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:10:43，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:11:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:11:12，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:11:52，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:11:52，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:12:10，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:12:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:12:26，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:12:27，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:14:43，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:14:44，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:16:48，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:16:49，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:17:13，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:17:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:25:06，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:25:06，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:26:13，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:26:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:28:34，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:28:35，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:33:32，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:33:33，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:43:10，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:43:10，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:52:07，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 03:52:08，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 04:14:08，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/xx' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:19:20，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 04:19:20，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 04:19:23，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 04:19:24，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/8 下午 04:23:16，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/er' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:17，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:23:39，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/dfg' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:24:25，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/ert' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:32:28，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/werwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:34:07，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/werwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:55，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:34:56，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:36:05，Url：System.Web.HttpRequest，Code：200，Message：值不能為 null。
+參數名稱: source
+現在時間：2017/6/8 下午 04:36:39，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwebretr' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:36:56，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:38:43，Url：System.Web.Mvc.UrlHelper，Code：404，Message：找不到路徑 '/newwe' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:39:10，Url：System.Web.Mvc.UrlHelper，Code：404，Message：找不到路徑 '/newweb/er' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:42:47，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwebrt' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:43:24，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwebhi' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:44:19，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwebretr' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:54:26，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/Error234234' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:55:58，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newweb12' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 04:56:57，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newwebret' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 05:03:29，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/newweb4' 的控制器或是未實作 IController。
+現在時間：2017/6/8 下午 05:03:39，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/E' 的控制器或是未實作 IController。

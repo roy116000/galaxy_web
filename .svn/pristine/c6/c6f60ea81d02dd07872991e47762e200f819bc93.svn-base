@@ -1,0 +1,66 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.data_group>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    string gid = Request["gid"];
+
+    }
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col />
+            <col class="width10" />
+        @*    <col class="width5" />*@
+            <col class="width5" />
+            <col class="width12" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th>@Html.DisplayNameFor(model => model.First().name) </th>
+               @* <th class="center">產品數量</th>*@
+                <th class="center">@Html.DisplayNameFor(model => model.First().inx) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible)</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {               
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.group_id" /></td>
+                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                    @*<td class="center">@Html.DisplayFor(modelItem => item.counts)</td>*@
+                    <td class="center">@Html.DisplayFor(modelItem => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td>
+                      @if (gid == "426" || gid == "427") { 
+                      @Html.ActionLink("編輯", action.Replace("SubList", "ActEdit").Replace("_ajax",""), new { id = item.group_id }, new { @class = "title" })
+                      <span>｜<a href="@Url.Action("Detail", "Activity", new {area="", title=NW.showTitleHtml(item.name), @id=item.group_id})" target="_blank">前台瀏覽</a></span>
+                          <span> | </span> @Html.ActionLink("第三層分類管理", "GroupSubList3", new { gid = item.group_id }, new { @class = "title" })
+                      } else { 
+                      @Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax",""), new { id = item.group_id }, new { @class = "title" })
+                          <span> | </span> @Html.ActionLink("第三層分類管理", "GroupSubList3", new { gid = item.group_id }, new { @class = "title" })
+
+                      }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+
+</div>
+<!--pagination-->

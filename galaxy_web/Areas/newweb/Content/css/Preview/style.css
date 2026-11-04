@@ -1,0 +1,233 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+/* 重設
+--------------------------------------------------- */
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain) */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;background: transparent;/*vertical-align: baseline;*/}
+ol, ul, li{list-style: none;}
+
+/*以下為針對HTML5,暫時不開放----------------*/  
+/* HTML5 display-role reset for older browsers */
+/*
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {display: block;}
+body {line-height: 1;}
+ol, ul {list-style: none;}
+blockquote, q {quotes: none;}
+blockquote:before, blockquote:after,
+q:before, q:after {content: '';content: none;}
+table {border-collapse: collapse;border-spacing: 0;}
+*/
+fieldset,img { border: none; }
+
+/*-------------------基本-----------------------------*/
+a{ font-size:15px; text-decoration:none;outline:none; /* for Firefox */
+ hlbr:expression(this.onFocus=this.blur()); color:#000 /* for IE */;transition:all 0.3s}
+a:hover{ font-size:15px; text-decoration:none;color:#000;outline:none; /* for Firefox */hlbr:expression(this.onFocus=this.blur());transition:all 0.3s}
+a:focus{outline: none;hlbr:expression(this.onFocus=this.blur());text-decoration:none;transition:all 0.3s}
+
+body{outline:none; /* for Firefox */hlbr:expression(this.onFocus=this.blur()); /* for IE */ line-height:0px; min-width:500px}
+
+/*背景控制*/
+.bg1{ width:100%; background:url(../../images/admin/bg1.jpg) center top no-repeat; 
+background-attachment:fixed;}
+
+
+/*中間區域*/
+
+/*TOP*/
+.m0{ width:100%; height:300px;}
+.m1{ height:auto; overflow:hidden; width:100%; /*background:rgba(30, 37, 65, 0.9);*/  box-shadow:0 0px 0px #000;position:fixed;top:0px;left:0px;}
+.m1 .a1{width:1200px;height:auto; overflow:hidden; margin:0 auto; padding:0px 0 0}
+.m1 .a1 .lg{width:220px; height:70px; float:left}
+.m1 .a1 .lg img{width:220px; height:70px; }
+.m1 .a1 .lk{width:700px; height:70px; float:right;}
+.m1 .a1 .lk .w1{width:100px; height:70px; margin:0 5px; float:right;}
+.m1 .a1 .lk .w1 a{width:100px; height:70px; float:right; font:bold 16px/70px Verdana, "微軟正黑體"; color:#f3e0ae; text-align:center}
+.m1 .a1 .lk .w1:hover a{ color:#a28038}
+/*擁擠順暢提示*/
+.m2{width:100%;height:auto; overflow:hidden; margin:0 auto 0px; text-align:center}
+.m2 .b1{ width:250px;height:36px; overflow:hidden; background:rgba(255,0,90,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #ff005a }
+.m2 .b2{ width:250px;height:36px; overflow:hidden; background:rgba(255,170,0,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #ffaa00 }
+.m2 .b3{ width:250px;height:36px; overflow:hidden; background:rgba(60,210,0,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #33d700 }
+
+
+/*mb-login*/
+.p1{ width:1200px; height:auto; overflow:auto; margin:0 auto;}
+.p1 .m3{ width:340px; min-height:200px; height:auto; overflow:hidden; padding:30px 20px 30px 19px; background:rgba(255,255,255,0.6); float:right; border-radius:5px;box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4{ width:300px;min-height:200px; height:auto; overflow:hidden;float:left; padding:0 20px 0 20px;}
+.p1 .m3 .b4-2{ min-height:40px; height:auto;margin-top:15px; padding-top:10px;border-top:1px dotted #888}
+.p1 .m3 .b4 .bta1{ width:290px; height:34px;  border-bottom:1px solid #002a56; padding:0 5px; margin:0 0 10px 0}
+.p1 .m3 .b4 .bta1 .btn1 a{width:100px;height:34px; float:left; display:inline-block; background:#a17f36; border-radius:3px 3px 0 0; text-align:center;font:15px/36px Georgia,"微軟正黑體"; color:#fff; margin-right:4px}
+.p1 .m3 .b4 .bta1 .btn1 a:hover{background:#f3e0ae; color:#a17f36}
+.p1 .m3 .b4 .bta1 .btn1 a.active{height:34px;margin-bottom:0px;background:#002a56; color:#fff; font-weight:bold; }
+
+.p1 .m3 .b4 .t1{ width:250px; height:24px; font:15px/24px verdana,"微軟正黑體"; margin:0; color:#555;margin:0 5px 5px 0;}
+.p1 .m3 .b4 .bx1{ width:280px; height:36px; border:0px solid #ccc; padding:0 10px;font:16px/34px verdana,"微軟正黑體"; background:rgba(255,255,255,0.9);margin:0 10px 10px 0; border-radius:3px;box-shadow:0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .bx2{ width:140px; height:36px; border:0px solid #ccc; padding:0 10px;font:16px/36px verdana,"微軟正黑體"; background:rgba(255,255,255,0.9);margin:0 10px 10px 0; border-radius:3px; float:left;box-shadow:0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .im1{ width:auto; height:auto; overflow:hidden; float:left; margin:2px 0}
+.p1 .m3 .b4 .im1 img{ width:auto; height:30px;overflow:hidden; }
+.p1 .m3 .b4 .btn2 a{width:300px; height:36px;font:bold 15px/34px "微軟正黑體";color:#555; display:inline-block; text-align:center; background:#ffdd99; border-radius:2px; margin:0 0 10px;box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .btn2 a:hover{ background:#002a56;color:#fff}
+.p1 .m3 .b4 .t2 {width:280px; min-height:20px; height:auto; overflow:hidden; font:13px/18px verdana,"微軟正黑體"; margin:0; color:#fff;margin:0 5px 0px 0; clear:both; background:#060063; padding:3px 10px;border-radius:0px; text-align:center}
+.p1 .m3 .b4 .t3 { width:100%; min-height:24px; height:auto; overflow:hidden; font:13px/20px verdana,"新細明體"; margin:0; color:#555; clear:both;text-align:justify;text-justify: inter-ideograph;}
+
+
+/*手機網頁選單*/
+.m1 .a1 .mn{ display:none}
+
+
+
+  /*----shop_view--------------*/
+.z1{ width:1200px;height:auto; overflow:hidden; margin:0 auto 40px}
+.gd2{width:100%; height:70px;  border-bottom:0px solid #ddd;font:15px/70px "微軟正黑體";color:#ccc; letter-spacing:-0.5px; float:left; }
+.gd2 a{font:15px/70px "微軟正黑體";color:#777}
+.gd2 a:hover{color:#000;}
+.gd2 h4{color:#111; font:15px/70px "微軟正黑體";display:inline; color:#ff536b}
+/*----shop_view-------商品主圖-------*/
+.z1 .a14{ width:1200px;height:auto;overflow:hidden;}
+.z1 .a14 .b17{ width:110px; height:auto; overflow:hidden;float:left}
+.z1 .a14 .b17 .im6{ width:88px; height:88px; overflow:hidden;border:1px solid #ddd; margin:0 20px 12px 0}
+.z1 .a14 .b17 .im6 img{width:100%; height:100%;border-radius:2px; transition:all 0.3s;}
+.z1 .a14 .b17 .im6:hover img{width:110%; height:110%;transform:translate(-5%, -5%);transition:all 0.3s}
+
+.z1 .a14 .im7{ width:500px;height:500px;overflow:hidden;border-radius:20px; float:left; margin-right:40px}
+.z1 .a14 .im7 img{ width:500px;height:500px;border-radius:20px;} 
+
+/*----shop_view-------功能按鈕-------*/
+.z1 .a14 .b18{ width:550px;  min-height:400px;height:auto; overflow:hidden;float:left; }
+.z1 .a14 .b18 .c10{ width:550px;max-height:45px; float:left}
+.z1 .a14 .b18 .c10 > div{float:left}
+.z1 .a14 .b18 .c10 .bt10{ width:auto;height:35px;}
+.z1 .a14 .b18 .c10 .bt10 a{width:40px; height:25px;font:15px/23px "微軟正黑體";color:#fff; display:inline-block; text-align:center; background:#74a42b; float:left; margin-right:4px }
+.z1 .a14 .b18 .c10 .bt10 a:hover{ background:#87b93a;color:#fff;}
+.z1 .a14 .b18 .c10 .ic2{width:80px; height:23px;font:13px/22px verdana,"微軟正黑體";color:#aaa;  text-align:center;border:1px solid #ddd; background:#fbfbfb; float:right;
+background:url(../../images/sp/ic1.png) 10px 4px no-repeat #fbfbfb; padding:0 0 0 23px; background-size:auto 15px}
+.z1 .a14 .b18 .c10 .ic2 img{ width:auto; height:15px; display:inline; vertical-align:middle; padding-bottom:3px; margin-right:4px}
+.z1 .a14 .b18 .c10 .bt11{ width:auto;height:25px;float:right}
+.z1 .a14 .b18 .c10 .bt11 a{width:90px; height:23px;font:13px/23px verdana,"微軟正黑體";color:#aaa; display:inline-block; text-align:center;background:url(../../images/sp/ic2.png) 10px 4px no-repeat #fbfbfb; border:1px solid #ddd; background:; padding:0 0 0 13px; background-size:auto 15px;border-left:0}
+.z1 .a14 .b18 .c10 .bt11 a:hover{  background:url(../../images/sp/ic2_over.png) 10px 4px no-repeat #43c3c7;color:#fff; background-size:auto 15px; border:1px solid #43c3c7;border-left:0 }
+.z1 .a14 .b18 .c10 .bt12{ width:auto;height:25px;float:right; position:relative}
+.z1 .a14 .b18 .c10 .bt12 a{width:90px; height:23px;font:13px/23px verdana,"微軟正黑體";color:#aaa; display:inline-block; text-align:center;background:url(../../images/sp/ic3.png) 10px 4px no-repeat #fbfbfb; border:1px solid #ddd; background:; padding:0 0 0 13px; background-size:auto 15px; border-left:0}
+.z1 .a14 .b18 .c10 .bt12 a:hover{  background:url(../../images/sp/ic3_over.png) 10px 4px no-repeat #43c3c7;color:#fff; background-size:auto 15px; border:1px solid #43c3c7;border-left:0 }
+.z1 .a14 .b18 .c10 .bt12 .pop{ width:50px;height:20px; overflow:hidden; position:absolute; top:27px; right:0px; background:rgba(50,50,50,1); border-radius:3px;font:12px/22px "新細明體";color:#fff; opacity:0; text-align:center; }
+.z1 .a14 .b18 .c10 .bt12 span{ width:0; height:0; border-bottom:5px solid rgba(50,50,50,1);border-left:0px solid rgba(0,0,0,0);border-right:8px solid rgba(0,0,0,0); display:inline-block;opacity:0; position:absolute; right:20px; top:22px}
+.z1 .a14 .b18 .c10 .bt12:hover .pop, .z1 .a14 .b18 .c10 .bt12:hover span{opacity:1; transition:all 0.5s}
+/*----shop_view-------商主標題-------*/
+.z1 .a14 .b18 .t24{ width:100%; min-height:90px; height:auto; overflow:hidden;margin:0 0 30px; font:27px/35px verdana,"微軟正黑體";color:#777; float:left;letter-spacing:-1px; text-align:justify;text-justify: inter-ideograph;}
+/*----shop_view-------數量+價格-------*/
+.z1 .a14 .b18 .c11{width:100%;height:45px; margin:0 0 30px; float:left}
+.z1 .a14 .b18 .c11 .bt13{width:45px; height:45px; float:left}
+.z1 .a14 .b18 .c11 .bt13 a{width:43px; height:43px;font:bold 17px/43px "微軟正黑體";color:#ccc; display:inline-block; text-align:center; background:#fbfbfb; border:1px solid #ddd}
+.z1 .a14 .b18 .c11 .bt13 a:hover{ background:#43c3c7; color:#fff;border:1px solid #43c3c7}
+.z1 .a14 .b18 .c11 input{width:45px; height:43px; border:1px solid #ddd; border-right:0;border-left:0; float:left; padding:0; text-align:center;font:17px/43px verdana; color:#43c3c7}
+.z1 .a14 .b18 .c11 .t25{width:auto; height:20px;font:15px/20px "微軟正黑體";color:#999; padding:25px 0 0 ;margin-left:15px; float:left} 
+.z1 .a14 .b18 .c11 .t25 span{font:bold 19px/20px Arial,"微軟正黑體"; color:#43c3c7; margin:0 3px}
+/*原價*/
+.z1 .a14 .b18 .c11 .t26{width:auto; height:20px;font:15px/23px Arial,"微軟正黑體";color:#999; padding:25px 0 0 ;margin-right:15px; float:right} 
+.z1 .a14 .b18 .c11 .t26 span{font:italic 15px/23px Arial,"微軟正黑體"; text-decoration:line-through}
+/*特價*/
+.z1 .a14 .b18 .c11 .t27{width:auto; height:20px;font:bold 15px/35px verdana,"微軟正黑體";color:#ff536b; padding:12px 0 0 ;float:right; text-align:right} 
+.z1 .a14 .b18 .c11 .t27 span{font:bold 33px/35px verdana, "微軟正黑體"; letter-spacing:-1.5px}
+/*----shop_view------付款+運費+寄送方式+購物回饋------*/
+.z1 .a14 .b18 .ls12{width:100%;height:35px; margin:0 0 10px; float:left}
+.z1 .a14 .b18 .ls12 > div{float:left;font:17px/35px verdana,"微軟正黑體"; color:#777}
+.z1 .a14 .b18 .ls12 .t28{width:140px;height:35px; margin-right:40px; background:linear-gradient(90deg,#ccc 100%,#c00 0) right 9px no-repeat; background-size:1px 17px }
+.z1 .a14 .b18 .ls12 .t28 img{ width:auto; height:21px; display:inline; padding-bottom:4px;margin:0 10px}
+.z1 .a14 .b18 .ls12 .t29{width:370px;height:35px; color:#333}
+.z1 .a14 .b18 .ls12 .t29 span{color:#ff536b; margin-right:4px;}
+.z1 .a14 .b18 .ls12 .t29 img{ width:auto; height:21px; display:inline; padding-bottom:4px; margin-right:4px}
+/*----shop_view------已販售------*/
+.z1 .a14 .b18 .c12{width:100%;height:35px;float:left;font:17px/35px verdana, "微軟正黑體"; text-align:right; color:333}
+.z1 .a14 .b18 .c12 img{ width:auto; height:24px; display:inline;padding-bottom:4px;margin:0 4px 0 0 }
+.z1 .a14 .b18 .c12 span{ color:#43c3c7; margin:0 8px;}
+
+/*----shop_view------貨到通知按鈕------*/
+.z1 .a14 .b18 .c13{width:100%;height:50px;float:left;}
+.z1 .a14 .b18 .c13 > div{width:180px; height:50px; float:left; margin-left:3px}
+.z1 .a14 .b18 .c13 .bt14 a{width:113px; height:48px;font:bold 17px/48px "微軟正黑體";color:#999; display:inline-block;border:1px solid #ddd; background:url(../../images/sp/ic14.png) 40px 13px no-repeat #fbfbfb; padding-left:65px;margin-left:0px}
+.z1 .a14 .b18 .c13 .bt14 a:hover{ background:url(../../images/sp/ic14_over.png) 40px 13px no-repeat #000;color:#fff; border:1px solid #000; }
+/*----shop_view------加入慾望良品按鈕------*/
+.z1 .a14 .b18 .c13 .bt15 a{width:128px; height:48px;font:bold 17px/48px "微軟正黑體";color:#fff; display:inline-block;border:1px solid #43c3c7; background:url(../../images/sp/ic15.png) 25px 14px no-repeat #43c3c7; margin-right:4px;padding-left:50px}
+.z1 .a14 .b18 .c13 .bt15 a:hover{ background:url(../../images/sp/ic15_over.png) 25px 14px no-repeat #fff;color:#43c3c7;}
+/*----shop_view------立即購買按鈕------*/
+.z1 .a14 .b18 .c13 .bt16 a{width:113px; height:48px;font:bold 17px/48px "微軟正黑體";color:#fff; display:inline-block; border:1px solid #ff536b; background:url(../../images/sp/ic16.png) 40px 14px no-repeat #ff536b; margin-right:4px;padding-left:65px}
+.z1 .a14 .b18 .c13 .bt16 a:hover{ background:url(../../images/sp/ic16_over.png) 40px 14px no-repeat #fff;color:#ff536b}
+
+/*----shop_view------商品詳細介紹------*/
+.z2{ width:1200px;height:auto; overflow:hidden; margin:0 auto 40px}
+.z2 > div{ float:left}
+.z2 .a15{ width:875px; height:auto; overflow:hidden; margin:0 40px 0 0}
+.z2 .a15 .mn3{width:100%;height:50px;border-top:1px solid #ddd; }
+.z2 .a15 .mn3 a{ width:auto; height:50px; float:left; display:inline-block;background:linear-gradient(90deg,#43c3c7 100%,#c00 0) left 24px no-repeat; background-size:0px 2px;  font:17px/48px verdana,"微軟正黑體";color:#999; padding:0 20px 0 30px}
+.z2 .a15 .mn3 a:hover{  background-size:16px 2px; color:#43c3c7}
+.z2 .a15 .mn3 a.active{  background-size:16px 2px; color:#43c3c7}
+.z2 .a15 .c14{ width:815px; min-height:100px;height:auto; overflow:hidden; padding:24px 29px; border:1px solid #ddd;font:16px/30px verdana,"微軟正黑體";color:#555; text-align:justify;text-justify: inter-ideograph; }
+.z2 .a15 .c14 > img{ max-width:100%; height:auto; /*float:left;*/ margin-top:10px}
+.z2 .a15 .c14 > ul{padding-left:20px;}
+/*----shop_view------關於店家------*/
+.z2 .a16{ width:285px;height:auto;overflow:hidden; margin:0 0 40px}
+.bgt7{width:285px;height:60px;font:19px/20px verdana,"微軟正黑體";color:#555;text-align:center;background:linear-gradient(90deg,#ff536b 100%,#c00 0) center bottom no-repeat; background-size:20px 2px;margin:0 0 10px; float:left}
+
+.bgt7 h4{font:12px/30px verdana,"微軟正黑體";color:#ccc;}
+.z2 .a16 .c15{ width:285px;height:auto;overflow:hidden;}
+.z2 .a16 .c15 .d3{width:204px;height:auto; overflow:hidden;float:left;}
+
+.z2 .a16 .c15 .d3 .ls13{width:100px;height:100px;overflow:hidden;margin:0 2px 2px 0;float:left}
+.z2 .a16 .c15 .d3 .ls13 img{width:100%; height:100%;transition:all 0.3s; filter:brightness(80%)}
+.z2 .a16 .c15 .d3 .ls13 img:hover{width:110%; height:110%;transform:translate(-5%, -5%);transition:all 0.3s;filter:brightness(100%)}
+.z2 .a16 .c15 .d4{width:81px;height:auto; overflow:hidden;float:right;}
+.z2 .a16 .c15 .d4 .ls14{width:81px;height:81px;overflow:hidden;margin:0 0 2px 0;}
+.z2 .a16 .c15 .d4 .ls14 img{width:100%; height:100%;transition:all 0.3s;filter:brightness(80%)}
+.z2 .a16 .c15 .d4 .ls14 img:hover{width:110%; height:110%;transform:translate(-5%, -5%);transition:all 0.3s; filter:brightness(100%)}
+
+/*商品內頁-------編輯器版型*/
+.lin{ width:100%; height:0;padding:10px 0 0;margin:0 0 9px;border-bottom:2px dotted #ddd }
+.d5{ width:100%;height:auto;overflow:hidden; margin-bottom:10px}
+.ct1{ width:100%;height:auto;overflow:hidden;font:bold 21px/21px "微軟正黑體";color:#666; padding:10px 0;}
+.ctx1{ width:100%;height:auto;overflow:hidden;font:16px/30px verdana,"微軟正黑體";color:#666; text-align:justify;text-justify: inter-ideograph;}
+.ctx1 ul{padding-left:20px;}
+.ctx1 ul li{ list-style:outside;list-style-type:disc}
+.cim1{max-width:100%;height:auto;overflow:hidden; position:relative}
+.cim1 img{ max-width:100%; height:auto; }
+
+.ctx2{ width:100%;height:auto;overflow:hidden;font:16px/30px verdana,"微軟正黑體";color:#666; text-align:justify;text-justify: inter-ideograph; }
+.ctx2 ul{ min-width:45%; width:auto; overflow:hidden;padding-left:4%;}
+.ctx2 ul li{ width:100%; list-style:outside;list-style-type:disc}
+.ctx2 .cim2{max-width:48%;height:auto;overflow:hidden; float:left; margin:0 2% 1% 0}
+.ctx2 .cim2 img{ max-width:100%; height:auto; }
+.ctx2 .cim3{max-width:48%;height:auto;overflow:hidden; float:right; margin:0 0 1% 2%}
+.ctx2 .cim3 img{ max-width:100%; height:auto; }
+.cim4{width:48%;height:auto;overflow:hidden; float:right; margin:0 1%}
+.cim4 img{ max-width:100%; height:auto; }
+/*版型7+版型8*/
+.cim5{max-width:100%;height:auto;overflow:hidden; position:relative; display:inline-block}
+.cim5 img{ width:100%; height:auto; }
+.cim5 .ct2{width:92%;height:auto;overflow:hidden; position:absolute; left:2%; bottom:10px; background:rgba(0,0,0,0.6); padding:12px 2% 10px;font:bold 21px/24px verdana,"微軟正黑體";color:#fff;}
+.cim5 .ct2 .ctx3{ width:100%;height:auto;overflow:hidden;font:16px/24px verdana,"微軟正黑體";color:#666; text-align:justify;text-justify: inter-ideograph;color:#fff;padding:5px 0 0 }
+
+.cbt1 a{width:auto; height:48px;font:bold 20px/48px "微軟正黑體";color:#fff; display:inline-block; border:1px solid #ff536b; background:#ff536b; margin:0 0 15px; padding:0 30px; text-align:center; }
+.cbt1 a:hover{ background: #fff;color:#ff536b}
+.cbt2 a{width:auto; height:48px;font:bold 20px/48px "微軟正黑體";color:#fff; display:inline-block; border:1px solid #43c3c7; background:#43c3c7; margin:0 0 15px; padding:0 30px; text-align:center}
+.cbt2 a:hover{ background: #fff;color:#43c3c7}
+
+/*--top*/
+.z3{width:100%;height:150px; background:url(../../images/sp/bg1.jpg) no-repeat center top/cover  ; margin:0 0 30px}
+.z3 .y1{ width:1200px;height:auto;overflow:hidden;margin:0 auto;}
+.z3 .y1 span{font: italic bold  32px/60px  verdana, "新細明體"; float:left; color:#fff; margin:45px 0 0 0px; letter-spacing:-1.5px}
+.z3 .y1 img{ margin-left:-20px;float:left; }

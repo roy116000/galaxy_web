@@ -1,0 +1,47 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            <h2>供應商：@(ViewBag.c_name)</h2>
+            <br />
+
+            <form method="post" action="@(Url.Action(action))">
+
+                <div>
+                    <div style="float: right">
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </div>
+                    <div>
+
+                        <select name="nation">
+                            @foreach (var item in NW.Nation)
+                            {
+                                <option @(item.Key == ViewBag.nation ? "selected=selected" : "")  value="@(item.Key)">@(item.Value)</option>
+                            }
+                        </select>
+
+                    </div>
+                </div>
+
+            </form>
+
+
+
+
+        </div>
+        <br />
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax")
+
+    </div>
+    <!--contentinner-->
+</div>

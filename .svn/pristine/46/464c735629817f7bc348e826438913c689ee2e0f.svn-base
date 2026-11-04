@@ -1,0 +1,6 @@
+﻿@{
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    }
+
+@Html.Partial(action.Replace("Edit", "Add"))
+

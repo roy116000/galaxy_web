@@ -1,0 +1,77 @@
+﻿@using h365_web.Models;
+@model h365_web.Models.product_freight2
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<h365_web.Models.product_freight2> gData = (List<h365_web.Models.product_freight2>)ViewData["product_freight"];
+}
+<div class="maincontent">
+    <div class="contentinner">
+        
+        <div class="row-fluid">
+            
+            <div class="span10">
+                <div id="List_ajax">
+                    <table class="table table-bordered mailinbox">
+                        <colgroup>
+                            <col />
+                            <col class="width8" />
+                            <col class="width8" />
+                            <col class="width8" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(m=>m.name)</th>
+                                <th>@Html.DisplayNameFor(m=>m.total)</th>
+                                <th class="center">@Html.DisplayNameFor(m=>m.price)</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in gData)
+                            {               
+                                <tr class="unread">
+                                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.total)</td>
+                                    <td class="center">@Html.DisplayFor(modelItem => item.price)</td>
+                                    <td>@Html.ActionLink("編輯", action.Replace("List", "Edit"), new { id = item.freight_id }, new { @class = "title" })</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        @if (Model.name != null)
+        { 
+            <h4>&nbsp;</h4>
+            using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.freight_id)
+<div class="widgetcontent">
+
+                @Html.EditorFor(model => model.name)
+
+                @Html.EditorFor(model => model.total)
+
+                @Html.EditorFor(model => model.price)
+
+            <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+            }
+        }
+
+    </div>
+    <!--contentinner-->
+</div>

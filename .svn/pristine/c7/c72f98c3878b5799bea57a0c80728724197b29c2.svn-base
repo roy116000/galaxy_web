@@ -1,0 +1,198 @@
+﻿@model h365_web.Models.product_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var aData = (h365_web.Models.sys_admin_data)ViewData["aData"];
+
+    var ingredient = (h365_web.Models.product_ingredient)ViewData["ingredient"];
+    var specification = (h365_web.Models.product_specification)ViewData["specification"];
+    
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.product_id)
+            @Html.HiddenFor(model => model.company_id)
+            <div class="widgetcontent">
+
+                <h4 class="widgettitle">@(Model.product_id == 0 ? "新增" : "修改")商品資料 
+                    @if (Model.product_id != 0)
+                    {
+                        <span class="pull-right"><a href="~/Shop_Detail.html?id=@(Model.product_id)" target="_blank">前台預覽</a></span>
+                         
+@*<span class="pull-right"><a href="~/Shop_PreView.html?id=@(Model.product_id)" target="_blank">前台預覽</a> </span>Url.Action("Detail", "Shop", new { title = NW.showTitleHtml(Model.item_name), id = Model.product_id }).Replace("/newweb", "")"*@
+                    }
+                </h4>
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬廠商</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.company_name)</span>
+                    </span>
+                </div>
+
+                @if (Model.product_id != 0 && aData.power_id <= 2)
+                {
+                    @Html.EditorFor(m => m.group_ids) @*分類*@
+                }
+
+                @Html.EditorFor(m => m.item_no) @*貨號*@
+
+                @Html.EditorFor(m => m.web_name) @*品牌*@
+
+                @Html.EditorFor(m => m.item_name) @*品名*@
+
+
+
+
+                <div class="abgne_tab">
+                    <ul class="tabs">
+
+                        @if (aData.power_id <= 2)
+                        {
+                            <li><a href="#tab10">相關設定</a></li>
+                            <li><a href="#tab9">產品促銷</a></li>                          
+                        }
+
+                        <li><a href="#tab1">產品價格</a></li>
+                        <li><a href="#tab2">產品資訊</a></li>
+                        @*<li><a href="#tab3">產品設定</a></li>*@
+                        <li><a href="#tab4">產品圖檔</a></li>
+                        <li><a href="#tab5">產品週期</a></li>
+                        <li><a href="#tab6">營養標示</a></li>
+                        <li><a href="#tab7">產品規格</a></li>
+
+
+
+                        @if (Model.product_id != 0)
+                        {
+                            <li><a href="#tab8">變更記錄</a></li>
+                        }
+
+
+
+
+
+                    </ul>
+
+                    <div>
+                        <div id="tab1" class="tab_content">
+                            @Html.Partial("_tab1")
+                        </div>
+                        <div id="tab2" class="tab_content">
+                            @Html.Partial("_tab2")
+                        </div>
+                        <div id="tab3" class="tab_content">
+                            @Html.Partial("_tab3")
+                        </div>
+                        <div id="tab4" class="tab_content">
+                            @Html.Partial("_tab4")
+                        </div>
+                        <div id="tab5" class="tab_content">
+                            @Html.Partial("_tab5")
+                        </div>
+                        <div id="tab6" class="tab_content">
+                            @Html.Partial("_tab6", ingredient)
+                        </div>
+                        <div id="tab7" class="tab_content">
+                            @Html.Partial("_tab7", specification)
+                        </div>
+
+                        <div id="tab8" class="tab_content">
+                            @Html.Partial("_tab8")
+                        </div>
+
+                        @if (aData.power_id <= 2)
+                        {
+                            
+                            <div id="tab10" class="tab_content">
+                                @{Html.RenderPartial("_tab10");}
+                            </div>
+                            
+                            
+                            <div id="tab9" class="tab_content">
+                                @Html.Partial("_tab9")
+                            </div>
+                            
+
+                              
+                        }
+
+
+
+
+                    </div>
+
+                </div>
+
+            </div>
+            
+                        if (aData.power_id > 2 && Model.status_flag < 2)
+                        {
+                            
+            @Html.HiddenFor(m => m.visible)
+            @Html.EditorFor(model => model.status_flag)
+
+                        }
+
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    <button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>
+                </div>
+            </div>
+            
+        }
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                group_ids_s: "required",
+                item_name: "required",
+                web_name: "required"
+            },
+            messages: {
+                group_ids_s: "分類標題，必需選擇！",
+                item_name: "*",
+                web_name: "*"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>
+

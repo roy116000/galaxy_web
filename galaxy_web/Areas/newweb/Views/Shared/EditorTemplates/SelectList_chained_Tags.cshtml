@@ -1,0 +1,138 @@
+﻿@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "span2");
+
+    string id = ViewData.ModelMetadata.PropertyName;
+    string val = ViewData.TemplateInfo.FormattedModelValue.ToString();
+
+    List<ListItem> ListItems = new List<ListItem>();
+
+    if (ViewData[id] != null) { ListItems = (List<ListItem>)ViewData[id]; }
+
+    List<ListItem> ListItems_Chained = new List<ListItem>();
+
+    if (ViewData[id + "_chained"] != null) { ListItems_Chained = (List<ListItem>)ViewData[id + "_chained"]; }
+
+    //之前已選擇
+    var Y = (Dictionary<int, string>)ViewData[id + "_s"];
+    string Y_Ts = "";
+
+    string Tid = id;
+
+    id = id + "y";
+
+
+}
+<script type="text/javascript">jQuery(function () { jQuery("#@(id)").chained("#@(id + "_chained")"); })</script>
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <div class="field">
+        @if (ListItems.Count > 0)
+        {
+            @Html.SelectListChained(id, ListItems_Chained, ListItems, htmlAttributes2)
+        }
+        <span class="help-inline"></span>
+    </div>
+</div>
+
+
+<div class="control-group">
+
+    @Html.Label("", htmlAttributes)
+
+
+    <div class="tagsinput" id="@(id)_tags" style="width: 456px;">
+
+        @if (Y != null)
+        {
+            foreach (var item in Y)
+            {                        
+            <span onclick="@(id)_('@(item.Key)')" class="tag" id="@(id)_@(item.Key)">@(item.Value)</span>
+                            
+                Y_Ts = (Y_Ts + "," + item.Key).Trim(',');
+            }
+        }
+        <input name="@(Tid)" value="@(Y_Ts)" hidden="hidden" />
+    </div>
+</div>
+
+<script>
+
+    //選擇時
+    $('select[name="@(id)"]').change(function () {
+        var o = $(this).val();
+
+        if (o != "") {
+
+            //目前有的
+            var q = $('input[name="@(Tid)"]').val();
+
+            //沒有才新增
+            if (q.search(o) == -1) {
+
+                //新增選擇的值
+                $('input[name="@(Tid)"]').val(function (n, c) {
+
+                    //先判斷裡面是否有值
+                    var Ts = (c == "" ? o : c + "," + o);
+
+                    //按照數字大小排序
+                    Ts = Ts.split(',').sort(function (a, b) {
+                        return a - b
+                    });
+
+                    //回傳結果
+                    return Ts;
+                });
+
+                //框框內新增選擇的顯示值
+                $('#@(id)_tags').append('<span onclick="@(id)_(' + $(this).val() + ')" class="tag" id="@(id)_' + $(this).val() + '"> ' + $('#@(id) :selected').text() + ' </span>')
+
+            }
+
+            //拿掉選單裡面被選擇的值
+            $("#@(id)").find(":selected").remove(); //刪除選擇的選項
+
+            if ($('#@(id) option').val() != "") //新增一個請選擇置頂
+            {
+                $('#@(id) option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+            }
+        }
+    })
+
+    //刪除時
+    function @(id)_(o) {
+
+        var tags = $('#@(id)_' + o).html();
+
+        $("#@(id)").append($("<option></option>").attr("value", o).text(tags)); //將刪除的選項,加回選單中
+
+        if ($('#@(id) option').val() != "") //新增一個請選擇置頂
+        {
+            $('#@(id) option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+        }
+
+        //刪除選項
+        $('#@(id)_' + o).remove();
+
+        $('input[name="@(Tid)"]').val(function (n, c) {
+
+            //先轉陣列
+            var arr = c.split(',');
+
+            //過濾掉需要刪除的
+            var arr2 = arr.filter(function (value) {
+                return value != o
+            });
+
+            //組回字串
+            return arr2.join(',');
+        });
+
+    }
+
+</script>

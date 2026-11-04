@@ -1,0 +1,14 @@
+﻿@model string
+
+@{
+    int number = 1;
+    if (ViewData.ModelMetadata.AdditionalValues.ContainsKey("number"))
+    {
+        number = (int)ViewData.ModelMetadata.AdditionalValues["number"];
+    }
+}
+
+@if (Model != null && Model != "")
+{ 
+    @NW.hideword(Model, number)
+}

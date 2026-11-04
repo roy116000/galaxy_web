@@ -1,0 +1,149 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Rank = (Dictionary<string, List<galaxy_web.Areas.newweb.Controllers.NwReportController._Ranking>>)ViewData["Rank"];
+    //var Rank = (List<galaxy_web.Areas.newweb.Controllers.NwReportController._Ranking>)ViewData["Rank"];
+
+    int num = 0;
+    decimal cost = 0, erp_cost = 0, total = 0, price = 0, gross = 0;
+    //decimal total_all = 0;
+
+    //var x = new decimal[] { num, cost, erp_cost, total };
+    var All = new Dictionary<string, string[]>() { };
+
+    //var All = new Dictionary<string, KeyValuePair<int, decimal>>() { };
+    
+}
+
+
+@if (Rank != null)
+{
+    foreach (var item2 in Rank)
+    {
+    <div style="height: auto; overflow: auto">
+
+        <h4 class="widgettitle">@(item2.Key)<a style="float: right" onclick="$('#@(item2.Key)').toggle(300)">明細</a></h4>
+
+        <table id="@(item2.Key)" hidden="hidden" class="table table-bordered mailinbox">
+            <colgroup>
+                <col class="width4" />
+                <col class="width15" />
+                <col />
+                <col class="width10" />
+                <col class="width6" />
+                <col class="width8" />
+                <col class="width8" />
+                <col class="width8" />
+                <col class="width8" />
+            </colgroup>
+
+            <thead>
+                <tr>
+                    <th class="center">#</th>
+                    <th class="center">供應商</th>
+                    <th class="center">商品名稱</th>
+                    <th class="center">商品貨號</th>
+                    <th class="center">數量</th>
+                    <th class="center">商城售價</th>
+                    <th class="center">成本</th>
+                    <th class="center">翻購成本</th>
+                    <th class="center">營收毛利</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @{ var R = item2.Value.Select(m => m.item_no).ToArray();}
+                @foreach (var item in item2.Value)
+                {
+                    int i = Array.IndexOf(R, item.item_no) + 1;
+                    decimal t = (item.erp_cost - item.cost) * item.num;
+
+                    <tr class="@NW.echoBool(true, "unread", "visible")">
+                        <td class="right">@(i)</td>
+                        <td>@(item.company_name)</td>
+                        <td>@(item.item_name)</td>
+                        <td>@(item.item_no)</td>
+                        <td class="right">@(item.num)</td>
+                        <td class="right">@((item.price).ToString(NW.point))</td>
+                        <td class="right">@(item.cost.ToString(NW.point))</td>
+                        <td class="right">@(item.erp_cost.ToString(NW.point))</td>
+                        <td class="right">@(t.ToString(NW.point))</td>
+                    </tr>
+                    
+                    num += 1; //筆數
+                    cost += item.cost * item.num; //成本
+                    erp_cost += item.erp_cost * item.num; //erp成本
+                    price += item.price * item.num; //商城售價
+                    total += t;
+                    //gross += (price - cost) / price;
+                }
+
+            </tbody>
+        </table>
+    </div>
+        gross = price > 0 ? (price - cost) / price : 0;
+        var x = new string[] { num.ToString(), cost.ToString(NW.point), erp_cost.ToString(NW.point), price.ToString(NW.point), total.ToString(NW.point), (gross * 100).ToString("F2") + "%" };
+                All.Add(item2.Key, x);
+                num = 0; cost = 0; erp_cost = 0; total = 0;
+
+
+    }
+}
+
+
+
+
+
+
+
+
+<br />
+<table class="table table-bordered mailinbox">
+    <colgroup>
+        <col />
+        <col class="width10" />
+        <col class="width10" />
+        <col class="width10" />
+        <col class="width10" />
+        <col class="width10" />
+        <col class="width10" />
+
+    </colgroup>
+    <thead>
+        <tr>
+            <th></th>
+            <th>筆數</th>
+            <th>銀河成本</th>
+            <th>翻購成本</th>
+            <th>商城售價</th>
+            <th>營收</th>
+            <th>毛利率</th>  
+            @*            @foreach (var item in All)
+            {
+                <th class="center">@(item.Key)</th>
+            }*@
+
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in All)
+        {
+            <tr class="@NW.echoBool(true, "unread", "visible")">
+                <td class="center">@(item.Key)</td>
+
+                @foreach (var item2 in item.Value)
+                {
+                    <td class="right">@(item2)</td>
+                }
+
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+
+

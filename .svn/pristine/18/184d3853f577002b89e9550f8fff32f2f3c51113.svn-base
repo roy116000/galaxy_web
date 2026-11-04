@@ -1,0 +1,130 @@
+﻿@using h365_web.Models;
+@model MvcPaging.IPagedList<h365_web.Models.order_data2>
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        if ($("input[name='block_id']:checked").length == 0 && flag !=1) { alert('請至少選擇一項'); return false; }
+        var name = '回復待匯出';
+        switch (flag) { case 1: name = ""; break; case 2: name = "回復待匯出"; break; }
+        if (confirm('確定要' + name + '？')) {
+            var arrVal = new Array();
+            $("input[name='block_id']:checked").each(function (i) {
+                arrVal[i] = this.value;
+            });
+        }
+        $('#cb_flag').val(flag);
+        $('#cb_id').val(arrVal.toString());
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox", @target = "_blank" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="cb_id" name="cb_id" value="" />
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+        <ul class="nav nav-pills">
+        </ul>
+        
+        <div class="widgetcontent">
+          <div class="row-fluid">
+            <div class="span6">
+              <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">匯入出貨資料</h4>
+              @using (Html.BeginForm("GoodsAddSave", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+              {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="widgetcontent bordered">
+                  <div>
+                    <div class="controls">
+                      <div class="fileupload fileupload-new" data-provides="fileupload">
+                        <div class="input-append">
+                          <div class="uneditable-input span3">
+                            <i class="icon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                          </div>
+                          <span class="btn btn-file">
+                            <span class="fileupload-new">選擇Execl檔</span>
+                            <span class="fileupload-exists">更改</span>
+                            <input type="file" id="file_name" name="file_name" />
+                          </span>
+                          <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">移除</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="stdformbutton">
+                      <button class="btn btn-primary">匯入出貨資料</button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="span6">
+              <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">匯入費用資料</h4>
+              @using (Html.BeginForm("GoodsAdd2Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+              {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                <div class="widgetcontent bordered">
+                  <div>
+                    <div class="controls">
+                      <div class="fileupload fileupload-new" data-provides="fileupload">
+                        <div class="input-append">
+                          <div class="uneditable-input span3">
+                            <i class="icon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                          </div>
+                          <span class="btn btn-file">
+                            <span class="fileupload-new">選擇Execl檔</span>
+                            <span class="fileupload-exists">更改</span>
+                            <input type="file" id="file_name2" name="file_name2" />
+                          </span>
+                          <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">移除</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="stdformbutton">
+                      <button class="btn btn-primary">匯入費用資料</button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <ul class="msghead_menu">
+                        <li>
+                            <div class="btn-group">
+                                <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                                <ul class="dropdown-menu">
+                                    <li><a onclick="cbHandel(2);" href="#"><span class="icon-ban-circle"></span>回復待匯出</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                <span class="clearall"></span>
+        </div>
+             <!--msghead-->
+            <br />
+    
+        @Html.Partial(action + "_ajax", Model)
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>

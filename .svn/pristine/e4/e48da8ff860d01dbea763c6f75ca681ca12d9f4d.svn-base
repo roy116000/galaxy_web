@@ -1,0 +1,375 @@
+﻿@model h365_web.Models.drugstore_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var admindata = NW.admin(User.Identity.Name);
+
+    List<h365_web.Models.drugstore_sales> sdata = (List<h365_web.Models.drugstore_sales>)ViewData["sdata"];
+    h365_web.Models.drugstore_dealer pdata = (h365_web.Models.drugstore_dealer)ViewData["pdata"];
+    h365_web.Models.drugstore_sales sales_data = (h365_web.Models.drugstore_sales)ViewData["sales_data"];
+
+    string url = Request.Url.Authority;
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.drugstore_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+
+                @*@Html.EditorFor(model => model.group_id)*@
+
+                @* @Html.EditorFor(model => model.sales_id)*@
+
+                @if (admindata.power_id == 10)
+                {
+                    <div class="control-group">
+                        <label class="control-label">所屬業務</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(pdata.name)-
+                            <select class="span2" id="sales_id" name="sales_id">
+                                <option value="">請選擇 </option>
+                                @foreach (var sd in sdata)
+                                {
+                                    <option value="@(sd.sales_id)">@(sd.name)</option>
+                                }
+
+                            </select>
+                        </div>
+                    </div>
+                       
+                }
+                else if (admindata.power_id == 9)
+                {
+                    <div class="control-group">
+                        <label class="control-label">所屬業務</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(pdata.name)-@(sales_data.name)
+                            <input id="sales_id" name="sales_id" type="hidden" value="@(sales_data.sales_id)"  />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    
+                    @Html.EditorFor(model => model.sales_id)
+
+                }
+
+
+                @Html.EditorFor(model => model.name)
+
+
+                <div class="abgne_tab">
+                    <ul class="tabs">
+                        <li><a href="#tab1">藥局資訊</a></li>
+                        <li><a href="#tab2">營業時間</a></li>
+                        <li><a href="#tab3">現場勘查</a></li>
+                        <li><a href="#tab4">方案選擇</a></li>
+                        @*<li><a href="#tab4">合約下載/簽約審核</a></li>*@
+                        @*                       <li><a href="#tab5">藥局設定</a></li>
+                        <li><a href="#tab6">藥局圖檔</a></li>
+                        <li><a href="#tab7">稅籍、發票設定</a></li>
+                        <li><a href="#tab8">簽約文件</a></li>*@
+
+                    </ul>
+                    <div>
+                        <div id="tab1" class="tab_content">
+
+                            @*@Html.EditorFor(model => model.hos_flag)*@
+
+                            @Html.EditorFor(model => model.ishealth)
+
+                            @Html.EditorFor(model => model.drug_type)
+
+                            @Html.EditorFor(model => model.drug_sn)
+
+                            <div class="control-group">
+                                <label>&nbsp;</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    <a href="http://www.nhi.gov.tw/Query/query3.aspx?menu=20&menu_id=712&WD_ID=828" target="_blank">【查詢機構代碼】</a>&nbsp;
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.boss)
+
+                            @*@Html.EditorFor(model => model.mail)*@
+                            @*  <div class="control-group">
+                                <label class="control-label">密碼</label>
+                                <input type="password" id="pwd" name="pwd" class="field" style="padding: 5px 5px; width: 195px" />
+
+                                <span>確認密碼</span>
+                                <input type="password" id="checkpwd" name="checkpwd" class="field" style="padding: 5px 5px; width: 195px" />
+                            </div>*@
+                            @Html.EditorFor(model => model.tel)
+
+                            @Html.EditorFor(model => model.fax)
+
+                            @Html.EditorFor(model => model.zip)
+
+                            @Html.EditorFor(model => model.address)
+
+                            @Html.EditorFor(model => model.info)
+
+                            @Html.EditorFor(model => model.holidays)
+
+                            @Html.EditorFor(model => model.business_project)
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">聯絡資訊：</h3>
+
+                            @Html.EditorFor(model => model.contact_name)
+
+                            @Html.EditorFor(model => model.contact_tel)
+
+                            @Html.EditorFor(model => model.contact_fax)
+
+                            @Html.EditorFor(model => model.contact_phone)
+
+                            @Html.EditorFor(model => model.contact_mail)
+
+                            @*@Html.EditorFor(model => model.contact_title)*@
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">稅籍資料：</h3>
+
+                            @*@Html.EditorFor(model => model.index_visible)*@
+
+                            @*@Html.EditorFor(model => model.start_date)*@
+
+                            @*@Html.EditorFor(model => model.end_date)*@
+
+                            @Html.EditorFor(model => model.taxes)
+                            @Html.EditorFor(model => model.uniform_numbers)
+                            @Html.EditorFor(model => model.invoice_title)
+                            @Html.EditorFor(model => model.invoice_type)
+                            @Html.EditorFor(model => model.facebook)
+
+                            @Html.EditorFor(model => model.url)
+
+                        </div>
+
+                        <div id="tab2" class="tab_content">
+
+                            @Html.EditorFor(m => m.times)
+
+                        </div>
+
+
+                        <div id="tab3" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <span class="label label-important">圖片建議：寬:620px 高:415px
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            @if (!NW.isAf(url))
+                            {
+                                @Html.EditorFor(model => model.uploadimage1)
+                            }
+                            else
+                            {
+                                <div class="control-group">
+                                    @Html.LabelFor(model => model.uploadimage1)
+                                    <div class="field" style="padding: 5px 5px;">
+                                        您目前所在的網址無法上傳此資料，如需上傳請<a href="@(NW.ph_url)" target="_blank" >【至此】</a>
+                                    </div>
+                                </div>
+                            }
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">&nbsp;</h3>
+
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <span class="label label-important">圖片建議：寬:300px 高:240px
+                                    </span>
+                                </div>
+                            </div>
+
+                           
+                            @if (!NW.isAf(url))
+                            {
+                                @Html.EditorFor(model => model.uploadimage2)
+                            }
+                            else
+                            {
+                                <div class="control-group">
+                                    @Html.LabelFor(model => model.uploadimage2)
+                                    <div class="field" style="padding: 5px 5px;">
+                                        您目前所在的網址無法上傳此資料，如需上傳請<a href="@(NW.ph_url)" target="_blank" >【至此】</a>
+                                    </div>
+                                </div>
+                            }
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">&nbsp;</h3>
+
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <span class="label label-important">圖片建議：一律橫式
+                                    </span>
+                                </div>
+                            </div>
+
+                           
+                            @if (!NW.isAf(url))
+                            {
+                                @Html.EditorFor(model => model.uploadimage3)
+                            }
+                            else
+                            {
+                                <div class="control-group">
+                                    @Html.LabelFor(model => model.uploadimage3)
+                                    <div class="field" style="padding: 5px 5px;">
+                                        您目前所在的網址無法上傳此資料，如需上傳請<a href="@(NW.ph_url)" target="_blank" >【至此】</a>
+                                    </div>
+                                </div>
+                            }
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">&nbsp;</h3>
+
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <span class="label label-important">圖片建議：一律橫式
+                                    </span>
+                                </div>
+                            </div>
+
+                           
+                            @if (!NW.isAf(url))
+                            {
+                                @Html.EditorFor(model => model.uploadimage4)
+                            }
+                            else
+                            {
+                                <div class="control-group">
+                                    @Html.LabelFor(model => model.uploadimage4)
+                                    <div class="field" style="padding: 5px 5px;">
+                                        您目前所在的網址無法上傳此資料，如需上傳請<a href="@(NW.ph_url)" target="_blank" >【至此】</a>
+                                    </div>
+                                </div>
+                            }
+
+                            <h3 style="padding-left: 10px; border-top: 1px dashed #ccc;">&nbsp;</h3>
+
+                            <div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <span class="label label-important">圖片建議：一律橫式
+                                    </span>
+                                </div>
+                            </div>
+
+                            
+                            @if (!NW.isAf(url))
+                            {
+                                @Html.EditorFor(model => model.uploadimage5)
+                            }
+                            else
+                            {
+                                <div class="control-group">
+                                    @Html.LabelFor(model => model.uploadimage5)
+                                    <div class="field" style="padding: 5px 5px;">
+                                        您目前所在的網址無法上傳此資料，如需上傳請<a href="@(NW.ph_url)" target="_blank" >【至此】</a>
+                                    </div>
+                                </div>
+                            }
+
+                            @*@Html.EditorFor(model => model.uploadimage22)*@
+                            @*<div class="control-group">
+                                <label for="" class="control-label"></label>
+                                <div class="controls">
+                                    <h4>所需勘查圖片：藥局外觀、招牌、內部、藥師照片、預計安裝位置。
+                                    </h4>
+
+                                </div>
+                            </div>*@
+
+                        </div>
+
+                        <div id="tab4" class="tab_content">
+
+                            @Html.EditorFor(model => model.program_flag)
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            ignore: "",
+            rules: {
+                drug_sn: "required",
+                sales_id: "required",
+                sales_id_chained: "required",
+                name: "required",
+                boss: "required",
+                mail: "required",
+                zip: "required",
+                address: "required",
+                tel: "required"
+            },
+            messages: {
+                drug_sn: "機構代碼必須填寫!",
+                sales_id: "必須填寫!",
+                sales_id_chained: "必須填寫!",
+                name: "名稱必需填寫!",
+                boss: "負責人必需填寫!",
+                mail: "帳號(郵件)必須填寫!",
+                zip: "地址必須填寫!",
+                address: "地址必須填寫!",
+                tel: "電話必須填寫!"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>
+

@@ -1,0 +1,66 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.sys_admin_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width10" />
+            <col />
+            <col class="width10" />
+            <col class="width10" />           
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().sys_power_data.label) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().pharmacist_sn) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().name)</th>              
+                <th class="center">@Html.DisplayNameFor(model => model.First().uid) </th>                
+                <th class="center">@Html.DisplayNameFor(model => model.First().start_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().end_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().msg_visible) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible)</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {               
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.admin_id" /></td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.sys_power_data.label)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.pharmacist_sn)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.name)</td>                   
+                    <td class="center">@Html.DisplayFor(modelItem => item.uid)</td>
+                    
+                    <td class="center">@Html.DisplayFor(modelItem => item.start_date)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.end_date)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.msg_visible)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax",""), new { id = item.admin_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax","")+"_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+
+</div>
+<!--pagination-->

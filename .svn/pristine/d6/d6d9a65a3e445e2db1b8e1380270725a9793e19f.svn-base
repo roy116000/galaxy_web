@@ -1,0 +1,74 @@
+﻿@using h365_web.Models;
+@model MvcPaging.IPagedList<h365_web.Models.order_data>
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+        @Html.ValidationSummary(true)
+        <script type="text/javascript">
+            function cbHandel(flag) {
+                if ($("input[name='block_id']:checked").length == 0 && flag != 1) { alert('請至少選擇一項'); return false; }
+                var name = '選擇匯出';
+                switch (flag) { case 1: name = "全部匯出"; break; case 2: name = ""; break; }
+                if (confirm('確定要' + name + '？')) {
+                    var arrVal = new Array();
+                    $("input[name='block_id']:checked").each(function (i) {
+                        arrVal[i] = this.value;
+                    });
+                }
+                $('#cb_flag').val(flag);
+                $('#cb_id').val(arrVal.toString());
+                $('#frmCheckbox').submit();
+            }
+        </script>
+        @using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox"}))
+        {
+            <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+            <input type="hidden" id="cb_id" name="cb_id" value="" />
+        }
+
+        <!--widgetsource-->
+        <div id="mail">
+            <div class="msghead">
+                @using (Html.BeginRouteForm("", FormMethod.Get))
+                {
+                    <ul class="msghead_menu">
+                        <li>
+                            <a onclick="cbHandel(1);" href="#" class="btn"><span class="icon-pencil"></span>全部匯出</a>
+                            <div class="btn-group">
+                                <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                                <ul class="dropdown-menu">
+                                    <li><a onclick="cbHandel(0);" href="#"><span class="icon-ban-circle"></span>選擇匯出</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="marginleft15 filesearch">
+                            <input type="text" id="kw" name="kw" class="filekeyword" placeholder="搜尋單號或訂購方" value="@ViewBag.kw" />
+                            <input type="hidden" id="gid" name="gid" value="@ViewBag.gid" />
+                        </li>
+                        <li class="right newfilebtn">
+                            <input type="submit" value="查詢" class="btn btn-primary" /></li>
+                    </ul>
+                }
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+        </div>
+        <!--#chat-->
+
+        @Html.Partial(action + "_ajax", Model)
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>

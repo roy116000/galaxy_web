@@ -1,0 +1,680 @@
+﻿@model galaxy_web.Models.product_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    Dictionary<int, string> Status_F = (Dictionary<int, string>)ViewData["Status_F"];
+
+    int Pid = ViewBag.aPower ?? 0;
+
+    var aData = (galaxy_web.Models.sys_admin_data)ViewData["aData"];
+    
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => m.product_id)
+            @Html.HiddenFor(m => m.nation)
+
+            <h4 class="widgettitle">商品資料<span style="float: right"><a target="_blank" href="@(Url.Action("Exhibition", new { id = Model.product_id }))">預覽</a></span></h4>
+
+            <div class="control-group">
+                <label class="control-label">@(Html.DisplayNameFor(m => aData.name))</label>
+                <div style="padding: 5px 5px; font-size: 200%; color: #0094ff; font-weight: bold" class="field">
+                    @(aData.name)&nbsp;&nbsp;
+                    <input name="company_id" value="@(aData.admin_id)" hidden="hidden"/>
+                </div>
+            </div>
+
+            @if (Pid > 2 && Model.status > 0)
+            {
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_no))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_no)
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.web_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.web_name)
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_name)
+
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_invoice_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_invoice_name)&nbsp;&nbsp;
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.status))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Status_F.Where(m => m.Key == Model.status).Select(m => m.Value).SingleOrDefault() ?? null)&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+            }
+            else
+            {
+@*@Html.EditorFor(m => m.company_id)*@
+
+                if (Model.sub_id > 0)
+                {
+                    
+                <div class="control-group">
+                    <label class="control-label">@(Html.DisplayNameFor(m => m.sub_id))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(ViewBag.sub)
+
+                    </div>
+                </div>
+                
+                }
+                else
+                {
+                @Html.EditorFor(m => m.sub_id)
+
+
+                }
+
+
+                if (Pid < 3)
+                {
+
+                    if (!string.IsNullOrEmpty(Model.erp_no))
+                    {
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.erp_no))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.erp_no)
+
+                    </div>
+                </div>
+                    }
+                    else
+                    {
+                @Html.EditorFor(model => model.erp_no)
+                    }
+
+                }
+               
+
+                
+                @Html.EditorFor(m => m.item_no) @*貨號*@ 
+                
+                if (Model.product_id == 0 || Pid < 3)
+                {
+                    //新增才能編輯 之後無法編輯
+                @Html.EditorFor(m => m.web_name) @*品牌*@
+
+                @Html.EditorFor(m => m.item_name) @*品名*@
+                    if (Pid < 3)
+                    {
+                @Html.EditorFor(m => m.platform_ids)
+                    }
+                }
+                else
+                {
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.web_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.web_name)
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_name)
+
+                    </div>
+                </div>
+                }
+                
+                <div class="control-group">
+                    <label class="control-label" for="item_invoice_name">發票商品名稱</label>
+                    <div class="controls">
+                        <input autocomplete="off" class="span5" id="item_invoice_name" maxlength="15" name="item_invoice_name" placeholder="" value="@(Model.item_invoice_name)" type="text">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                
+                //if (Model.product_id == 0)
+                //{
+                //新增才能編輯 之後無法編輯
+@*@Html.EditorFor(m => m.web_name)*@ @*品牌*@
+
+@*@Html.EditorFor(m => m.item_name)*@ @*品名*@
+                
+@* }
+                else
+                {
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.web_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.web_name)
+
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_name))</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_name)
+
+                    </div>
+                </div>
+                }*@
+                
+@*if (Model.product_id == 0 || Pid < 3)
+                {
+                    //新增時才可編輯
+                    @Html.EditorFor(m => m.item_invoice_name)
+                }
+                else
+                {
+                    
+                <div class="control-group">
+                    <label class="control-label" for="item_invoice_name">發票商品名稱</label>
+                    <div class="controls">
+                        <input autocomplete="off" class="span5" id="item_invoice_name" maxlength="15" name="item_invoice_name" placeholder="" value="@(Model.item_invoice_name)" type="text">
+                        <span class="help-inline"></span>
+                    </div>
+                </div>
+                }*@
+                
+                @Html.EditorFor(m => m.status) @*狀態*@
+
+                @Html.EditorFor(m => m.status_info) @*狀態更動備註*@
+            }
+
+            <div class="abgne_tab">
+                <ul class="tabs">
+                    <li><a href="#tab1">產品相關</a></li>
+
+                    @*<li><a href="#tab2">產品價格</a></li>*@
+                    <li><a href="#tab3">產品資訊</a></li>
+                    <li><a href="#tab4">產品圖檔</a></li>
+
+                    <li><a href="#tab6">產品數量</a></li>
+                    <li><a href="#tab5">變更記錄</a></li>
+
+                </ul>
+
+                <div>
+
+                    @*產品價格*@
+                    <div id="tab1" class="tab_content">
+
+
+
+                        @if (Pid > 2 && Model.status > 0)
+                        {
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.cost))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.cost)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+@*<div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.freight))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.freight)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>*@
+                            
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.sprice))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.sprice)&nbsp;&nbsp;
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.price))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.price)&nbsp;&nbsp; 
+                                </div>
+                            </div>
+                                                    
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.place))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.place)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.unit))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.unit)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.specification))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.specification)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+                            if (Model.nation == "TS")
+                            { 
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.specification))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.start_date.Value)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.specification))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.end_date.Value)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            
+                            }
+
+                        }
+                        else
+                        {
+                            //if (Pid < 3)
+                            //{
+                            <div class="control-group">
+                                <label class="control-label">公式</label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #0094ff; font-weight: bold" class="field">
+                                    商城售價 = 商品售價
+                                </div>
+                            </div>
+                         
+                            <div class="control-group">
+                                <label class="control-label">毛利率公式</label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #0094ff; font-weight: bold" class="field">
+                                    [(商城售價 - 成本) / 商城售價] * 100%
+                                </div>
+                            </div>
+                            
+
+                            <div class="control-group">
+                                <label class="control-label">商品價格計算</label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #0094ff; font-weight: bold" class="field">
+                                    商城售價：<span style="color: red" class="colcou"></span>&nbsp;
+                                    毛利率：<span style="color: red" class="colcou"></span>@*(毛利率最少於15%)*@&nbsp;
+                                @*商城折扣率：<span style="color: red" class="colcou"></span>&nbsp;*@
+
+                                    @*                                    商城利潤：<span class="colcou"></span>
+                                推薦人利潤：<span class="colcou"></span>*@
+                                </div>
+                            </div>
+                            //}
+                            
+                            <div class="control-group">
+                                <label class="control-label">幣別</label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #0094ff; font-weight: bold" class="field">
+                                    @* @(Model.nation == "TW" ? "新台幣 (NTD) " : "人民幣 (RMB) ")*@
+                                    @switch (Model.nation)
+                                    {
+                                        case "TW":
+                                        @("新台幣 (NTD)");
+                                                      break;
+                                        case "CN":
+                                        @("人民幣 (RMB)");
+                                                      break;
+                                        case "TS":
+                                        @("商城紅利 (試用品)");
+                                                       break;
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="control-group">
+                                <label class="control-label"></label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #002A56; font-weight: bold" class="field">
+                                    @switch (Model.nation)
+                                    {
+                                        default:
+                                        @("備註:商品運費請加在成本中(此為請款金額)");
+                                                                  break;
+                                        case "TS":
+                                        @("");
+                                             break;
+                                    }
+
+                                </div>
+                            </div>
+                            
+                            @Html.EditorFor(model => model.cost)
+
+@*@Html.EditorFor(model => model.freight)*@
+                                
+                            @Html.EditorFor(model => model.sprice)
+
+                            @Html.EditorFor(model => model.price)
+
+                                    if (Pid < 3)
+                                    {  
+  
+                            @Html.EditorFor(model => model.erp_cost)
+
+                            <div class="control-group">
+                                <label class="control-label"></label>
+                                <div style="padding: 5px 5px; font-size: 150%; color: #002A56; font-weight: bold" class="field">
+                                    erp成本計算公式為：(成本+最終售價*1.1)*
+                                    <input id="nnn1" value="0.5" type="number">
+                                    =
+                                    <input id="nnn2" value="@(Model.erp_cost)" type="number">
+                                </div>
+                            </div>
+                            <script>
+                                $(function () {
+                                    var p = @(Model.erp_cost);
+                                    var d = p * 2;
+                                    $('#nnn1').keyup(function () {
+                                        if (!isNaN($(this).val())) {
+                                            if($(this).val() >= 0.5 && $(this).val() <= 0.7)
+                                            {
+                                                var p2 = d * $(this).val(); 
+                                                $('#nnn2').val(p2);
+                                            }    
+                                        }else{
+                                            ('#nnn2').val(p);
+                                        }
+                                    })
+
+                                    $('#nnn2').keyup(function () {
+                                        if (!isNaN($(this).val())) {
+                                            var p2 = $(this).val() / d; 
+
+                                            $('#nnn1').val(formatFloat(p2, 2));
+                                        }else{
+                                            ('#nnn1').val(0.5);
+                                        }
+                                    })
+
+                                    function formatFloat(num, pos)
+                                    {
+                                        var size = Math.pow(10, pos);
+                                        return Math.round(num * size) / size;
+                                    }
+                                })
+                                
+                            </script>
+                            <style>
+                                #nnn1, #nnn2 {
+                                    width: 50px;
+                                }
+                            </style>
+                            
+                                    }
+
+
+
+                            @Html.EditorFor(m => m.place)
+
+                            @Html.EditorFor(m => m.unit)
+
+                            @Html.EditorFor(m => m.specification)
+
+                                    if (Model.nation == "TS")
+                                    {
+                                        //檔期
+                            @Html.EditorFor(model => model.start_date)
+                            @Html.EditorFor(model => model.end_date)
+                                    }
+                        }
+
+                    </div>
+
+                    @*產品價格*@
+                    @*                    <div id="tab2" class="tab_content">
+                    </div>*@
+
+                    @*產品資訊*@
+                    <div id="tab3" class="tab_content">
+
+
+                        @*@Html.EditorFor(m => m.group_ids) @*分類*@
+
+                        @Html.EditorFor(model => model.style)
+
+                        @Html.EditorFor(model => model.info)
+
+                        <div class="control-group">
+                            <label class="control-label"></label>
+                            <div style="padding: 5px 5px; font-size: 150%; color: #0094ff; font-weight: bold" class="field">
+                                商品介紹須包含：<br>
+                                1.商品基本介紹(不可有療效字眼)<br>
+                                2.商品介紹圖(2張以上)<br>
+                                3.影片介紹(非必要)<br>
+                                4.相關檢驗證明<br>
+                                5.廠商資訊<br>
+                                6.保固責任資訊<br>
+                                7.退換貨資訊
+                            </div>
+                        </div>
+
+                        @Html.EditorFor(model => model.introduce)
+
+                        @Html.EditorFor(model => model.preorder_visible)
+                    </div>
+
+                    @*產品圖檔*@
+                    <div id="tab4" class="tab_content">
+
+                        @Html.EditorFor(m => m.Img)
+
+                        <div class="control-group">
+                            <label for="" class="control-label"></label>
+                            <div class="controls">
+                                <span class="label label-important">(必需附上包裝平面圖) 
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @*產品外包裝圖*@
+                    @*<div id="tab7" class="tab_content">
+
+                        @Html.EditorFor(m => m.other_Img)
+
+                    </div>*@
+
+                    @*產品數量*@
+                    <div id="tab6" class="tab_content">
+
+                        <div class="control-group">
+                            <label class="control-label" for="cost">數量</label>
+                            <span class="field">
+                                <input class="span2 input-spinner" name="stock_num" style="text-align: right" value="0" type="number">
+                                <span class="help-inline"></span>
+                            </span>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="stock_info">備註</label>
+                            <div class="controls">
+                                <textarea class="span5" cols="20" id="stock_info" maxlength="255" name="stock_info" placeholder="" rows="4"></textarea>
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+
+                        @{Html.RenderPartial("Add_Tab6");}
+
+                    </div>
+
+                    @*變更紀錄*@
+                    <div id="tab5" class="tab_content">
+
+                        @{Html.RenderPartial("Add_Tab5");}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    @*<button type="button" onclick="location.href = '@(Request.RawUrl)'" class="btn">回列表</button>*@
+                    <button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+
+    //狀態修改備註
+    $('input[name=status]').change(function () {
+
+        var b = '@(Model.status)'; //未更動前
+        var a = $(this).val(); //更動後
+
+        $('#status_info').attr('required', a < b ? true : false);
+
+    })
+</script>
+
+<style>
+    input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+        margin: 0;
+    }
+</style>
+
+
+
+<script>
+    $(function () {
+        $('#item_name, #sub_id, #company_id').attr('required', true);
+        $('#cost, #price, #erp_cost, #sprice, #freight').attr('required', true);
+
+    })
+</script>
+
+
+<script>
+    $(function () {
+        var cost = $('input[name="cost"]').val(); //成本
+        //var freight = $('input[name="freight"]').val(); //運費
+        var freight = 0;
+        var sprice = $('input[name="sprice"]').val(); //商品定價
+        var price = $('input[name="price"]').val(); //商品售價
+
+        Calculate(cost, freight, sprice, price);
+    });
+
+
+    $('#cost, #price, #sprice, #freight').keyup(function () {
+
+        var cost = $('input[name="cost"]').val(); //成本
+        //var freight = $('input[name="freight"]').val(); //運費
+        var freight = 0;
+        var sprice = $('input[name="sprice"]').val(); //商品定價
+        var price = $('input[name="price"]').val(); //商品售價
+
+
+        //本次操作
+        var id = $(this).attr('name');
+        var o = $(this).val();
+        if ($.isNumeric(o)) {
+
+            switch (id) {
+                case "cost":
+                    cost = o;
+                    break;
+
+                case "freight":
+                    freight = o;
+                    break;
+
+                case "sprice":
+                    sprice = o;
+                    break;
+
+                case "price":
+                    price = o;
+                    break;
+            }
+
+        } else {
+            swal('請輸入數字');
+        }
+
+        Calculate(cost, freight, sprice, price);
+    })
+
+    function Calculate(cost, freight, sprice, price) {
+
+        cost = Number(cost); //成本
+        freight = Number(freight); //運費
+        sprice = Number(sprice); //商品定價 
+        price = Number(price);//商品售價
+
+        //商城售價
+        var o = price + freight;
+
+        $('.colcou').eq(0).html(o);
+
+        ////商品折扣率
+        //var s = (o / (sprice + freight)) * 100
+        //if ($.isNumeric(s)) {
+        //    $('.colcou').eq(1).html(s.toFixed(2) + '%');
+        //} else {
+        //    $('.colcou').eq(1).html('計算錯誤');
+        //}
+
+        //商城利潤
+        var x = ((o - (cost + freight)) / (o)) * 100;
+        if ($.isNumeric(x)) {
+            $('.colcou').eq(1).html(x.toFixed(2) + '%');
+        } else {
+            $('.colcou').eq(1).html('計算錯誤');
+        }
+
+        //推薦人利潤
+        var z = (x * 0.1);
+        if ($.isNumeric(z)) {
+            $('.colcou').eq(3).html(z.toFixed(2) + '%');
+        } else {
+            $('.colcou').eq(3).html('計算錯誤');
+        }
+    }
+
+</script>

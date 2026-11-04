@@ -1,0 +1,70 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.education_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var gData = (List<ListItem>)ViewData["gData"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width10" />
+            <col class="width15" />
+
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().group_id))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().title))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().cont))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().inx))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                string[] gid = item.group_id.Split(',');
+                
+                var g = gData.Where(m => gid.Contains(m.Value)).Select(m => m.DisplayText).ToArray();
+                //string g_n = g != null ? string.Join(",", g.FirstOrDefault()) : "";
+                string g_name = g != null ? string.Join(",", g) : "";
+                
+                
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.education_id)" /></td>
+                    <td class="center" title="@(g_name)">分類</td>
+
+                    <td>@Html.DisplayFor(m => item.title)</td>
+                    @*<td>@Html.DisplayFor(m => item.cont)</td>*@
+                    <td>@(NW.word(item.cont, 40, "..."))</td>
+                    <td class="center">@Html.DisplayFor(m => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.education_id }, new { @class = "title", target = "_blank" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid))
+
+    </div>
+
+</div>

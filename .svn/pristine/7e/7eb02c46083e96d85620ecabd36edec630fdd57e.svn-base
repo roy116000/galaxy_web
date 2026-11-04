@@ -1,0 +1,117 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+
+    public class about_data
+    {
+        [Key]
+        public int config_id { get; set; }
+
+        [DisplayName("網站名稱")]
+        public string siteName { get; set; }
+
+        [DisplayName("聯絡電話")]
+        public string tel { get; set; }
+
+        [DisplayName("傳真號碼")]
+        public string fax { get; set; }
+
+        [DisplayName("聯絡信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("Skype帳號")]
+        public string skype { get; set; }
+
+        [DisplayName("Yahoo帳號")]
+        public string yahoo { get; set; }
+
+        [DisplayName("Line帳號")]
+        public string line { get; set; }
+
+        [DisplayName("聯絡地址")]
+        public string address { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("關鍵字組")]
+        public string keyword { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("網站簡介")]
+        public string description { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("描述")]
+        public string info { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; } 
+ 
+
+    }
+
+    public class mail_group {
+        [Key]
+        [DisplayName("group_id")]
+        public int group_id { get; set; }
+
+        [DisplayName("信件名稱")]
+        public string name { get; set; }
+
+        [DisplayName("parent_id")]
+        public int parent_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("主旨")]
+        public string subject { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("內容")]
+        public string body { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("副本")]
+        public string cc { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("簽名檔")]
+        public string sign { get; set; } 
+    }
+}

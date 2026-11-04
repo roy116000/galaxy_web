@@ -1,0 +1,172 @@
+﻿@model galaxy_web.Models.order_bills
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var sys_bills = (galaxy_web.Models.sys_admin_bills)ViewData["sys_bills"];
+
+    var orders = (List<galaxy_web.Models.order_data>)ViewData["orders"];
+
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.bills_id)
+            <input type="hidden" id="index" name="index" value="0" />
+                        
+            
+            <div class="widgetcontent">
+
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬廠商</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.company_name)</span>
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.bills_datetime, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @if (Model != null)
+                        {
+                            @:@((Model.bills_datetime).Value.ToString("yyyy/MM/dd"))
+                                                                                                                                                                                                                                                }
+                        &nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">請款月份</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        @(Model.yymm)&nbsp
+                    </div>
+                </div>
+
+                <form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">
+
+                    <div class="control-group">
+                        <label class="control-label">發票日期</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(Model.invoice_datetime.HasValue ? Model.invoice_datetime.Value.ToString("yyyy/MM/dd") : "")&nbsp
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">發票號碼</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(Model.invoice_no)&nbsp
+                        </div>
+                    </div>
+
+
+                    <div class="control-group">
+                        <label class="control-label">銀行別</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(sys_bills.bank)&nbsp
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">分行別</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(sys_bills.bank2)&nbsp
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">收款行代號</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(sys_bills.receiving_code)&nbsp
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">收款行帳號</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(sys_bills.receiving_account)&nbsp
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">收款戶名</label>
+                        <div class="field" style="padding: 5px 5px;">
+                            @(sys_bills.receiving_name)&nbsp
+                        </div>
+                    </div>
+
+
+                    <div class="control-group">
+                        <label for="" class="control-label">請款總額</label>
+                        <span class="field">
+                            @{
+                        decimal total = 0;
+                        try
+                        {
+                            total = ViewBag.orders_all;
+                        }
+                        catch { }
+                            }
+                            <span class="label label-success" style="font-size: 150%;">@(total.ToString("F2"))</span>
+                        </span>
+                    </div>
+
+                    @* 請款狀態 *@
+                    @if (Model.flag == 3)
+                    { 
+                        <div class="control-group">
+                            <label class="control-label">請款狀態</label>
+                            <div class="field" style="padding: 5px 5px;">
+                                @(NW.bills_flag(3))&nbsp
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">匯款完成日期</label>
+                            <div class="field" style="padding: 5px 5px;">
+                                @(Model.finish_datetime.HasValue ? Model.finish_datetime.Value.ToString("yyyy/MM/dd") : "")&nbsp
+                            </div>
+                        </div>
+                    }
+                    else if (Model.flag == 0)
+                    {
+                        <div class="control-group">
+                            <label class="control-label">請款狀態</label>
+                            <div class="field" style="padding: 5px 5px;">
+                                @(NW.bills_flag(0))&nbsp
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        if (Model.flag == 2)
+                        { 
+                        @Html.EditorFor(m => m.finish_datetime)
+                        }
+                        
+                        @Html.EditorFor(m => m.flag)
+                    }
+                    <div class="control-group">
+                        <div class="stdformbutton">
+                            @if (new int[] { 1, 2 }.Contains(Model.flag))
+                            {
+                                <button class="btn btn-primary">確認送出</button>
+                            }
+                            <button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List", new { flag = Model.flag })'" class="btn">回請款列表</button>
+                        </div>
+                    </div>
+
+                </form>
+
+                @Html.Partial("template_orders")
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">$(function () { $("#invoice_datetime").datepicker(); })</script>
+<script type="text/javascript">$(function () { $("#finish_datetime").datepicker(); })</script>

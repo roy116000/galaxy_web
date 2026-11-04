@@ -1,0 +1,177 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class pharmacist_data
+    {
+        [Key]
+        public int pharmacist_id { get; set; }
+
+        [DisplayName("藥局編號")]
+        public int drugstore_id { get; set; }
+
+        [DisplayName("姓名")]
+        public string name { get; set; }
+
+        [DisplayName("帳號")]
+        public string uid { get; set; }
+
+        [DisplayName("密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("性別")]
+        public int sex { get; set; }
+
+        [DisplayName("電話")]
+        public string phone { get; set; }
+
+        [DisplayName("信箱")]
+        public string mail { get; set; }
+
+        [DisplayName("藥師字號")]
+        public string pharmacist_sn { get; set; }
+
+        [DisplayName("執照字號")]
+        public string certificate_sn { get; set; }
+
+        [DisplayName("照片")]
+        public string b_img { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+    }
+
+    #region"活動專區"
+
+    public class pharmacist_activity 
+    {
+        [Key]
+        [DisplayName("活動編號")]
+        public int activity_id { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("類型")]
+        public int type { get; set; }
+
+        [UIHint("Img")]
+        [DisplayName("圖片或影片")]
+        public string type_img { get; set; }
+
+        [DisplayName("Youtobe")]
+        public string type_url { get; set; }
+
+        [UIHint("Img")]
+        [DisplayName("Youtobe")]
+        public string type_url_img { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("贈品類型")]
+        public int gift { get; set; }
+
+        [DisplayName("金額或商品編號")]
+        public int gift_num { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("簡介")]
+        public string info { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("解說")]
+        public string cont { get; set; }
+
+        [DisplayName("活動開始")]
+        public DateTime? start_datetime { get; set; }
+
+        [DisplayName("活動結束")]
+        public DateTime? end_datetime { get; set; }
+
+        [DisplayName("啟用")]
+        public bool visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+    }
+
+    public class pharmacist_activity_data 
+    {
+        [Key]
+        [DisplayName("編號")]
+        public int question_id { get; set; }
+
+        [DisplayName("對應編號")]
+        public int activity_id { get; set; }
+
+        [DisplayName("題目")]
+        public string title { get; set; }
+
+        [DisplayName("答案")]
+        public string answer1 { get; set; }
+
+        [DisplayName("分數")]
+        public int fraction1 { get; set; }
+
+        [DisplayName("答案")]
+        public string answer2 { get; set; }
+
+        [DisplayName("分數")]
+        public int fraction2 { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public bool visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+    }
+
+    #endregion
+
+
+
+
+}

@@ -1,0 +1,117 @@
+﻿@model h365_web.Models.product_price2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.price_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+              @Html.HiddenFor(model => model.group_name) 
+              <div class="control-group">
+                  <label class="control-label" for="price">活動名稱</label>
+                  <span class="field">
+                    @Model.group_name
+                  </span>
+              </div>
+
+              @Html.HiddenFor(model => model.product_name) 
+              <div class="control-group">
+                  <label class="control-label" for="">產品名稱</label>
+                  <span class="field">
+                    @Model.product_name
+                  </span>
+              </div>
+              @{ double mou = ((Model.org_price - Model.org_cost) / Model.org_price)*100; }
+              <div class="control-group">
+                  <label class="control-label" for="">原始價格</label>
+                  <span class="field">
+                    @Model.org_price 元
+                  </span>
+              </div>
+              <div class="control-group">
+                  <label class="control-label" for="">原始成本</label>
+                  <span class="field">
+                    @Model.org_cost 元 (原始毛利率:@mou.ToString("n2") %)
+                  </span>
+              </div>
+
+
+              @Html.EditorFor(model => model.subject) 
+
+              @Html.EditorFor(model => model.price) 
+
+              @Html.EditorFor(model => model.cost) 
+
+              @{ mou = ((Model.price - Model.cost) / Model.price) * 100; }
+              <div class="control-group">
+                  <label class="control-label" for="">活動毛利率</label>
+                  <span class="field">
+                   @mou.ToString("n2") %
+                  </span>
+              </div>
+
+
+              @Html.EditorFor(model => model.stock) 
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定產品活動時間內可訂購數量，0表無限制。</span>
+                  </span>
+              </div>
+
+              @Html.EditorFor(model => model.limit) 
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定每個帳號可訂購數量，0表示無限制。</span>
+                  </span>
+              </div>
+
+              @Html.EditorFor(model => model.start_date) 
+
+              @Html.EditorFor(model => model.end_date) 
+
+              @Html.EditorFor(model => model.countback_visible) 
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+  $(function () {
+    // With Form Validation
+    $("#form1").validate({
+      rules: {
+        group_name: "required",
+        subject: "required",
+        start_date: "required",
+        end_date: "required"
+      },
+      messages: {
+        group_name: "活動標題，必需填寫！",
+        subject: "前台促銷用語，必需填寫！",
+        start_date: "啟用日期，必需填寫！",
+        end_date: "結束日期，必需填寫！"
+      },
+      highlight: function (label) {
+        jQuery(label).closest('.control-group').addClass('error');
+      }
+    });
+
+  })
+</script>

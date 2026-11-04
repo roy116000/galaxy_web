@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models2
+{
+    public class news_data
+    {
+        [Key]
+        public int news_id { get; set; }
+
+        [DisplayName("分類編號")]
+        public int group_id { get; set; }
+
+        [DisplayName("作者編號")]
+        public int author_id { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [DisplayName("簡介")]
+        [UIHint("Info")]
+        [Display(Prompt = "此欄位僅能填入文字，且限255個字，此內容會在列表出現")]
+        public string info { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("內容")]
+        public string cont { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_admin_id")]
+        public string create_user { get; set; }
+
+        [DisplayName("change_branch_id")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+    }
+
+}

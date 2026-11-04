@@ -1,0 +1,87 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.order_bills2>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width5" />
+            <col class="width8" />
+            <col class="width8" />
+            <col />
+            <col class="width16" />
+            <col class="width8" />
+            <col class="width10" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">清帳月份 </th>
+                <th class="center">處理狀態 </th>
+                <th>取款人 </th>
+                <th class="center">清帳日期 </th>
+                <th class="center">清帳金額 </th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                string bills = "";
+                switch (item.bills_flag)
+                {
+                    case 1:
+                        bills = "-上";
+                        break;
+                    case 2:
+                        bills = "-下";
+                        break;
+                }
+                        
+                <tr class="unread">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.bills_id" /></td>
+                    <td class="center">@(item.yymm.ToString()+bills)</td>
+                    <td class="center">
+                        @switch (item.flag)
+                        {
+                            case 0: 
+                            <span class="label" style="background-color: #d9534f;">未清帳</span>
+                                break;
+                            case 1: 
+                            <span class="label" style="background-color: #337ab7;">清帳中</span>
+                                break;
+                            case 2:                                  
+                            <span class="label label-success">清帳完成</span>
+                                break;
+                        }
+
+                    </td>
+                    <td>@(item.create_user)</td>
+                    <td class="center" >@(((DateTime)item.create_datetime).ToString("yyyy/MM/dd"))</td>
+                    <td class="center" >@(item.total.ToString("N0"))</td>
+                    <td>
+                        @Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax",""), new { id = item.bills_id }) |
+                        @Html.ActionLink("匯出請款", "BillsExport", new { id = item.bills_id })
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    <div>@ViewBag.total</div>
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber())
+    </div>
+</div>
+<!--pagination-->

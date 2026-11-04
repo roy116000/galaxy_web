@@ -1,0 +1,118 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwBillsController._Bill>
+@Html.Partial("template_list_fix")
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var aData = NW.admin(User.Identity.Name);
+        
+    bool yn = Gs.Today.Day < 6;
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width8" />
+            <col class="width20" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width12" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">#</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.date)</th>
+                <th class="center">廠商</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.bill_num)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.bill_money)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.no_num)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.no_money)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.yes_num)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().bill.yes_money)</th>
+
+
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                            
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+
+                    <td class="center">@(Array.IndexOf(Model.ToArray(), item) + 1 + Model.PageSize * (Model.PageNumber - 1))</td>
+
+                    <td class="center">@(item.bill.date.Value.ToString("yyyy / MM月"))</td>
+                    <td class="left">@Html.DisplayFor(m => item.c_name)</td>
+
+                    <td class="center">@Html.DisplayFor(m => item.bill.bill_num)</td>
+                    <td class="right">@(item.bill.bill_money.ToString("N0"))</td>
+
+                    <td class="center" style="@(item.bill.no_num != 0 ? "color:red" : "") ">@Html.DisplayFor(m => item.bill.no_num)</td>
+                    <td class="right" style="@(item.bill.no_money != 0 ? "color:red" : "") ">@(item.bill.no_money.ToString("N0"))</td>
+
+                    <td class="center">@Html.DisplayFor(m => item.bill.yes_num)</td>
+                    <td class="right">@(item.bill.yes_money.ToString("N0"))</td>
+
+
+                    <td class="center">
+
+                        @if (yn && action != "FinishList" || aData.power_id == 2)
+                        {
+                            @Html.ActionLink("請款", "Edit", new { id = item.bill.bill_id }, new { @class = "title" })
+                            <span>||</span>
+                        }
+
+                        @Html.ActionLink("檢視", "Add", new { id = item.bill.bill_id }, new { @class = "title" })
+
+                        <span>||</span>
+
+                        @Html.ActionLink("匯出", "BillsExport", new { id = item.bill.bill_id }, new { @class = "title" })
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+        .MaxNrOfPages(15)
+        .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+        .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+
+            )
+
+        @*        <form method="post" action="@(Url.Action("List", "NwHealth"))">
+            <input id="kw" name="kw" value="@(ViewBag.kw)" />
+            <input id="gid" name="gid" value="@(ViewBag.gid)" />
+            <input id="page" name="page" placeholder="可輸入頁數" value="" />
+            <button  id ="Summ">跳轉</button>
+        </form>*@
+
+
+    </div>
+
+</div>
+
+<script>
+
+    @*    var page = $('#page').val();
+    var kw = $('#kw').val();
+    var gid = $('#gid').val();
+
+    $('#Summ').click(function () {
+        $.post('@(Url.Action("List", "NwHealth"))', { page: page }, function (result) {
+
+        })
+    })*@
+
+</script>

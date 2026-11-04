@@ -1,0 +1,206 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class adv_group
+    {
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [DisplayName("寬度")]
+        public int size_width { get; set; }
+
+        [DisplayName("高度")]
+        public int size_height { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        public int count { get; set; }
+
+        //public virtual ICollection<adv_data> adv_data { get; set; }
+
+    }
+
+    public class adv_data
+    {
+
+        [Key]
+        public int adv_id { get; set; }
+
+        [UIHint("Select_Tags")]
+        [DisplayName("藥局")]
+        public string drugstore_id { get; set; }
+
+        [NotMapped]
+        public string drugstore_id_s { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("主題分類")]
+        public int g_id { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("種類")]
+        public int flag { get; set; }
+
+        [DisplayName("連結")]
+        public string url { get; set; }
+
+        //[UIHint("Info")]
+        //[DisplayName("連結網址")]
+        //public string url { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("簡介")]
+        public string info { get; set; }
+
+        [UIHint("Img")]
+        [DisplayName("圖片管理")]
+        public string s_img { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("點閱率")]
+        public int hits { get; set; }
+
+        [DisplayName("曝光數")]
+        public int impressions { get; set; }
+
+        [DisplayName("透明圖層網址")]
+        public string youtubelink { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("另開")]
+        public Boolean target { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        public string g_name { get; set; }
+
+        //public virtual adv_group adv_group { get; set; }
+
+        //public virtual ICollection<adv_filter> adv_filter { get; set; }
+
+    }
+
+    public class adv_filter
+    {
+
+        [Key]
+        public int filter_id { get; set; }
+
+        public int adv_id { get; set; }
+
+        [DisplayName("藥局")]
+        public string drugstore_id { get; set; }
+
+        [NotMapped]
+        [DisplayName("藥局")]
+        public string drugstore_id_s { get; set; }
+
+        //[NotMapped]
+        //[UIHint("CheckBoxList")]
+        //[DisplayName("藥局")]
+        //public string[] drugstore_id_x { get; set; }
+
+        [DisplayName("過濾啟用")]
+        public Boolean filter_visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public virtual adv_data adv_data { get; set; }
+    }
+
+    public class index_data
+    {
+        [Key]
+        public int vid { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("連結網址")]
+        public string url { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("英文文字內容")]
+        public string text_eng { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("中文文字內容")]
+        public string text_cht { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+
+    }
+}

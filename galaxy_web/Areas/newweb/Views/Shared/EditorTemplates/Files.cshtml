@@ -1,0 +1,194 @@
+﻿@using System.Text.RegularExpressions;
+@model string
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("type", "hidden");
+
+    string id = ViewData.TemplateInfo.HtmlFieldPrefix;
+
+    Dictionary<string, string> Files = (Dictionary<string, string>)ViewData[id];
+
+    
+}
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+
+    <div class="controls">
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="input-append">
+                <div class="uneditable-input span3">
+                    <i class="icon-file fileupload-exists"></i>
+                    <span class="fileupload-preview"></span>
+                </div>
+                <span class="btn btn-file">
+                    <span class="fileupload-new">Select file</span>
+                    <span class="fileupload-exists">Change</span>
+
+                    <input type="file" name="@(id)" multiple="multiple"/>
+
+                </span>
+                <a id="@(id)_c" href="#" class="btn fileupload-exists @(id)_c" data-dismiss="fileupload">Remove</a>
+            </div>
+            <h2 class="help-inline" style="vertical-align: middle">(可多選)</h2>
+        </div>
+
+    </div>
+
+
+</div>
+
+<div class="control-group">
+
+    <label class="control-label">本次</label>
+
+    <div style="padding: 5px 5px;" class="field preview">
+        &nbsp;&nbsp;
+    </div>
+
+</div>
+
+
+<div class="control-group">
+
+    <label class="control-label">先前</label>
+
+    <div style="padding: 5px 5px;" class="field">
+
+        @if (Files.Count() > 0)
+        {
+            foreach (var item in Files)
+            {         
+            <a target="_blank" href="@(item.Key)">@(item.Value)</a><br />   
+@*<img class="@(id)_Del" src="@(item)">*@
+            }
+        }
+        else
+        {
+            <span>&nbsp; &nbsp;</span> 
+        }
+
+    </div>
+
+</div>
+
+
+@*預覽圖*@
+<script>
+
+    //預覽圖暫存
+    var show_imgs = "";
+
+    $('input[name="@(id)"]').change(function () {
+
+        //先清空
+        show_imgs = "";
+
+        //製作預覽圖
+        local_show(this);
+    })
+
+    // 批次圖片，先清空後再插入
+    var local_show = function (input) {
+
+        if (input.files && input.files[0]) {
+
+            local_each_img(input.files);
+        }
+    }
+
+    // 批次讀取，最後再一次寫入
+    var local_each_img = function (files) {
+
+        var file_new = "";
+
+        //$(this).val();
+        var size = 0;
+
+        $.each(files, function (index, file) {
+
+            size += file.size;
+
+            if (size > 1024 * 1024 * 5) {
+
+                swal("本次上傳大小已超過5M");
+
+                $('#@(id)_c').click();
+
+            } else {
+
+                var src = URL.createObjectURL(file);
+                local_create_imgcode(src); //建立圖片
+            }
+
+            //console.log(file); //檔案資訊可以在這裡看到
+        });
+
+    }
+
+    // 建立圖片
+    var local_create_imgcode = function (src) {
+
+        show_imgs += '<img class="img" src="' + src + '">';
+        $('.preview').html(show_imgs);
+    }
+
+</script>
+
+@*刪除本次選擇*@
+<script>
+
+    $('#@(id)_c').click(function () {
+
+        $('input[name="@(id)"]').val('');
+
+        $('.preview').empty();
+        $('.preview').append('&nbsp;');
+
+    })
+
+</script>
+
+@*刪除圖檔*@
+<script>
+    $('.@(id)_Del').click(function () {
+
+        var num = $('.@(id)_Del').index(this);
+
+        var src = $('.@(id)_Del').eq(num).attr('src');
+
+        if (src != "") {
+            swal({
+                title: '請問您確認刪除嗎?',
+                text: "",
+                //type: "success",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "是的，確定",
+                cancelButtonText: "再考慮看看",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+            }, function () {
+
+                $.post('@(Url.Action("ImgDel", "NwHome"))', { src: src }, function (result) {
+                    var msg = result.msg;
+
+                    if (msg != "") {
+
+                        $('.@(id)_Del').eq(num).remove();
+
+                        swal(msg);
+
+                    }
+                })
+
+            })
+        }
+
+
+
+    });
+</script>

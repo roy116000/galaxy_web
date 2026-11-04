@@ -1,0 +1,116 @@
+﻿@{    
+    Layout = null;
+        //Guid guid = Guid.NewGuid();
+         
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(NW.ssTitle)</title>
+
+    <link href="~/Areas/newweb/Content/css/style.default.css" rel="stylesheet" />
+    <script src="~/Areas/newweb/Content/js/jquery-1.9.1.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/jquery-migrate-1.1.1.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/jquery.validate.min.js"></script>
+
+</head>
+
+<body class="loginbody">
+
+    <div class="loginwrapper">
+        <div class="loginwrap zindex100 animate2 bounceInDown">
+            <h1 class="logintitle"><span class="iconfa-lock"></span>@(NW.ssTitle)<span class="subtitle" style="@(!string.IsNullOrEmpty(ViewBag.msg) ? "color:red" : "") ">
+                @(!string.IsNullOrEmpty(ViewBag.msg) ? ViewBag.msg : "請輸入帳密")</span></h1>
+            <div class="loginwrapperinner">
+                <form id="loginform" action="@(Url.Action("Login", "NwHome"))" method="post" novalidate="novalidate">
+
+                    @Html.AntiForgeryToken()
+
+                    <p class="animate4 bounceIn">
+                        <input type="text" id="username" name="uid" placeholder="請輸入帳號" autocomplete="off" autofocus="autofocus" />
+                    </p>
+                    <p class="animate5 bounceIn">
+                        <input type="password" id="password" name="pwd" placeholder="請輸入密碼" />
+                    </p>
+                    <p class="control-group" @*class="animate6 bounceIn"*@>
+                        <div style="position: relative;">
+                            <input type="text" placeholder="請輸入驗證碼" maxlength="5" name="code" id="code" autocomplete="off">
+                            <div style="position: absolute; top: 10px; right: 10px;">
+                                <img id="code_img" style="width:100%" src="@(Url.Action("code", "NwHome"))">
+                                @*<img src="@(Url.Action("code", "NwHome"))" width="71" height="24">*@
+                            </div>
+                        </div>
+                    </p>
+                    <p class="animate6 bounceIn">
+                        <button class="btn btn-default btn-block">登入</button>
+                        @*<button class="btn btn-default btn-block" onclick="self.location.href='@(Url.Action("MedicineLogin","NwHome"))'">藥師WEB後台-QRCode-登入</button>*@
+                    </p>
+                    @*<p class="animate7 fadeIn"><a href=""><span class="icon-question-sign icon-white"></span>Forgot Password?</a></p>*@
+                </form>
+            </div>
+            <!--loginwrapperinner-->
+        </div>
+        <div class="loginshadow animate3 fadeInUp"></div>
+    </div>
+    <!--loginwrapper-->
+
+    <script>
+        $('#code_img').click(function () {
+
+            @* var url = '@(Url.Action("Code", "NwHome"))';
+
+            $.get(url, null, function () { }, 'text');*@
+
+
+            @*$.post('@(Url.Action("code", "NwHome"))', null, function (result) {
+                alert(123);
+                var d = new Date()
+                var t = (d.getMinutes().toString() + d.getSeconds().toString() + d.getMilliseconds().toString());
+                $('#code_img').attr("src", "/code?t=" + t);
+
+            })*@
+
+        });
+    </script>
+
+    <script type="text/javascript">
+        jQuery.noConflict();
+
+        jQuery(document).ready(function () {
+
+            var anievent = (jQuery.browser.webkit) ? 'webkitAnimationEnd' : 'animationend';
+            jQuery('.loginwrap').bind(anievent, function () {
+                jQuery(this).removeClass('animate2 bounceInDown');
+            });
+
+            jQuery('#username,#password').focus(function () {
+                if (jQuery(this).hasClass('error')) jQuery(this).removeClass('error');
+            });
+
+            jQuery('#loginform button').click(function () {
+                if (!jQuery.browser.msie) {
+                    if (jQuery('#username').val() == '' || jQuery('#password').val() == '') {
+                        if (jQuery('#username').val() == '') jQuery('#username').addClass('error'); else jQuery('#username').removeClass('error');
+                        if (jQuery('#password').val() == '') jQuery('#password').addClass('error'); else jQuery('#password').removeClass('error');
+                        jQuery('.loginwrap').addClass('animate0 wobble').bind(anievent, function () {
+                            jQuery(this).removeClass('animate0 wobble');
+                        });
+                    } else {
+                        jQuery('.loginwrapper').addClass('animate0 fadeOutUp').bind(anievent, function () {
+                            jQuery('#loginform').submit();
+                        });
+                    }
+                    return false;
+                }
+            });
+        });
+
+    </script>
+
+</body>
+</html>
+
+

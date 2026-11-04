@@ -1,0 +1,88 @@
+﻿@model h365_web.Models.zz_data
+@{
+    //string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    }
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action+"Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1"}))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.zz_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                @Html.EditorFor(model => model.text)
+
+                @Html.EditorFor(model => model.text_max)
+
+                @Html.EditorFor(model => model.text_required)
+
+                @Html.EditorFor(model => model.text_date)
+
+                @Html.EditorFor(model => model.text_end_date)
+
+                @Html.EditorFor(model => model.text_mail)
+
+                @Html.EditorFor(model => model.text_num)
+
+                @Html.EditorFor(model => model.text_phone)
+
+                @Html.EditorFor(model => model.text_area)
+
+                @Html.EditorFor(model => model.text_area_charCount)
+
+                @Html.EditorFor(model => model.text_tags)
+
+                @Html.EditorFor(model => model.checkbox)
+
+                @Html.EditorFor(model => model.checkbox2)
+
+                @Html.EditorFor(model => model.radio)
+
+                @Html.EditorFor(model => model.text_html)
+
+                @Html.EditorFor(model => model.select_chosen)
+
+                @Html.EditorFor(model => model.select_chosen2)
+
+                @Html.EditorFor(model => model.select1)
+
+                @Html.EditorFor(model => model.select2)
+
+                @Html.EditorFor(model => model.select3)
+
+                @Html.EditorFor(model => model.uploadimage2)
+
+                <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    <button type="reset" class="btn">取消</button>
+                </div>
+               </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                text: "required",
+                text_required: "required"
+            },
+            messages: {
+                text: "[一般文字]必填!!",
+                text_required: "[限制必填]必填"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

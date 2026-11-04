@@ -1,0 +1,51 @@
+﻿@using MvcPaging;
+@*@model IPagedList<h365_web.Models.pharmacist_activity>*@
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            @Html.Partial("template_select")
+
+            <form action="@(Url.Action(action, controller))" method="post">
+
+                <div>
+
+                    @*<span style="text-align: left">分類選單： @Html.SelectList("gid", gData, htmlAttributes)</span>*@
+                    <span style="float: right">
+                        起始日：
+                        <input type="datetime" id="sD" name="sD" class="span3" value="@(ViewBag.sD)" />
+                        ～
+                        結束日：
+                        <input type="datetime" id="eD" name="eD" class="span3" value="@(ViewBag.eD)" />
+                        <script>
+                            $(function () {
+                                jQuery("#sD").datepicker();
+                                jQuery("#eD").datepicker();
+                            })
+                        </script>
+                        <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax")
+
+    </div>
+    <!--contentinner-->
+</div>

@@ -1,0 +1,112 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.sys_admin_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            @*<col class="width4" />*@
+            <col class="width10" />
+            <col class="width8" />
+            <col class="width12" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            @*<col />*@
+            @*<col class="width8" />*@
+            <col class="width4" />
+            <col class="width10" />
+        </colgroup>
+        <thead>
+            <tr>
+                @*<th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>*@
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().name))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().erp_sn))</th>
+                <th class="center">統編/身分證/會員編號</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().tel))</th>
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().tel2))</th>*@
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().fax))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().contact))</th>
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().mail))</th>*@
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().boss))</th>
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().contact_tel))</th>*@
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().address))</th>*@
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().address2))</th>*@
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if (Model != null)
+            {
+
+                foreach (var item in Model)
+                {
+                    
+                <tr class="@(NW.echoBool(item.visible, "unread", "visible"))">
+                    @*<td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.admin_id)" /></td>*@
+                    <td class="left">@(item.name)</td>
+                    <td class="left">@(item.erp_sn)</td>
+                    <td class="left">@(item.sn)</td>
+                    <td class="left" title="@(item.tel2)">@(item.tel)</td>
+                    @*<td class="left">@(item.tel2)</td>*@
+                    <td class="left">@(item.fax)</td>
+                    @*<td class="left">@(item.mail)</td>*@
+                    <td class="left" title="電話 - @(item.contact_tel)">@(item.contact)</td>
+                    <td class="left" title="電話 - @(item.boss_tel)">@(item.boss)</td>
+                    @*<td class="left">@(item.contact_tel)</td>*@
+                    @*<td class="left" title="@(item.address2)">@(item.address)</td>*@
+                    @*<td class="left">@(item.address2)</td>*@
+                    <td class="center">@(Html.DisplayFor(m => m.FirstOrDefault().visible))</td>
+                    <td class="center">
+
+                        @*<span style="position: relative;">
+                            <a data-toggle="dropdown">選擇設定</a>
+                            <ul class="dropdown-menu" style="min-width: 100%">
+                                <li>@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.admin_id })</li>
+                                <li><a href="@(Url.Action("List", "NwProduct", new { cid = item.admin_id }))">商品專區</a></li>
+                                <li><a href="@(Url.Action("SubList", "NwProduct", new { id = item.admin_id }))">分類專區</a></li>
+                            </ul>
+                        </span>*@
+                        
+                            <ul style="position: relative;">
+                                <li>
+                                    <a data-toggle="dropdown">選擇設定</a>
+                                    <ul class="dropdown-menu" style="min-width: 100%">
+                                        <li>@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.admin_id })</li>
+                                        <li><a href="@(Url.Action("List", "NwProduct", new { cid = item.admin_id }))">商品專區</a></li>
+                                        <li><a href="@(Url.Action("SubList", "NwProduct", new { id = item.admin_id }))">分類專區</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                       
+                    </td>
+                </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(15)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("sD", ViewBag.sD)
+            .AddRouteValue("eD", ViewBag.eD)
+            .AddRouteValue("sort", ViewBag.sort)
+            .AddRouteValue("visible", ViewBag.visible)
+            )
+
+    </div>
+
+</div>

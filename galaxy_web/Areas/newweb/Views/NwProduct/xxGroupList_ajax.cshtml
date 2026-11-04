@@ -1,0 +1,78 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.product_group>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    string s = "";
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+
+            <col class="width10" />
+            <col class="width18" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().name))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().name_en))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().inx))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().count))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                              
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.group_id)" /></td>
+                    <td>@Html.DisplayFor(m => item.name)</td>
+                    <td>@Html.DisplayFor(m => item.name_en)</td>
+                    <td class="center">@Html.DisplayFor(m => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible)</td>
+                    <td class="center">@Html.DisplayFor(m => item.count)</td>
+                    <td class="center">
+
+                        @Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.group_id }, new { @class = "title", target = "_blank" })
+                        ||
+
+                        @if (action == "GroupSubList")
+                        {
+                            <a href="@(Url.Action("List", "NwProduct", new { gid = item.group_id }))">商品專區</a>
+                        }else
+                        {
+                            <a href="@(Url.Action("GroupSubList", "NwProduct", new { id = item.group_id }))">分類專區</a>
+                        }
+                        
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+                //.AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+                //.AlwaysAddFirstPageNumber().AddRouteValue("flag", ViewBag.flag)
+            )
+
+    </div>
+
+</div>

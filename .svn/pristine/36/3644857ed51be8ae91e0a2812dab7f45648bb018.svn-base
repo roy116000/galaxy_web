@@ -1,0 +1,963 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+using NPOI.SS.UserModel;
+using ClosedXML.Excel;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwInvoiceController : _BaseController
+    {
+        //
+        // GET: /newweb/NwNews/
+
+        private static double gRound(double value, int digit = 0)
+        {
+            return Math.Round(value, digit, MidpointRounding.AwayFromZero);
+        }
+
+        //無條件捨去
+        private static double gFloor(double value)
+        {
+            return Math.Floor(value);
+        }
+
+        public class Invoice 
+        {
+            public int order_id { get; set; }
+            public string web_name { get; set; }
+            public string item_name { get; set; }
+            public DateTime? finish_datetime { get; set; }
+            public string order_name { get; set; }
+            public string send_name { get; set; }
+            public int total { get; set; }
+            public double bouns { get; set; }
+
+        }
+
+        #region"發票詳細明細(當月日期, 藥局ID)-公式"
+
+        public static List<order_data> Invoice_order(DateTime nD, int drug_id)
+        {
+            _dbContext db = new _dbContext();
+
+            DateTime sD = nD.AddMonths(-1); //上個月
+
+            var Maori = db.partner_maori.FirstOrDefault(); //分潤表
+            double Maori_Drug = (double)Maori.drugstore_num / 100; //藥局分潤
+
+
+            var data = new List<order_data> { }; //儲存訂單
+           
+            var Drug = db.drugstore_data.Where(m => m.drugstore_id == drug_id).FirstOrDefault(); //藥局資料
+
+
+            var M = (from a in db.partner_money.Where(m => m.id == Drug.admin_id && (m.money_date >= sD && m.money_date < nD) && m.order_id != 0)
+                     join b in db.order_data on a.order_id equals b.order_id into mm
+                     join c in db.order_sub on a.order_id equals c.order_id into mm2
+                     join d in db.product_data on mm2.FirstOrDefault().product_id equals d.product_id into mm3
+                     join e in db.solt_data on a.order_id equals e.order_id into mm4
+                     select new Invoice()
+                     {
+                         order_id = a.order_id,
+                         bouns = a.money,
+                         order_name = mm.FirstOrDefault().order_name,
+                         send_name = mm.FirstOrDefault().send_name,
+                         finish_datetime = mm.FirstOrDefault().finish_datetime,
+                         item_name = mm3.FirstOrDefault().item_name,
+                         web_name = mm3.FirstOrDefault().web_name,
+                         total = mm.Where(m => m.order_name.IndexOf("XX") == -1).FirstOrDefault() != null ? mm.Where(m => m.order_name.IndexOf("XX") == -1).FirstOrDefault().total - mm.Where(m => m.order_name.IndexOf("XX") == -1).FirstOrDefault().bonus - (mm4.FirstOrDefault() != null ? mm4.FirstOrDefault().prize : 0) : 0
+                     }).ToList().Select(m => new order_data()
+                     {
+                         order_id = m.order_id,
+                         cost_total = m.bouns,
+                         order_name = m.order_name,
+                         send_name = m.send_name,
+                         finish_datetime = m.finish_datetime,
+                         pro_web_name = m.web_name,
+                         pro_item_name = m.item_name,
+                         total = m.total
+                     }).ToList();
+                                    
+                   
+
+            int id = 0;
+            M.ForEach(m => { 
+
+                if (m.order_id == id) 
+                {
+                    m.total = 0;
+                };
+
+                id = m.order_id; 
+            });
+
+            data.AddRange(M);
+                                  
+
+            return data;
+        }
+
+        #endregion
+
+        #region"計算當月發票"
+
+        public ActionResult Output(DateTime? yymm)
+        {
+            string msg = "";
+            if (yymm == null) { msg = "請填寫匯出日期"; TempData["jgrowl"] = msg; return RedirectToAction("List", "NwInvoice"); } //沒填日期時
+            string cler_date_YYMM = yymm.Value.ToString("yyyy/MM" + "月"); //結算月份
+            string yyyy = yymm.Value.ToString("yyyy"); //年
+            int MM = Convert.ToInt32(yymm.Value.ToString("MM")); //月份
+
+            DateTime eD = new DateTime(yymm.Value.AddMinutes(-1).Year, yymm.Value.AddMinutes(-1).Month, 21);//當月 (3月是產2月的發票)
+            //DateTime eD = (DateTime)yymm.Value.AddDays(-10); //當月 (3月是產2月的發票)
+            DateTime sD = eD.AddMonths(-1); //上個月
+
+            //當月---(商品出貨日+10天、啟用、付錢、沒退貨問題)
+            var Drug_s = this._DB.order_data.Where(m => m.back_flag == 0 && m.flag >=2 && m.visible && (m.goods_datetime >= sD && m.goods_datetime < eD)).OrderBy(m => m.order_id).ToList();
+            foreach (var item in Drug_s) 
+            {
+                if (item.send_drug_id != 0) //有寄送藥局的
+                {
+                    item.drugstore_id = item.send_drug_id;
+                }
+            }
+
+            var Drug = Drug_s.Select(m => m.drugstore_id).Distinct().ToArray(); //有產出的藥局
+            if (Drug.Count() == 0) { msg = "此月份無任何銷售，故無發票產出"; TempData["jgrowl"] = msg; return RedirectToAction("List", "NwInvoice"); } //沒有的話
+            
+            foreach (var item in Drug)
+            {
+
+                //撈發票詳細明細(當月、藥局ID)
+                var in_data = Invoice_order((DateTime)yymm, item);
+
+                //銷售金額
+                int price_total = in_data.Select(m2 => m2.total).DefaultIfEmpty(0).Sum();
+                //銷售分潤
+                int aa = (int)in_data.Select(m2 => m2.cost_total).DefaultIfEmpty(0).Sum();
+                int price_cost = (int)gFloor(in_data.Select(m2 => m2.cost_total).DefaultIfEmpty(0).Sum());
+                //需匯款金額
+                int price_pay = price_total - price_cost;
+                //if (price_pay != 0)
+                //{
+                    var Drug_data = this._DB.drugstore_data.Where(m => m.drugstore_id == item).FirstOrDefault();
+                    var Invo_yes = this._DB.order_invoice2.Where(m => m.drug_uid == Drug_data.uid && m.clearing_date == cler_date_YYMM).FirstOrDefault();                     
+                    if (Invo_yes != null)
+                    {
+                        //如果有寄送日期，就不能更改
+                        if (Invo_yes.invoice_datetime == null)
+                        {
+                            //結算日期
+                            Invo_yes.order_datetime = yymm;
+                            //銷售金額
+                            Invo_yes.price_total = price_total;
+                            //銷售分潤
+                            Invo_yes.price_cost = price_cost;
+                            //匯款金額
+                            Invo_yes.price_pay = price_pay;
+
+                            Invo_yes.change_user = User.Identity.Name;
+                            Invo_yes.change_datetime = DateTime.Now;
+                        }
+
+                    }
+                    else
+                    {
+                        order_invoice2 data2 = new order_invoice2();
+
+                        //藥局帳號
+                        data2.drug_uid = Drug_data.uid;
+                        //藥局名字
+                        data2.name = Drug_data.name;
+                        //結算月份
+                        data2.clearing_date = cler_date_YYMM;
+                        //結算日期
+                        data2.order_datetime = yymm;
+                        //銷售金額
+                        data2.price_total = price_total;
+                        //銷售分潤
+                        data2.price_cost = price_cost;
+                        //匯款金額
+                        data2.price_pay = price_pay;
+
+                        data2.create_user = User.Identity.Name;
+                        data2.create_datetime = DateTime.Now;
+                        _DB.order_invoice2.Add(data2);
+                    //}                                                        
+                }
+                    this._DB.SaveChanges();
+            }
+                msg = cler_date_YYMM + "-發票產出成功";
+          
+            TempData["jgrowl"] = msg;
+            return RedirectToAction("List", "NwInvoice", new { kw_time = yymm });
+
+        }
+
+         #endregion
+
+        #region "開藥局發票列表"
+
+        public IPagedList Public_Invo(int currentPageIndex, IQueryable<order_invoice2> Linq, string kw, DateTime? kw_time)
+        {
+
+            #region"搜尋"
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.name.Contains(kw));
+                ViewBag.kw = kw;
+            }
+            if (kw_time.HasValue)
+            {
+                string time = kw_time.Value.ToString("yyyy/MM月");
+
+                Linq = Linq.Where(m => m.clearing_date == time);
+
+                ViewBag.yymm = kw_time.Value.ToString("yyyy.MM");
+            }
+
+
+            #endregion
+
+            IPagedList data = Linq.OrderByDescending(m => m.price_cost).ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            //if (data.TotalItemCount == 0) { TempData["jgrowl"] = "無發票"; };
+
+            #region"傳至前台"
+
+            var Time = this._DB.order_invoice_time.ToList(); //發票設定日期
+            ViewData["Time"] = Time;
+
+            #endregion
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return data;
+        }
+
+        public ActionResult List(int? page, string kw, DateTime? kw_time)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_invoice2.Where(m => m.flag < 2); //撈出未完成的發票
+
+            IPagedList data = Public_Invo(currentPageIndex, Linq, kw, kw_time);
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var data = this._DB.order_invoice2.Find(id);
+            var Drug = this._DB.drugstore_data.Where(m => m.uid == data.drug_uid).FirstOrDefault();
+
+            //var indata = this._DB.order_invoice2.Find(data.invoice_id);
+            ViewData["invoice_data"] = data;
+
+            DateTime date = Convert.ToDateTime(data.clearing_date); //發票結算月份
+            //DateTime sD = new DateTime(date.AddMonths(-1).Year, date.AddMonths(-1).Month, 1); 
+            DateTime nD = new DateTime(date.Year, date.Month, 1); //當月
+            //ViewBag.Datetime = sD.ToString("yyyy/MM/dd") + " ～ " + eD.ToString("yyyy/MM/dd");
+          
+            //撈發票詳細明細
+            var in_data = Invoice_order(nD, Drug.drugstore_id);
+            ViewData["in_data"] = in_data;
+
+            #region"下拉選單"
+            List<ListItem> ListItems = new List<ListItem>();
+
+            //發票種類     藥局資料沒有值就預設三聯,有值就設預設   有修改就依修改顯示  (以內容搜尋求"0","1")
+            string type = data.invoice_type == null ? Array.IndexOf(NW.Invoice_type, Drug.invoice_type == null ? "三聯" : Drug.invoice_type).ToString() : Array.IndexOf(NW.Invoice_type, data.invoice_type).ToString();
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            ListItems.AddRange(NW.sList(NW.Invoice_type, type));
+            ViewData["invoice_type"] = ListItems;
+            #endregion
+
+
+            if (data.invoice_datetime == null)
+            {
+                //稅籍單位
+                data.taxes = Drug.taxes;
+                //統一編號
+                data.uniform_numbers = Drug.uniform_numbers;
+                //發票抬頭
+                data.invoice_title = Drug.invoice_title;
+                //寄送地址
+                data.invoice_address = Drug.invoice_address;
+            }
+                     
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult EditSave(order_invoice2 order_invoice2)
+        {
+            var data = this._DB.order_invoice2.Find(order_invoice2.invoice_id);
+
+            var mdata = this._DB.member_data.Find(data.invoice_id);
+
+            int type = Convert.ToInt32(order_invoice2.invoice_type);
+            
+            data.invoice_type = NW.Invoice_type[type];
+
+            data.taxes = order_invoice2.taxes;
+            data.invoice_title = order_invoice2.invoice_title;
+            data.uniform_numbers = order_invoice2.uniform_numbers;
+            data.invoice_address = order_invoice2.invoice_address;
+            data.invoice_no = order_invoice2.invoice_no;
+            data.invoice_datetime = order_invoice2.invoice_datetime;
+            data.pay_datetime = order_invoice2.pay_datetime;
+            data.return_datetime = order_invoice2.return_datetime;
+         
+            this._DB.SaveChanges();
+            
+            if (data.return_datetime != null) { data.flag = 2; this._DB.SaveChanges(); }
+            
+            TempData["jgrowl"] = "發票修改成功";
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return RedirectToAction("Edit", new { @id = order_invoice2.invoice_id });
+        }
+
+        [HttpPost]
+        public ActionResult InvoiceListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "選擇匯出", "全部匯出", "作廢" };
+            string msg = "匯出失敗，請洽系統工程師，謝謝!!";
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            if (cb_flag == 1) { cb_id = ""; }
+
+            string FileName = Export2(cb_id);
+
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                return File(FileName, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Today.ToString("yyyyMMdd") + "待開發票列表.xlsx"));
+            }
+            else
+            {
+                return Content(msg);
+            }
+
+            //TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        }
+
+        //匯出發票明細
+        [HttpPost]
+        public ActionResult Export(int id)
+        {
+            string value = "";
+            var data = this._DB.order_invoice2.Where(m => m.invoice_id == id).FirstOrDefault();
+            if (data != null)
+            {
+                var Drug = this._DB.drugstore_data.Where(m => m.uid == data.drug_uid).FirstOrDefault(); //藥局資訊
+                if(Drug != null)
+                {
+
+                    DateTime nD = new DateTime(data.order_datetime.Value.Year, data.order_datetime.Value.Month, 1); //當月
+
+                    //DateTime sD = new DateTime(eD.AddMonths(-1).Year, eD.AddMonths(-1).Month, 13); //上個月
+
+                string[] cols = "商品交貨日期,訂單編號,訂購方,收件方,商品名稱,銷貨金額,銷貨分潤".Split(',');
+
+                var data2 = Invoice_order(nD, Drug.drugstore_id);
+
+                XLWorkbook workbook = new XLWorkbook();
+                var sheet = workbook.Worksheets.Add("發票明細");
+                int colIdx = 1;
+                int rowIdx = 2;
+
+                //標頭
+                foreach (string colName in cols)
+                {
+                    sheet.Cell(1, colIdx++).Value = colName;
+                }
+
+                //純文字格式
+                string p = "'";
+
+                //內容
+                foreach (var item in data2)
+                {
+                    var data_sub = this._DB.order_sub.Where(m => m.order_id == item.order_id).FirstOrDefault();
+                    if(data_sub != null)
+                    {
+                        List<string> data_content = new List<string>();
+                        data_content.Add(item.finish_datetime != null ? item.finish_datetime.Value.ToString("yyyy/MM/dd") : "");
+                        data_content.Add(item.order_id.ToString());
+                        data_content.Add(item.order_name);
+                        data_content.Add(item.send_name);
+                        data_content.Add(data_sub.item_name);
+                        data_content.Add(item.total.ToString("N0"));
+                        data_content.Add(item.cost_total.ToString("N0"));
+                        data_content.Add(item.back_datetime != null ? item.back_datetime.Value.ToString("yyyy/MM/dd") : "");
+
+                        int num = 1;
+                        foreach (var item2 in data_content)
+                        {
+                            sheet.Cell(rowIdx, num).Value = item2;
+                            num++;
+                        }
+                        rowIdx++;
+                    }
+
+                }
+
+                int total = data2.DefaultIfEmpty().Sum(m => m.total);
+                double cost_total = gFloor(data2.DefaultIfEmpty().Sum(m => m.cost_total));
+                sheet.Cell(rowIdx + 1, 6).Value = "銷貨金額合計";
+                sheet.Cell(rowIdx + 2, 6).Value = total.ToString("N0");
+                sheet.Cell(rowIdx + 1, 7).Value = "銷貨分潤合計";
+                sheet.Cell(rowIdx + 2, 7).Value = cost_total.ToString("N0");
+                sheet.Cell(rowIdx + 1, 8).Value = "匯款金額";
+                sheet.Cell(rowIdx + 2, 8).Value = (total - cost_total).ToString("N0");
+
+                //自動伸縮欄寬
+                for (int i = 1; i <= cols.Length; i++)
+                {
+                    sheet.Column(i).AdjustToContents();
+                }
+
+                value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+                workbook.SaveAs(value);
+                workbook.Dispose();
+
+                }
+            }
+            return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx"));
+           
+        }
+
+        //匯入發票
+        [HttpPost]
+        public ActionResult InvoiceAddSave(HttpPostedFileBase file_name)
+        {
+
+            if (file_name != null && file_name.ContentLength > 0 && NW.getFileType(file_name, 3))
+            {
+
+                try
+                {
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name.InputStream);
+
+                    //XSSFWorkbook excel = new XSSFWorkbook(file_name.InputStream);
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+                    DateTime create_datetime = DateTime.Now;
+                    List<int> arrOrder_id = new List<int>(new[] { 0 });
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+                        if (sheet.GetRow(row).GetCell(0) != null) // 驗證是不是空白列
+                        {
+                            string oid = sheet.GetRow(row).GetCell(0).ToString();
+                            string invoice_no = sheet.GetRow(row).GetCell(1).ToString();
+
+                            int order_id = Convert.ToInt32(oid);
+                            var data = this._DB.order_data.Where(m => m.order_id == order_id).FirstOrDefault();
+
+                            if (!string.IsNullOrEmpty(invoice_no))
+                            {
+                                data.invoice_no = invoice_no;
+                                data.invoice_datetime = DateTime.Now;
+                                data.flag = 5;
+                                this._DB.SaveChanges();
+                            }
+
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+            return RedirectToAction("InvoiceList");
+        }
+
+        private string Export2(string id)
+        {
+            string value = "";
+            string[] cols = "".Split(',');
+            List<order_data> data;
+
+            //DateTime eD = DateTime.Today.AddDays(-10);
+            cols = "訂單單號,發票號碼,商品名稱,稅別,統一編號,公司名稱,發票格式,銷售額,稅額,總額".Split(',');
+
+            DateTime eD = DateTime.Today;
+
+            List<int> oid = new List<int> { };
+            var Linq1 = this._DB.order_data.Where(m => m.visible == true && m.flag == 2 && m.goods_datetime != null && m.back_flag == null);
+
+            int view_day = 10;
+            foreach (var item in Linq1)
+            {
+                TimeSpan Total = eD.Subtract((DateTime)item.goods_datetime); //日期相減
+
+                if (Total.Days > view_day)
+                {
+                    oid.Add(item.order_id);
+                }
+            }
+
+            Linq1 = Linq1.Where(m => oid.Contains(m.order_id));
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+            if (admin.power_id > 2) { Linq1 = Linq1.Where(m => m.company_id == admin.company_id); }
+
+            //測試用
+            //var Linq1 = this._DB.order_data.Where(m => m.order_id>0);
+            if (!string.IsNullOrEmpty(id))
+            {
+                //文字陣列轉數字陣列
+                int[] arrID = id.Split(',').Select((string s) => { int i; int.TryParse(s, out i); return i; }).ToArray();
+                Linq1 = Linq1.Where(m => arrID.Contains(m.order_id));
+            }
+            Linq1 = Linq1.OrderBy(m => m.order_id);
+            data = Linq1.ToList();
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("待開發票列表");
+            int colIdx = 1;
+            int rowIdx = 2;
+
+
+            foreach (string colName in cols)
+            {
+                if (colIdx == 8)
+                {
+                    sheet.Cell(1, colIdx).Style.Fill.BackgroundColor = XLColor.DodgerBlue;
+                }
+                else if (colIdx == 9)
+                {
+                    sheet.Cell(1, colIdx).Style.Fill.BackgroundColor = XLColor.PaleGreen;
+                }
+                else if (colIdx == 10)
+                {
+                    sheet.Cell(1, colIdx).Style.Fill.BackgroundColor = XLColor.CandyPink;
+                }
+                else
+                {
+                    sheet.Cell(1, colIdx).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                }
+
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            string p = "'";
+            double money = 0;
+            foreach (var item in data)
+            {
+                sheet.Cell(rowIdx, 1).Value = p + item.order_id.ToString(); //訂單單號
+                sheet.Cell(rowIdx, 2).Value = p;                           //發票號碼
+
+                //無統編，不需計算稅額
+                if (string.IsNullOrEmpty(item.inv_sn))
+                {
+
+                    sheet.Cell(rowIdx, 5).Value = p;
+                    sheet.Cell(rowIdx, 6).Value = p;
+                    sheet.Cell(rowIdx, 7).Value = p + "2聯";
+                    sheet.Cell(rowIdx, 8).Value = p + (item.total - item.freight).ToString("N0");
+                    sheet.Cell(rowIdx, 9).Value = p + "0";
+                    sheet.Cell(rowIdx, 10).Value = p + (item.total - item.freight).ToString("N0");
+
+                    foreach (var subitem in item.order_sub.OrderBy(m => m.sub_id))
+                    {
+                        if (!string.IsNullOrEmpty(subitem.style_name))
+                        {
+                            sheet.Cell(rowIdx, 3).Value = p + subitem.product_data.item_name + "-" + subitem.style_name;
+                        }
+                        else
+                        {
+                            sheet.Cell(rowIdx, 3).Value = p + subitem.product_data.item_name;
+                        }
+
+                        switch (subitem.product_data.tax_flag)
+                        {
+                            case 0:
+                                sheet.Cell(rowIdx, 4).Value = p + "應稅";           //稅別
+                                break;
+                            case 1:
+                                sheet.Cell(rowIdx, 4).Value = p + "免稅";           //稅別
+                                break;
+                        }
+
+                        if (subitem.product_id == 101 || subitem.product_id == 102)
+                        {
+
+                            sheet.Cell(rowIdx, 8).Value = p + item.bonus.ToString("N0");
+                            sheet.Cell(rowIdx, 9).Value = p + "0";
+                            sheet.Cell(rowIdx, 10).Value = p + item.bonus.ToString("N0");
+                        }
+
+                        rowIdx++;
+                    }
+
+                    if (item.freight != 0)
+                    {
+
+                        sheet.Cell(rowIdx, 3).Value = p + "運費";
+                        sheet.Cell(rowIdx, 4).Value = p + "應稅";
+                        sheet.Cell(rowIdx, 8).Value = p + item.freight.ToString("N0");
+                        sheet.Cell(rowIdx, 9).Value = p + "0";
+                        sheet.Cell(rowIdx, 10).Value = p + item.freight.ToString("N0");
+                        rowIdx++;
+                    }
+
+                }
+                else
+                {
+                    money = item.total - item.freight;
+                    money = Math.Round(money / 1.05, MidpointRounding.AwayFromZero);
+
+                    sheet.Cell(rowIdx, 5).Value = p + item.inv_sn;
+                    sheet.Cell(rowIdx, 6).Value = p + item.inv_title;
+                    sheet.Cell(rowIdx, 7).Value = p + "3聯";
+                    sheet.Cell(rowIdx, 8).Value = p + money.ToString("N0");
+                    sheet.Cell(rowIdx, 9).Value = p + (item.total - item.freight - money).ToString("N0");
+                    sheet.Cell(rowIdx, 10).Value = p + (item.total - item.freight).ToString("N0");
+
+
+                    foreach (var subitem2 in item.order_sub.OrderBy(m => m.sub_id))
+                    {
+                        if (!string.IsNullOrEmpty(subitem2.style_name))
+                        {
+                            sheet.Cell(rowIdx, 3).Value = p + subitem2.product_data.item_name + "-" + subitem2.style_name;
+                        }
+                        else
+                        {
+                            sheet.Cell(rowIdx, 3).Value = p + subitem2.product_data.item_name;
+                        }
+
+                        switch (subitem2.product_data.tax_flag)
+                        {
+                            case 0:
+                                sheet.Cell(rowIdx, 4).Value = p + "應稅";           //稅別
+                                break;
+                            case 1:
+                                sheet.Cell(rowIdx, 4).Value = p + "免稅";           //稅別
+                                break;
+                        }
+
+                        if (subitem2.product_id == 101 || subitem2.product_id == 102)
+                        {
+                            money = Math.Round(item.bonus / 1.05, MidpointRounding.AwayFromZero);
+
+                            sheet.Cell(rowIdx, 8).Value = p + money.ToString("N0");
+                            sheet.Cell(rowIdx, 9).Value = p + (item.bonus - money).ToString("N0");
+                            sheet.Cell(rowIdx, 10).Value = p + item.bonus.ToString("N0");
+                        }
+
+                        rowIdx++;
+                    }
+
+                    if (item.freight != 0)
+                    {
+
+                        money = Math.Round(item.freight / 1.05, MidpointRounding.AwayFromZero);
+
+                        sheet.Cell(rowIdx, 3).Value = p + "運費";
+                        sheet.Cell(rowIdx, 4).Value = p + "應稅";
+                        sheet.Cell(rowIdx, 8).Value = p + money.ToString("N0");
+                        sheet.Cell(rowIdx, 9).Value = p + (item.freight - money).ToString("N0");
+                        sheet.Cell(rowIdx, 10).Value = p + item.freight.ToString("N0");
+
+                        rowIdx++;
+                    }
+
+                }
+
+            }
+
+            sheet.Cell(rowIdx, 9).Style.Fill.BackgroundColor = XLColor.CoralPink;
+            sheet.Cell(rowIdx, 10).Style.Fill.BackgroundColor = XLColor.CoralPink;
+            sheet.Cell(rowIdx, 9).Value = p + "總額";
+            sheet.Cell(rowIdx, 10).Value = p + data.Sum(m => m.total - m.bonus).ToString("N0");
+
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+            }
+
+
+            value = Server.MapPath("~/Content/files/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+            return value;
+        }
+
+        #endregion
+
+        #region "開藥局發票列表 - 完成"
+
+        public ActionResult FinishList(int? page, string kw, DateTime? kw_time)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_invoice2.Where(m => m.flag > 0); //目前有完成的所有發票
+
+            IPagedList data = Public_Invo(currentPageIndex, Linq, kw, kw_time);
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+        }
+
+        public ActionResult FinishEdit(int id)
+        {
+            var data = this._DB.order_invoice2.Find(id);
+            var Drug = this._DB.drugstore_data.Where(m => m.uid == data.drug_uid).FirstOrDefault();
+
+            DateTime date = Convert.ToDateTime(data.clearing_date);
+            DateTime sD = new DateTime(date.AddMonths(-1).Year, date.AddMonths(-1).Month, 20);
+            DateTime eD = new DateTime(date.Year, date.Month, 19);
+
+            //撈發票詳細明細
+            var in_data = Invoice_order( eD.AddDays(-6), Drug.drugstore_id);
+            ViewData["in_data"] = in_data;
+
+            var mdata = this._DB.member_data.Find(data.invoice_id);
+            ViewData["member_data"] = mdata;
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View(data);
+        }
+
+        public ActionResult FinishEditSave(order_invoice2 order_invoice2)
+        {
+            var data = this._DB.order_invoice2.Find(order_invoice2.invoice_id);
+
+            var mdata = this._DB.member_data.Find(data.invoice_id);
+
+            data.taxes = order_invoice2.taxes;
+            data.uniform_numbers = order_invoice2.uniform_numbers;
+            data.invoice_title = order_invoice2.invoice_title;
+            data.invoice_address = order_invoice2.invoice_address;
+            
+            data.invoice_datetime = order_invoice2.invoice_datetime;
+            data.return_datetime = order_invoice2.return_datetime;
+
+            this._DB.SaveChanges();
+
+            TempData["jgrowl"] = "發票修改成功";
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return RedirectToAction("Edit", new { @id = order_invoice2.invoice_id });
+        }
+
+        //匯入發票
+        [HttpPost]
+        public ActionResult FinishAddSave(HttpPostedFileBase file_name)
+        {
+
+            if (file_name != null && file_name.ContentLength > 0 && NW.getFileType(file_name, 3))
+            {
+
+                try
+                {
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name.InputStream);
+
+                    //XSSFWorkbook excel = new XSSFWorkbook(file_name.InputStream);
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+                    DateTime create_datetime = DateTime.Now;
+                    List<int> arrOrder_id = new List<int>(new[] { 0 });
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+                        if (sheet.GetRow(row).GetCell(0) != null) // 驗證是不是空白列
+                        {
+                            string oid = sheet.GetRow(row).GetCell(0).ToString();
+                            string invoice_no = sheet.GetRow(row).GetCell(1).ToString();
+
+                            int order_id = Convert.ToInt32(oid);
+                            var data = this._DB.order_data.Where(m => m.order_id == order_id).FirstOrDefault();
+
+                            if (!string.IsNullOrEmpty(invoice_no))
+                            {
+                                data.invoice_no = invoice_no;
+                                data.invoice_datetime = DateTime.Now;
+                                data.flag = 5;
+                                this._DB.SaveChanges();
+                            }
+
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+            return RedirectToAction("InvoiceList");
+        }
+
+        [HttpPost]
+        public ActionResult FinishListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "選擇匯出", "全部匯出", "作廢" };
+            string msg = "匯出失敗，請洽系統工程師，謝謝!!";
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            if (cb_flag == 1) { cb_id = ""; }
+
+            string FileName = Export2(cb_id);
+
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                return File(FileName, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Today.ToString("yyyyMMdd") + "待開發票列表.xlsx"));
+            }
+            else
+            {
+                return Content(msg);
+            }
+
+            //TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        }
+      
+        #endregion
+
+        #region"設定發票時間"
+
+        public ActionResult Time(DateTime? yymm, string year)
+        {
+            //年分
+            string yyyy = "";
+            if (yymm != null)
+            {
+                yyyy = yymm.Value.ToString("yyyy");
+                ViewBag.yyyy = yyyy;
+            }
+            else {
+                ViewBag.yyyy = year;
+            }
+           
+            var data = this._DB.order_invoice_time.Where(m => m.year == yyyy || m.year == year).ToList();
+            if (data.Count == 0 && !string.IsNullOrEmpty(yyyy))
+                {
+
+                    
+                    for (int a = 1; a <= 12; a++)
+                    {
+                        order_invoice_time data2 = new order_invoice_time { };
+
+                        data2.year = yyyy;
+                        data2.month = a;
+                        data2.day = 10;
+
+                        data2.create_user = User.Identity.Name;
+                        data2.create_datetime = DateTime.Now;
+
+                        this._DB.order_invoice_time.Add(data2);
+                        this._DB.SaveChanges();
+
+                        data.Add(data2);
+                    }                                                       
+                }
+          
+            return View(data);
+        }
+
+        public ActionResult TimeSave(List<int> item_day, string year)
+        {
+            var data = this._DB.order_invoice_time.Where(m => m.year == year).ToList();
+            if (data.Count != 0)
+            {
+                int a = 0;
+                foreach (var item in data)
+                {
+                    item.day = item_day[a];
+                    item.change_user = User.Identity.Name;
+                    item.change_datetime = DateTime.Now;
+                    this._DB.SaveChanges();
+
+                    a++;
+                    
+                }           
+            }
+
+           return RedirectToAction("Time", new { year = year });
+          
+        }
+        #endregion
+
+        public static order_invoice2 order_invoice2(string type, string kw_name, DateTime? kw_time)
+        {
+            _dbContext db = new _dbContext();
+
+            //目前有完成的所有發票
+            var Linq = db.order_invoice2.Where(m => m.invoice_id > 0);
+
+            switch (type)
+            {
+                case "2":
+                    Linq = Linq.Where(m => m.flag > 0);
+                    break;
+
+            }
+
+            if (!string.IsNullOrEmpty(kw_name))
+            {
+                Linq = Linq.Where(m => m.name.Contains(kw_name));
+            }
+            if (kw_time.HasValue)
+            {
+                string time = kw_time.Value.ToString("yyyy/MM月");
+                Linq = Linq.Where(m => m.clearing_date == time);
+            }
+
+            return new order_invoice2();
+        }
+    }
+}

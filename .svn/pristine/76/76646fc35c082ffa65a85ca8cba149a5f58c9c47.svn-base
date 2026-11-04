@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+
+    public class tag_data
+    {
+
+        [Key]
+        public int tag_id { get; set; }
+
+        [DisplayName("Tag名稱")]
+        public string tag_name { get; set; }
+
+        [DisplayName("所屬")]
+        public int type { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+    }
+
+    public class qrcode_login
+    {
+        [Key]
+        public int login_id { get; set; }
+        public int group_id { get; set; }
+        public int id { get; set; }
+        public string sn { get; set; }
+        public DateTime? create_datetime { get; set; }
+        public string create_ip { get; set; }
+        public string create_device { get; set; }
+        public DateTime? change_datetime { get; set; }
+        public string change_ip { get; set; }
+        public string change_device { get; set; }
+        public int drugstore_id { get; set; }
+
+    }
+
+}

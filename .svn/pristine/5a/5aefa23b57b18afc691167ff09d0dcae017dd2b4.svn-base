@@ -1,0 +1,1386 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+using System.IO;
+
+
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwMedicinesController : _BaseController
+    {
+        //
+        // GET: /newweb/NwNews/
+
+        #region "藥品列表"
+
+        public ActionResult List(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name_en.ToUpper().Contains(kw.ToUpper()) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            var data2 = this._DB.medicines_group.OrderBy(m => m.inx)
+                        .Select(m => new data_group()
+                        {
+                            group_id = m.group_id,
+                            name = m.name,
+                            counts = m.medicines_main.Count()
+                        });
+
+            ViewData["medicines_group"] = data2;
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult List_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+
+            var data = this._DB.medicines_main.Find(id);
+            string sn = data.sn, atc_code = data.atc_code;
+
+            int p_id = data.medicines_group == null ? 0 : data.medicines_group.group_id;
+
+            //圖片
+            var image = _DB.medicines_image.Where(m => m.main_id.Equals(id)).FirstOrDefault();
+            images_data imgData = new images_data();
+            if (image != null)
+            {
+                imgData.imgs_id = image.imgs_id;
+                imgData.s_img = image.s_img;
+                imgData.b_img = image.b_img;
+            }
+            ViewData["uploadimage"] = imgData;
+
+            //medicines_data
+            var data2 = this._DB.medicines_data.Where(m => m.visible && m.sn == sn && m.atc_code == atc_code).FirstOrDefault();
+            
+            if (image != null)
+            {
+                data2.img_url = image.s_img;
+            }
+            ViewData["data2"] = data2;
+
+            //medicines_approve
+            var data3 = this._DB.medicines_approve.Where(m => m.visible && m.sn == sn && m.atc_code == atc_code).FirstOrDefault();
+            ViewData["data3"] = data3;
+
+            string barcode = "- - -";
+            if(!string.IsNullOrEmpty(data3.barcode)){
+
+                barcode = data3.barcode;
+            }
+            ViewBag.barcode = barcode;
+            
+            //
+            string[] check_name_s = {"形狀","顏色","適應症(藥師)","適應症(民眾)","副作用","注意事項" };
+            string[] check_data_s = { "", "", "", "", "", "" };
+            string check_s = "- - -";
+             
+            for (int a = 0; a < check_name_s.Count(); a++)
+            {
+                string check_name = check_name_s[a];
+                var check = this._DB.medicines_check.Where(m => m.visible && m.check_name == check_name && m.main_id == id).FirstOrDefault();
+
+                if (check != null)
+                {
+                    check_s = check.check_info;
+                }
+                check_data_s[a] = check_s;
+                check_s = "- - -";
+            }
+
+            ViewBag.shape = check_data_s[0];
+            ViewBag.color = check_data_s[1];
+            ViewBag.pharmacist = check_data_s[2];
+            ViewBag.people = check_data_s[3];
+            ViewBag.side_effect = check_data_s[4];
+            ViewBag.notes = check_data_s[5];    
+
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(int main_id, string shape, string color, string pharmacist, string people, string side_effect, string notes, string literature, VmImage imgs,string img_s)
+        {
+            var data = this._DB.medicines_main.Find(main_id);
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+         
+                string[] check_name_s = {"形狀","顏色","適應症(藥師)","適應症(民眾)","副作用","注意事項" };
+                string[] check_data_s = {shape, color, pharmacist, people, side_effect, notes};
+
+                var data2 = new medicines_check { };
+
+                for (int a = 0; a < check_data_s.Count(); a++ )
+                {
+                    if (check_data_s[a] != "")
+                    {
+                        string check_data = check_data_s[a];
+                        var data3 = this._DB.medicines_check.Where(m =>m.visible == false && m.check_info == check_data && m.main_id == main_id).FirstOrDefault();
+
+                        if(data3 == null){
+                            //對應ID
+                        data2.main_id = main_id;
+                            //狀態名稱
+                        data2.check_name = check_name_s[a];
+                            //狀態
+                        data2.check_info = check_data_s[a];
+                            //文獻來源
+                        data2.literature = literature;
+                            //未啟用
+                        data2.visible = false;
+                            //建立者
+                        data2.create_user = User.Identity.Name;
+                            //建立時間
+                        data2.create_datetime = DateTime.Now;                       
+
+                        _DB.medicines_check.Add(data2);
+                        this._DB.SaveChanges();
+
+                        }
+                    }
+                }
+                
+                #region "圖片處理"
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new medicines_image();
+                        imgData.main_id = data.main_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = imgs.img_inx[i];
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.medicines_image.Add(imgData);                        
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var imgData = _DB.medicines_image.Find(imgs.img_id[i]);
+                        if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                        {
+                            _DB.medicines_image.Remove(imgData);
+
+                            data2.check_name = "圖片";
+
+                            data2.check_info = imgs.b_img[0];
+                            //建立者
+                            data2.create_user = User.Identity.Name;
+                            //建立時間
+                            data2.create_datetime = DateTime.Now;  
+                        }
+                        else
+                        {
+
+                            imgData.main_id = main_id;
+                            imgData.s_img = imgs.s_img[i].ToString();
+                            imgData.b_img = imgs.b_img[i].ToString();
+                            imgData.img_info = imgs.img_info[i].ToString();
+                            imgData.img_inx = imgs.img_inx[i];
+
+
+                        }
+                        _DB.SaveChanges();
+                    }
+                }
+
+                _DB.SaveChanges();
+
+                #endregion
+
+         
+                //如有新增圖片-(額外增加)
+                if(imgs.s_img[0] != img_s){
+                    
+                    //藥品ID
+                    data2.main_id = main_id;
+                    
+                    data2.check_name = "圖片";
+                    //圖片大圖
+                    data2.check_info = imgs.b_img[0];
+                    //文獻來源
+                    data2.literature = literature;
+                    //啟用
+                    data2.visible = true;
+                    //建立者
+                    data2.create_user = User.Identity.Name;
+                    //建立時間
+                    data2.create_datetime = DateTime.Now;
+
+                    _DB.medicines_check.Add(data2);
+                    this._DB.SaveChanges();
+                
+                }
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料送審成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = main_id });
+        }
+
+        public ActionResult Add(int id)
+        {
+            news_data data = new news_data();
+            data.inx = 0;
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+
+            //圖片
+            ViewData["UploadImage"] = new images_data();
+            //ViewData["UploadImage2"] = new List<images_data>();
+
+            //下拉選單
+            var gData = (from m in _DB.medicines_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in gData)
+            {
+                ListItems.Add(new ListItem(item.group_id.ToString(), item.name, false));
+            }
+            ViewData["group_id"] = ListItems;
+
+
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult AddSave(news_data news_data, VmImage imgs)
+        {
+            //var data = this._DB.news_data.Find(news_data.news_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+            var data = new news_data { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.news_id = news_data.news_id;
+                data.group_id = news_data.group_id;
+                data.title = news_data.title;
+                data.cont = news_data.cont;
+                data.cont2 = news_data.cont2;
+                data.inx = news_data.inx;
+                data.hits = news_data.hits;
+                data.start_date = news_data.start_date;
+                data.end_date = news_data.end_date;
+                data.visible = news_data.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.news_data.Add(data);
+                this._DB.SaveChanges();
+
+                news_data.news_id = data.news_id;
+
+                #region "圖片處理"
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new news_image();
+                        imgData.news_id = data.news_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = imgs.img_inx[i];
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.news_image.Add(imgData);
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var imgData = _DB.news_image.Find(imgs.img_id[i]);
+                        if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                        {
+                            _DB.news_image.Remove(imgData);
+                        }
+                        else
+                        {
+                            imgData.news_id = news_data.news_id;
+                            imgData.s_img = imgs.s_img[i].ToString();
+                            imgData.b_img = imgs.b_img[i].ToString();
+                            imgData.img_info = imgs.img_info[i].ToString();
+                            imgData.img_inx = imgs.img_inx[i];
+                        }
+                        _DB.SaveChanges();
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = news_data.news_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update news_data set visible = 1 Where news_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update news_data set visible = 0 Where news_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From news_image Where news_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From news_data Where news_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "藥品分類列表"
+
+        public ActionResult GroupList(string kw)
+        {
+
+            int currentPageIndex = 0;
+            var tmpData = this._DB.medicines_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.medicines_main.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupList_ajax(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            var tmpData = this._DB.medicines_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.medicines_main.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult GroupEdit(int id)
+        {
+
+            var data = this._DB.medicines_group.Find(id);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupEditSave(medicines_group medicines_group)
+        {
+            var data = this._DB.medicines_group.Find(medicines_group.group_id);
+            //var data1 = this._DB.medicines_group.Where(m => m.zz_id.Equals(medicines_group.zz_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = medicines_group.group_id;
+                data.name = medicines_group.name;
+                data.inx = medicines_group.inx;
+                data.visible = medicines_group.visible;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+                //data.create_user = medicines_group.create_user;
+                //data.create_datetime = medicines_group.create_datetime;
+
+                this._DB.SaveChanges();
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = medicines_group.group_id });
+        }
+
+        public ActionResult GroupAdd(int id)
+        {
+            medicines_group data = new medicines_group();
+            data.inx = 0;
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupAddSave(medicines_group medicines_group, VmImage imgs)
+        {
+            //var data = this._DB.medicines_group.Find(medicines_group.zz_id);
+            //var data1 = this._DB.medicines_group.Where(m => m.zz_id.Equals(medicines_group.zz_id)).Select(m => m).SingleOrDefault();
+            var data = new medicines_group { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = medicines_group.group_id;
+                data.name = medicines_group.name;
+                data.inx = medicines_group.inx;
+                data.visible = medicines_group.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.medicines_group.Add(data);
+                this._DB.SaveChanges();
+
+                medicines_group.group_id = data.group_id;
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = medicines_group.group_id });
+        }
+
+        [HttpPost]
+        public ActionResult GroupListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update medicines_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update medicines_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From medicines_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "藥品審核"
+
+        public ActionResult CheckList(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm                           
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            //data3 過濾check中重複id
+            //var data3 = this._DB.medicines_check.Select(m => m.main_id).ToList().Distinct();
+            var data3 = this._DB.medicines_check.Where(m => m.visible == false).Select(m => m.main_id).ToList().Distinct();
+            string main_id_str = "";
+                 
+            foreach (var item in data3)
+            {
+                main_id_str += item.ToString()+",";   
+            }
+
+            main_id_str = main_id_str.TrimEnd(',');
+            string[] main_id_ind = main_id_str.Split(',');
+
+            tmpData = tmpData.Where(m => main_id_ind.Contains(m.main_id.ToString()));
+
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name_en.ToUpper().Contains(kw.ToUpper()) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            var data2 = this._DB.medicines_group.OrderBy(m => m.inx)
+                        .Select(m => new data_group()
+                        {
+                            group_id = m.group_id,
+                            name = m.name,
+                            counts = m.medicines_main.Where(n => main_id_ind.Contains(n.main_id.ToString())).Count()
+                        });
+
+            ViewData["medicines_group"] = data2;
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult CheckList_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            //data3 過濾check中重複id
+            var data3 = this._DB.medicines_check.Where(m => m.visible == false).Select(m => m.main_id).ToList().Distinct();
+            string main_id_str = "";
+
+            foreach (var item in data3)
+            {
+                main_id_str += item.ToString() + ",";
+            }
+
+            main_id_str = main_id_str.TrimEnd(',');
+            string[] main_id_ind = main_id_str.Split(',');
+
+            tmpData = tmpData.Where(m => main_id_ind.Contains(m.main_id.ToString()));
+            
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult CheckEdit(int id)
+        {
+
+            var data = this._DB.medicines_main.Find(id);
+            
+            string sn = data.sn, atc_code = data.atc_code;
+
+            //當前資訊         
+            var now = this._DB.medicines_data.Where(m => m.visible && m.sn == sn && m.atc_code == atc_code).FirstOrDefault();
+            var approve = this._DB.medicines_approve.Where(m => m.visible && m.sn == sn && m.atc_code == atc_code).FirstOrDefault();
+
+            int p_id = data.medicines_group == null ? 0 : data.medicines_group.group_id;
+
+            #region"圖片"
+            var image = _DB.medicines_image.Where(m => m.main_id.Equals(id)).FirstOrDefault();
+            images_data imgData = new images_data();
+            if (image != null)
+            {
+                imgData.imgs_id = image.imgs_id;
+                imgData.s_img = image.s_img;
+                imgData.b_img = image.b_img;
+            }
+            ViewData["uploadimage"] = imgData;
+            #endregion
+
+            #region"當前"
+
+            string[] check_name_s = { "形狀", "顏色", "適應症(藥師)", "適應症(民眾)", "副作用", "注意事項" };
+            string[] check_data_s = { "", "", "", "", "", "" };
+            string[] check_litera_s = { "", "", "", "", "", "" };
+            //string[] check_datetime_s = { "", "", "", "", "", "" };
+
+            List<string> check_phar_s = new List<string>();
+            List<string> check_datetime_s = new List<string>();
+
+
+                for (int a = 0; a < check_name_s.Count(); a++)
+                {
+                    string check_s = "- - -";
+                    string check_z = "- - -";
+                    string phar_z = "- - -";
+                    string datetime_z = "- - -";
+
+                    string check_name = check_name_s[a];
+                    var check = this._DB.medicines_check.Where(m => m.visible && m.check_name == check_name && m.main_id == id).OrderByDescending(m => m.change_datetime).FirstOrDefault();
+
+                    if (check != null)
+                    {
+                        int create_user = Convert.ToInt32(check.create_user);
+                        var pharmacist = this._DB.sys_admin_data.Where(m => m.visible && m.admin_id == create_user).FirstOrDefault();
+
+                        check_s = check.check_info;
+                        check_z = check.literature;
+                        phar_z = pharmacist.name;
+                        datetime_z = check.create_datetime.ToString();
+                    }
+
+                    check_data_s[a] = check_s;
+                    check_litera_s[a] = check_z;
+
+                    check_phar_s.Add(phar_z);
+                    check_datetime_s.Add(datetime_z);                   
+
+                }
+
+            ViewBag.shape = check_data_s[0];
+            ViewBag.color = check_data_s[1];
+            ViewBag.pharmacists = check_data_s[2];
+            ViewBag.people = check_data_s[3];
+            ViewBag.side_effect = check_data_s[4];
+            ViewBag.notes = check_data_s[5];
+            ViewData["pharmacist"] = check_phar_s;
+            ViewData["datetime"] = check_datetime_s;
+
+
+            #region"參考文獻"
+
+            ViewBag.shape_liter = check_litera_s[0];
+            ViewBag.color_liter = check_litera_s[1];
+            ViewBag.pharmacist_liter = check_litera_s[2];
+            ViewBag.people_liter = check_litera_s[3];
+            ViewBag.effect_liter = check_litera_s[4];
+            ViewBag.notes_liter = check_litera_s[5];
+
+            #endregion
+
+            #endregion         
+
+            #region"審核"
+
+            //未啟用、ID對應
+            var check_x = this._DB.medicines_check.Where(m => m.visible == false && m.main_id == id && m.deadline_visible == false).OrderByDescending(m => m.create_datetime);
+            
+            #region"形狀"
+
+            string shape = check_data_s[0];
+            var shape_s = check_x.Where(m => m.check_name == "形狀" && m.check_info != shape ).ToList();
+            List<ListItem> ListItems1 = new List<ListItem> { };
+            ListItems1.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in shape_s)
+            {
+                ListItems1.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["shape_id"] = ListItems1;
+
+            #endregion
+
+            #region"顏色"
+
+            string color = check_data_s[1];
+            var color_s = check_x.Where(m => m.check_name == "顏色" && m.check_info != color).ToList();
+            List<ListItem> ListItems2 = new List<ListItem> { };
+            ListItems2.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in color_s)
+            {
+                ListItems2.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["color_id"] = ListItems2;
+
+            #endregion
+
+            #region"適應症(藥師)"
+
+            string pharmcist = check_data_s[2];
+            var pharmacist_s = check_x.Where(m => m.check_name == "適應症(藥師)" && m.check_info != pharmcist).ToList();
+            List<ListItem> ListItems3 = new List<ListItem> { };
+            ListItems3.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in pharmacist_s)
+            {
+                ListItems3.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["pharmacist_id"] = ListItems3;
+
+            #endregion
+
+            #region"適應症(民眾)"
+
+            string people = check_data_s[3];
+            var people_s = check_x.Where(m => m.check_name == "適應症(民眾)" && m.check_info != people).ToList();
+            List<ListItem> ListItems4 = new List<ListItem> { };
+            ListItems4.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in people_s)
+            {
+                ListItems4.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["people_id"] = ListItems4;
+
+            #endregion
+
+            #region"副作用"
+
+            string side_effect = check_data_s[4];
+            var side_effect_s = check_x.Where(m => m.check_name == "副作用" && m.check_info != side_effect).ToList();
+            List<ListItem> ListItems5 = new List<ListItem> { };
+            ListItems5.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in side_effect_s)
+            {
+                ListItems5.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["effect_id"] = ListItems5;
+
+            #endregion
+
+            #region"注意事項"
+
+            string notes = check_data_s[5];
+            var notes_s = check_x.Where(m => m.check_name == "注意事項" && m.check_info != notes).ToList();
+            List<ListItem> ListItems6 = new List<ListItem> { };
+            ListItems6.Add(new ListItem("0", "請選擇", false));
+            foreach (var item in notes_s)
+            {
+                ListItems6.Add(new ListItem(item.check_id.ToString(), item.check_info, false));
+            }
+            ViewData["notes_id"] = ListItems6;
+
+            #endregion
+
+            int[] num_s = { ListItems1.Count(), ListItems2.Count(), ListItems3.Count(), ListItems4.Count(), ListItems5.Count(), ListItems6.Count()};
+
+            List<int> num = new List<int>();
+            foreach (var item in num_s)
+            {
+                num.Add(item);
+            }
+            
+            //num = ListItems1.Count();
+            //num[2] = ListItems2.Count();
+            //num[3] = ListItems3.Count();
+            //num[4] = ListItems4.Count();
+            //num[5] = ListItems5.Count();
+            //num[6] = ListItems6.Count();
+
+            ViewData["num"] = num;
+
+
+            #endregion
+
+            #region"判斷期限"
+
+            var deadline = this._DB.medicines_check.Where(m => m.deadline_visible && m.main_id == id).ToList();
+            foreach (var item in deadline)
+            {
+                //判斷日期是否大於7天了
+                if (item.create_datetime.Value.AddDays(7) <= DateTime.Today)
+                {
+
+                    item.deadline_visible = false;
+
+                    this._DB.SaveChanges();
+                }
+            }
+
+            #endregion
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public class check_id
+        {
+            public int shape_id { get; set; }
+            public int color_id { get; set; }
+            public int picture_id { get; set; }
+            public int pharmacist_id { get; set; }
+            public int people_id { get; set; }
+            public int effect_id { get; set; }
+            public int notes_id { get; set; }
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult CheckEditSave(int main_id, check_id check_id)
+        {
+            var data = this._DB.medicines_main.Find(main_id);
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                int[] all_id = {check_id.shape_id, check_id.color_id, check_id.pharmacist_id, check_id.people_id, check_id.effect_id,check_id.notes_id };
+
+                for (int a = 0; a < all_id.Count(); a++)
+                {
+                    int all_id_s = all_id[a];
+                    var update = this._DB.medicines_check.Where(m => m.check_id == all_id_s).FirstOrDefault();
+                    if (all_id_s != 0)
+                    {
+                        //啟用
+                        update.visible = true;
+                        //期限-啟用
+                        update.deadline_visible = true;
+                        //修改人
+                        update.change_user = User.Identity.Name;
+                        //修改時間
+                        update.change_datetime = DateTime.Now;
+
+                        this._DB.SaveChanges();
+                    }
+                 
+                }                             
+                                          
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料審核成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = main_id });
+        }
+
+        public ActionResult CheckAdd(int id)
+        {
+            news_data data = new news_data();
+            data.inx = 0;
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+
+            //圖片
+            ViewData["UploadImage"] = new images_data();
+            //ViewData["UploadImage2"] = new List<images_data>();
+
+            //下拉選單
+            var gData = (from m in _DB.medicines_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in gData)
+            {
+                ListItems.Add(new ListItem(item.group_id.ToString(), item.name, false));
+            }
+            ViewData["group_id"] = ListItems;
+
+
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult CheckAddSave(news_data news_data, VmImage imgs)
+        {
+            //var data = this._DB.news_data.Find(news_data.news_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+            var data = new news_data { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.news_id = news_data.news_id;
+                data.group_id = news_data.group_id;
+                data.title = news_data.title;
+                data.cont = news_data.cont;
+                data.cont2 = news_data.cont2;
+                data.inx = news_data.inx;
+                data.hits = news_data.hits;
+                data.start_date = news_data.start_date;
+                data.end_date = news_data.end_date;
+                data.visible = news_data.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.news_data.Add(data);
+                this._DB.SaveChanges();
+
+                news_data.news_id = data.news_id;
+
+                #region "圖片處理"
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new news_image();
+                        imgData.news_id = data.news_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = imgs.img_inx[i];
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.news_image.Add(imgData);
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var imgData = _DB.news_image.Find(imgs.img_id[i]);
+                        if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                        {
+                            _DB.news_image.Remove(imgData);
+                        }
+                        else
+                        {
+                            imgData.news_id = news_data.news_id;
+                            imgData.s_img = imgs.s_img[i].ToString();
+                            imgData.b_img = imgs.b_img[i].ToString();
+                            imgData.img_info = imgs.img_info[i].ToString();
+                            imgData.img_inx = imgs.img_inx[i];
+                        }
+                        _DB.SaveChanges();
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = news_data.news_id });
+        }
+
+        [HttpPost]
+        public ActionResult CheckListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update news_data set visible = 1 Where news_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update news_data set visible = 0 Where news_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From news_image Where news_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From news_data Where news_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "藥品關聯"
+
+        public ActionResult TagList(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            ////data3 過濾check中重複id
+            ////var data3 = this._DB.medicines_check.Select(m => m.main_id).ToList().Distinct();
+            //var data3 = this._DB.medicines_check.Where(m => m.visible == false).Select(m => m.main_id).ToList().Distinct();
+            //string main_id_str = "";
+
+            //foreach (var item in data3)
+            //{
+            //    main_id_str += item.ToString() + ",";
+            //}
+
+            //main_id_str = main_id_str.TrimEnd(',');
+            //string[] main_id_ind = main_id_str.Split(',');
+
+            //tmpData = tmpData.Where(m => main_id_ind.Contains(m.main_id.ToString()));
+
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name_en.ToUpper().Contains(kw.ToUpper()) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            var data2 = this._DB.medicines_group.OrderBy(m => m.inx)
+                        .Select(m => new data_group()
+                        {
+                            group_id = m.group_id,
+                            name = m.name,
+                            counts = m.medicines_main.Count()
+                        });
+
+            ViewData["medicines_group"] = data2;
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult TagList_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.medicines_main
+                           join m2 in _DB.medicines_group on m.group_id equals m2.group_id into mm
+                           orderby m.main_id, m.create_datetime descending
+                           select new zzmedicines_main()
+                           {
+                               main_id = m.main_id,
+                               group_id = m.group_id,
+                               name = m.name,
+                               name_en = m.name_en,
+                               atc_code = m.atc_code,
+                               sn = m.sn,
+                               visible = m.visible
+                           });
+
+            ////data3 過濾check中重複id
+            //var data3 = this._DB.medicines_check.Where(m => m.visible == false).Select(m => m.main_id).ToList().Distinct();
+            //string main_id_str = "";
+
+            //foreach (var item in data3)
+            //{
+            //    main_id_str += item.ToString() + ",";
+            //}
+
+            //main_id_str = main_id_str.TrimEnd(',');
+            //string[] main_id_ind = main_id_str.Split(',');
+
+            //tmpData = tmpData.Where(m => main_id_ind.Contains(m.main_id.ToString()));
+
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) || m.sn.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult TagEdit(int id)
+        {
+
+            var data = this._DB.medicines_main.Find(id);
+
+            string sn = data.sn, atc_code = data.atc_code;
+
+            //tag用
+            var tag = this._DB.tag_data.Where(m => m.visible).ToList();
+            ViewData["tag"] = tag;
+
+            //當前tag
+            string tag_s = "- - -";
+            if(!string.IsNullOrEmpty(data.tag)){
+            tag_s = data.tag;
+            }
+            ViewBag.tag_s = tag_s;
+
+
+
+           
+
+            
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }     
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult TagEditSave(int main_id, string tag)
+        {
+            var data = this._DB.medicines_main.Find(main_id);
+
+              
+                //藥品的tag
+                data.tag = tag;
+                
+                this._DB.SaveChanges();
+
+
+                //更新
+                TempData["jgrowl"] = "藥品關聯成功";
+            
+
+          
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = main_id });
+        }
+
+        public ActionResult TagAdd(int id)
+        {
+
+            tag_data data = new tag_data();
+             data.visible = true;
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult TagAddSave(tag_data tag_data,int med_id)
+        {
+            //var data = this._DB.news_data.Find(news_data.news_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+            var data = new tag_data { };
+
+            var data2 = this._DB.tag_data.Where(m => m.tag_name == tag_data.tag_name).FirstOrDefault();
+            
+            if (data2 != null)
+            {
+                data2.inx = tag_data.inx;
+                data2.visible = tag_data.visible;
+                data2.change_user = User.Identity.Name;
+                data2.change_datetime = DateTime.Now;
+
+                this._DB.SaveChanges();
+
+                //修改
+                TempData["jgrowl"] = "關聯修改成功!!";
+
+            }
+            else
+            {
+                // data.news_id = news_data.news_id;
+                data.tag_name = tag_data.tag_name;
+                data.inx = tag_data.inx;
+           
+                data.visible = tag_data.visible;
+
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.tag_data.Add(data);
+                this._DB.SaveChanges();
+
+                //新增
+                TempData["jgrowl"] = "關聯新增成功!!";
+                      
+            }
+
+           
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = med_id});
+        }
+
+        [HttpPost]
+        public ActionResult TagListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update news_data set visible = 1 Where news_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update news_data set visible = 0 Where news_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From news_image Where news_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From news_data Where news_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+    }
+}

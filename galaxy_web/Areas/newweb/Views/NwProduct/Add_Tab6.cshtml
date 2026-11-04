@@ -1,0 +1,47 @@
+﻿@{
+    var S = (List<galaxy_web.Models.product_stock>)ViewData["S"]; //庫存紀錄
+}
+
+@if (S != null)
+{
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+
+            <col class="width12" />
+            <col class="width10" />
+            <col class="width10" />
+            <col />
+
+
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">#</th>
+
+                <th class="center">@(Html.DisplayNameFor(m => S.FirstOrDefault().create_datetime))</th>
+                <th class="center">@(Html.DisplayNameFor(m => S.FirstOrDefault().num))</th>
+                <th class="center">@(Html.DisplayNameFor(m => S.FirstOrDefault().num_old))</th>
+                <th class="center">@(Html.DisplayNameFor(m => S.FirstOrDefault().info))</th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in S)
+            {
+                int num = Array.IndexOf(S.ToArray(), item) + 1;
+                    
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="right">@(num)</td>
+
+                    <td class="center" title="@(item.create_datetime)">@(NW.getDate(item.create_datetime))</td>
+                    <td class="center">@Html.DisplayFor(m => item.num)</td>
+                    <td class="center">@Html.DisplayFor(m => item.num_old)</td>
+                    <td class="left">@Html.DisplayFor(m => item.info)</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}

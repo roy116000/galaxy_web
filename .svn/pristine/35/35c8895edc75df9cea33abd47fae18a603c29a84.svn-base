@@ -1,0 +1,50 @@
+﻿@model h365_web.Models.product_data
+@{
+    var aData = (h365_web.Models.sys_admin_data)ViewData["aData"];
+    }
+<div class="control-group">
+    @Html.LabelFor(model => model.create_user, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @NW.admin(Model.create_user).name&nbsp;&nbsp;
+    </div>
+</div>
+<div class="control-group">
+    @Html.LabelFor(model => model.create_datetime, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @Model.create_datetime&nbsp;&nbsp;
+    </div>
+</div>
+<div class="control-group">
+    @Html.LabelFor(model => model.check_user, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @NW.admin(Model.check_user).name&nbsp;&nbsp;
+    </div>
+</div>
+<div class="control-group">
+    @Html.LabelFor(model => model.check_datetime, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @Model.check_datetime&nbsp;&nbsp;
+    </div>
+</div>
+<div class="control-group">
+    @Html.LabelFor(model => model.change_user, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @NW.admin(Model.change_user).name&nbsp;&nbsp;
+    </div>
+</div>
+<div class="control-group">
+    @Html.LabelFor(model => model.change_datetime, new { @class = "control-label" })
+    <div class="field" style="padding: 5px 5px;">
+        @Model.change_datetime&nbsp;&nbsp;
+    </div>
+</div>
+
+@if (aData.power_id > 2 && aData.power_id != 7)
+{
+    <div class="control-group">
+        @Html.LabelFor(model => model.back_info, new { @class = "control-label" })
+        <div class="field" style="padding: 5px 5px;">
+            @Model.back_info&nbsp;&nbsp;
+        </div>
+    </div>
+}

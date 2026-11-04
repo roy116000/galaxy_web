@@ -1,0 +1,34 @@
+﻿@model String
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "ckeditor");
+    //htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+
+   // int maxlength = 50;
+   // if (ViewData.ModelMetadata.AdditionalValues.ContainsKey("maxLenght"))
+   // {
+   //     maxlength = (int)ViewData.ModelMetadata.AdditionalValues["maxLenght"];
+   // }
+   //htmlAttributes2.Add("maxlength", maxlength);
+   
+   string id = ViewData.ModelMetadata.PropertyName;
+   NW.id = id;
+   
+   string controller = ViewContext.RouteData.Values["controller"].ToString();
+   NW.controller = controller;
+   
+   //string action = ViewContext.RouteData.Values["action"].ToString();
+   //if (controller == "NwProduct") { NW.controller = "NwProduct"; } else { NW.controller = ""; }
+
+   //string xx =Request.Url.AbsoluteUri.Replace( Request.Url.AbsolutePath,"");
+}
+<div class="control-group">
+    @Html.Label("",htmlAttributes)
+    <div class="field">
+    @Html.TextArea("", ViewData.TemplateInfo.FormattedModelValue.ToString(), htmlAttributes2)
+    <span class="help-inline"></span>
+    </div>
+</div>

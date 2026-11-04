@@ -1,0 +1,76 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width7" />
+      @*      <col class="width7" />*@
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">日</th>
+             @*   <th class="center">完成-金額總計</th>*@
+                <th class="center">完成-訂單總計</th>
+                <th class="center">完成-毛利總計</th>
+                <th class="center">退貨-金額總計</th>
+                <th class="center">退貨-訂單總數</th>
+                <th class="center">作廢-金額總計</th>
+                <th class="center">作廢-訂單總數</th>   
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {               
+                <tr class="@NW.echoBool(true, "unread", "visible")" >
+                    <td class="center">@Html.DisplayFor(modelItem => item.day)</td>
+                   @* <td class="center" style="@(item.finish_total != 0 ? "color:#0D33FF" : "")">@("$ " + item.finish_total.ToString("N0"))</td>*@
+                    <td class="center" style="@(item.finish_num != 0 ? "color:#0D33FF" : "")">@Html.DisplayFor(modelItem => item.finish_num)</td> 
+                    <td class="center" style="@(item.gross_total >= 0? "color:#FF0000" : "color:#0D33FF")">@("$ " + item.gross_total.ToString("N0"))</td>          
+                    <td class="center" style="@(item.back_total != 0 ? "color:#008080" : "")">@("$ " + item.back_total.ToString("N0"))</td>
+                    <td class="center" style="@(item.back_num != 0 ? "color:#008080" : "")">@Html.DisplayFor(modelItem => item.back_num)</td>
+                    <td class="center" style="@(item.clear_total != 0 ? "color:#FF0000" : "")">@("$ " + item.clear_total.ToString("N0"))</td>
+                    <td class="center" style="@(item.clear_num != 0 ? "color:#FF0000" : "")">@Html.DisplayFor(modelItem => item.clear_num)</td>
+                    
+                    
+                    
+                    
+                    
+                    <td class="center">
+                        @if (item.clear_num != 0 || item.back_num != 0 || item.finish_num != 0)
+                        {
+                            if (action.IndexOf("Add") != -1)
+                            {
+                                @Html.ActionLink("觀看內容", action.Replace("Add", "Edit"), new { year = item.year, mon = item.mon, day = item.day }, new { @class = "title" })                                                                     
+                            }else
+                            {
+                                @Html.ActionLink("回上一頁", action.Replace("Edit", "Add"), new { year = item.year, mon = item.mon}, new { @class = "title" })    
+                            
+                            }
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @*<div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>*@
+
+</div>

@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class industry_group
+    {
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [DisplayName("parent_id")]
+        public int parent_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public virtual ICollection<industry_data> industry_data { get; set; }
+    }
+
+    public class industry_data
+    {
+        [Key]
+        public int news_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("簡介")]
+        public string cont { get; set; }
+
+        [UIHint("Number")]
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("點閱率")]
+        public int hits { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("詳細介紹")]
+        public string cont2 { get; set; }
+
+        [UIHint("Img")]
+        [DisplayName("圖片管理")]
+        public string img { get; set; }
+
+        public virtual industry_group industry_group { get; set; }
+
+    }
+
+    public class industry_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("news_id")]
+        public int news_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+    }
+
+}

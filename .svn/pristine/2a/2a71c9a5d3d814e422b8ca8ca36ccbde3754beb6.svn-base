@@ -1,0 +1,115 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.order_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+        //List<h365_web.Models.news4_data> marData = (List<h365_web.Models.news4_data>)ViewData["marData"];
+}
+
+<div id="List_ajax">
+    <div style="text-align: left; font-size: 20px; padding-bottom: 20px">@ViewBag.total</div>
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            @*<col class="width6" />*@
+            
+            <col class="width6" />
+            <col class="width10" />
+            <col class="width10" />
+            <col />
+            <col class="width10" />
+            <col class="width8" />
+            @*<col class="width10"/>*@
+            <col class="width8" />
+            @*<col class="width8" />*@
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                @*<th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>*@
+                
+                <th class="center">單號 </th>
+                <th class="center">訂購方</th>
+                <th class="center">收件方</th>
+                <th class="center">品名</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().back_datetime)</th>
+                <th class="center">狀態</th>
+                @*<th class="center">@Html.DisplayNameFor(model => model.First().backok_datetime)</th>*@
+                @*<th class="center">發票狀態</th>*@
+                <th class="center">@Html.DisplayNameFor(model => model.First().total) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().discount) </th>
+                <th class="center">退款金額</th>
+                <th class="center">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                //item.total = item.discount != 0 ? item.discount : item.total;
+                //int total = item.total - item.solt_price - item.bonus;
+                
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    @*<td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.order_id" /></td>*@
+                    <td class="center"><span class="label label-info" title="前台單號：@(item.order_sn), 所屬廠商：@(item.company_data.name)">@Html.DisplayFor(modelItem => item.order_id)</span></td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.order_name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.send_name)</td>
+                    <td class="center" title="@(item.pro_web_name + "-" + item.info)">@NW.word(item.info, 10, "...")</td>
+                    <td class="center">@(NW.getDate(item.back_datetime))</td>
+                    <td class="center">@(item.back_datetime != null && item.backok_datetime == null ? "申請中" : (item.back_freight_no != null && item.back_flag != 0 ? "已收回" : "派車取貨"))</td>
+                    @*<td class="center">@NW.getDate(item.backok_datetime)</td>*@
+                    @*<td class="center"><span class="label label-@(item.flag > 0 ? "success" + item.flag : "default")" title="@(item.order_flag == 0 ? "店取" : "寄送")">@((item.finish_datetime != null && item.goods_datetime == null) ? NW.Name_flag[1] : NW.Name_flag[item.flag])</span></td>*@
+                    @*<td class="center">
+                        <span style="@(item.invoice_datetime > item.back_datetime ? "color:#000080" : "")">
+                            @(action == "BackList" && item.backok_datetime == null ? "審核中" : (item.back_flag != 2 ? NW.Flag_Back[item.back_flag] : (item.invoice_datetime > item.back_datetime ? item.invoice_no : "未開發票")))
+                        </span>
+                    </td>*@
+                    <td class="right" style="@((item.solt_price != 0 || item.bonus != 0) ? "color:#4169E1" : "")" >$ @(item.total.ToString("N0"))</td>
+                    <td class="right" style="color: green">$ @(item.discount.ToString("N0"))</td>
+                    <td class="right" style="color: red">$ @((item.total - item.discount).ToString("N0"))</td>
+                    <td class="center">
+                        @Html.ActionLink("編輯", "BackEdit", new { id = item.order_id }, new { @class = "title" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("start_date", ViewBag.start_date)
+            .AddRouteValue("end_date", ViewBag.end_date)
+            .AddRouteValue("flag", ViewBag.vflag)
+            .AddRouteValue("pay_visible", ViewBag.vpay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("pay_id", ViewBag.vpay_id)
+            )
+    </div>
+</div>
+<!--pagination-->
+
+
+<style>
+    .label-default {
+        background-color: red;
+    }
+
+    .label-success1 {
+        background-color: #DB8F00;
+    }
+
+    .label-success2 {
+        background-color: green;
+    }
+
+    .label-success5 {
+        background-color: #0033FF;
+    }
+</style>

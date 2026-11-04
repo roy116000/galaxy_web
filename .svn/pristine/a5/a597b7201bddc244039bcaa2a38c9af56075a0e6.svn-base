@@ -1,0 +1,114 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.pharmacist_activity>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                    //var gData = (List<h365_web.Models.adv_group>)ViewData["gData"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col />
+
+            <col class="width8" />
+            <col class="width8" />
+            
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+            <col class="width8" />
+
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" />
+                </th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().title)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().type)</th>
+                <th class="center">@Html.DisplayNameFor(m => m.FirstOrDefault().gift)</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().start_datetime) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().end_datetime) </th>
+                <th class="center">目前人數</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible)</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.activity_id)" />
+                    </td>
+
+                    <td>@Html.DisplayFor(modelItem => item.title)</td>
+
+                    <td class="center">@(h365_web.Areas.newweb.Controllers.NwPharmacistController.Type[item.type])</td>
+                    <td class="center">
+
+                        @if (item.gift == 0)
+                        {
+                            <a target="_blank" href="@(Url.Action("PEdit", "NwProduct", new { id = item.gift_num }))">
+                                @(h365_web.Areas.newweb.Controllers.NwPharmacistController.Gift[item.gift])
+                            </a> 
+                        }
+                        else
+                        {
+                            @(h365_web.Areas.newweb.Controllers.NwPharmacistController.Gift[item.gift])
+                        }
+
+                    </td>
+
+                    @*<td class="center"><a href="@Html.DisplayFor(modelItem => item.type_url)" target="_blank">網址</a></td>*@
+                    <td class="center">@(NW.getDate(item.start_datetime))</td>
+                    <td class="center">@(NW.getDate(item.end_datetime))</td>
+                    <td class="center">0</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.activity_id }, new { @class = "title" })</td>
+                </tr>
+                
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+        .MaxNrOfPages(15)
+        .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+        .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+
+            )
+
+        @*        <form method="post" action="@(Url.Action("List", "NwHealth"))">
+            <input id="kw" name="kw" value="@(ViewBag.kw)" />
+            <input id="gid" name="gid" value="@(ViewBag.gid)" />
+            <input id="page" name="page" placeholder="可輸入頁數" value="" />
+            <button  id ="Summ">跳轉</button>
+        </form>*@
+
+
+    </div>
+
+</div>
+
+<script>
+
+    @*    var page = $('#page').val();
+    var kw = $('#kw').val();
+    var gid = $('#gid').val();
+
+    $('#Summ').click(function () {
+        $.post('@(Url.Action("List", "NwHealth"))', { page: page }, function (result) {
+
+        })
+    })*@
+
+</script>

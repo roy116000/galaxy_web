@@ -1,0 +1,126 @@
+﻿@model h365_web.Models.health_symptom_data
+
+<div class="abgne_tab">
+    <ul class="tabs">
+        <li><a href="#tab0">器官系</a></li>
+        <li><a href="#tab1">概述</a></li>
+        <li><a href="#tab2">原因</a></li>
+        @*      <li><a href="#tab2">症狀</a></li>
+        <li><a href="#tab3">飲食</a></li>
+        <li><a href="#tab4">預防</a></li>
+        <li><a href="#tab5">治療</a></li>
+        <li><a href="#tab6">檢查</a></li>
+        <li><a href="#tab7">鑑別診斷</a></li>*@
+        <li><a href="#tab8">關聯</a></li>
+    </ul>
+
+    <div>
+
+        @*器官系*@
+        <div id="tab0" class="tab_content">
+
+            @Html.EditorFor(model => model.group_id)
+
+        </div>
+
+        @*概述*@
+        <div id="tab1" class="tab_content">
+
+            @Html.EditorFor(m => m.cont)
+
+        </div>
+
+        @*原因*@
+        <div id="tab2" class="tab_content">
+
+            @Html.EditorFor(m => m.d1_title)
+
+            @Html.EditorFor(m => m.d1_content)
+
+        </div>
+
+        @*症狀*@
+        @*<div id="tab2" class="tab_content">
+
+            @Html.EditorFor(m => m.d2_title)
+
+            @Html.EditorFor(m => m.d2_content)
+
+        </div>*@
+
+        @*飲食*@
+        <div id="tab3" class="tab_content">
+
+            @Html.EditorFor(m => m.d3_title)
+
+            @Html.EditorFor(m => m.d3_content)
+
+        </div>
+
+        @*預防*@
+        <div id="tab4" class="tab_content">
+
+            @Html.EditorFor(m => m.d4_title)
+
+            @Html.EditorFor(m => m.d4_content)
+
+        </div>
+
+        @*治療*@
+        <div id="tab5" class="tab_content">
+
+            @Html.EditorFor(m => m.d5_title)
+
+            @Html.EditorFor(m => m.d5_content)
+
+        </div>
+
+        @*檢查*@
+        <div id="tab6" class="tab_content">
+
+            @Html.EditorFor(m => m.d6_title)
+
+            @Html.EditorFor(m => m.d6_content)
+
+        </div>
+
+        @*鑑別診斷*@
+        <div id="tab7" class="tab_content">
+
+            @Html.EditorFor(m => m.d7_title)
+
+            @Html.EditorFor(m => m.d7_content)
+
+        </div>
+
+        @*關聯*@
+        <div id="tab8" class="tab_content">
+
+            @Html.EditorFor(m => m.tag)
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        $(function () {
+            var _showTab = 0;
+            var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+            $($defaultLi.find('a').attr('href')).siblings().hide();
+
+            $('ul.tabs li').click(function () {
+                var $this = $(this),
+                    _clickTab = $this.find('a').attr('href');
+
+                $this.addClass('active').siblings('.active').removeClass('active');
+
+                $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+                return false;
+            }).find('a').focus(function () {
+                this.blur();
+            });
+
+        });
+    </script>
+</div>

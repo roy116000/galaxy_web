@@ -1,0 +1,229 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.equip_use>
+@{
+    Layout = null;  
+    var i = 1;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewBag.sd + " ~ " + ViewBag.ed + "各店開機使用率報表")</title>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+
+            body div {
+                margin: 0px;
+                font-family: "新細明體";
+                font-size: 15px;
+            }
+
+        .bgg {
+            /*210*297  27.7 */
+            width: 30.0cm;
+            height: auto;
+        }
+
+        .pixeltable {
+            border: 1pt solid #000000;
+        }
+
+        .table {
+            width: 100%;
+            border: 1px solid #000000;
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 5px;
+            text-align: left;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .h3 {
+            line-height: 32px;
+        }
+
+        .c1 {
+            width: 1%;
+        }
+
+        .c2 {
+            width: 2%;
+        }
+
+        .c3 {
+            width: 3%;
+        }
+
+        .c4 {
+            width: 4%;
+        }
+
+        .c5 {
+            width: 5%;
+        }
+
+        .c6 {
+            width: 6%;
+        }
+
+        .c7 {
+            width: 7%;
+        }
+
+        .c8 {
+            width: 8%;
+        }
+
+        .c9 {
+            width: 9%;
+        }
+
+        .c10 {
+            width: 10%;
+        }
+
+        .c11 {
+            width: 11%;
+        }
+
+        .c12 {
+            width: 12%;
+        }
+
+        .c13 {
+            width: 13%;
+        }
+
+        .c14 {
+            width: 14%;
+        }
+
+        .c15 {
+            width: 15%;
+        }
+
+        .c16 {
+            width: 16%;
+        }
+
+        .c17 {
+            width: 17%;
+        }
+
+        .c18 {
+            width: 18%;
+        }
+
+        .c19 {
+            width: 19%;
+        }
+
+        .c20 {
+            width: 20%;
+        }
+
+        .c21 {
+            width: 21%;
+        }
+
+        .c22 {
+            width: 22%;
+        }
+
+        .c23 {
+            width: 23%;
+        }
+
+        .c24 {
+            width: 24%;
+        }
+
+        .c25 {
+            width: 25%;
+        }
+
+        .c30 {
+            width: 30%;
+        }
+
+        .c35 {
+            width: 35%;
+        }
+
+        .c100 {
+            width: 100%;
+        }
+
+        .info {
+            font: bold 19px/30px 標楷體;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bgg">
+
+        <table class="table" border="1">
+            <colgroup>
+             
+                <col class="c5"/>
+                <col class="c5"/>
+                <col class="c5" />
+                <col class="c8" />
+                <col class="c5" />
+
+            </colgroup>
+
+            <tr style="background:yellow">
+                
+                <td style="color:green" class="center">排名</td>
+                <td style="color:green" class="center">藥局名稱</td>
+                <td style="color:green" class="center">總營業數</td>
+                <td style="color:green" class="center">實際開機時數</td>     
+                <td style="color:green"  class="center">設備使用率</td>
+
+            </tr>
+
+            @foreach(var item in Model.OrderByDescending(m => m.rate))
+            {
+                
+            <tr>
+             
+                <td>@(i)&nbsp</td>
+                <td>@(item.name)&nbsp</td>
+                <td>@(item.total_time.ToString())&nbsp</td>
+                <td>@(item.act_time.ToString())</td> 
+                <td>@(item.rate.ToString("F2") + "%")</td>            
+              
+
+            </tr>
+                i++;
+            }
+
+
+
+        </table>
+    </div>
+
+ 
+
+
+</body>
+</html>
+

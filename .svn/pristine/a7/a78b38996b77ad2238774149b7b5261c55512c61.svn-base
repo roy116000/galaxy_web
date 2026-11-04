@@ -1,0 +1,253 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Member_Buy>
+@{
+    Layout = null;  
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewBag.sd + " ~ " + ViewBag.ed + "會員轉單率報表")</title>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+
+            body div {
+                margin: 0px;
+                font-family: "新細明體";
+                font-size: 15px;
+            }
+
+        .bgg {
+            /*210*297  27.7 */
+            width: 30.0cm;
+            height: auto;
+        }
+
+        .pixeltable {
+            border: 1pt solid #000000;
+        }
+
+        .table {
+            width: 100%;
+            border: 1px solid #000000;
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 5px;
+            text-align: left;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .h3 {
+            line-height: 32px;
+        }
+
+        .c1 {
+            width: 1%;
+        }
+
+        .c2 {
+            width: 2%;
+        }
+
+        .c3 {
+            width: 3%;
+        }
+
+        .c4 {
+            width: 4%;
+        }
+
+        .c5 {
+            width: 5%;
+        }
+
+        .c6 {
+            width: 6%;
+        }
+
+        .c7 {
+            width: 7%;
+        }
+
+        .c8 {
+            width: 8%;
+        }
+
+        .c9 {
+            width: 9%;
+        }
+
+        .c10 {
+            width: 10%;
+        }
+
+        .c11 {
+            width: 11%;
+        }
+
+        .c12 {
+            width: 12%;
+        }
+
+        .c13 {
+            width: 13%;
+        }
+
+        .c14 {
+            width: 14%;
+        }
+
+        .c15 {
+            width: 15%;
+        }
+
+        .c16 {
+            width: 16%;
+        }
+
+        .c17 {
+            width: 17%;
+        }
+
+        .c18 {
+            width: 18%;
+        }
+
+        .c19 {
+            width: 19%;
+        }
+
+        .c20 {
+            width: 20%;
+        }
+
+        .c21 {
+            width: 21%;
+        }
+
+        .c22 {
+            width: 22%;
+        }
+
+        .c23 {
+            width: 23%;
+        }
+
+        .c24 {
+            width: 24%;
+        }
+
+        .c25 {
+            width: 25%;
+        }
+
+        .c30 {
+            width: 30%;
+        }
+
+        .c35 {
+            width: 35%;
+        }
+
+        .c100 {
+            width: 100%;
+        }
+
+        .info {
+            font: bold 19px/30px 標楷體;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bgg">
+        <div class="h3">＠查詢日期：@(ViewBag.sd + " ~ " + ViewBag.ed)</div>
+        <div class="h3">＠查詢筆數：@(Model.Count()) 筆</div>
+        <div class="h3">＠現正查詢：@(ViewBag.nowsearch)</div>
+
+        <table class="table" border="1">
+            <colgroup>
+             
+                <col class="c5"/>
+                <col class="c5"/>
+                <col class="c5" />
+                <col class="c8" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+                <col class="c5" />
+
+            </colgroup>
+
+            <tr style="background:yellow">
+                
+                <td style="color:green" class="center">地區</td>
+                <td style="color:green" class="center">藥局名稱</td>
+                <td style="color:green" class="center">總人數</td>
+                <td style="color:green" class="center">性別</td>     
+                <td style="color:green"  class="center">18-24歲</td>
+                <td style="color:green" class="center">25-34歲</td>
+                <td style="color:green" class="center">35-44歲</td>
+                <td style="color:green" class="center">45-54歲</td>
+                <td style="color:green" class="center">55-64歲</td>
+                <td style="color:green" class="center">總訂單數</td>
+                <td style="color:green" class="center">不重複訂單數</td>
+                <td style="color:green" class="center">購買率</td>
+                <td style="color:green" class="center">地區購買率</td>
+
+            </tr>
+
+            @foreach(var item in Model.OrderByDescending(m => m.area_buyrate))
+            {
+            <tr>
+             
+                <td>@(item.area)&nbsp</td>
+                <td>@(item.drugstore)&nbsp</td>
+                <td>@(item.area_total_member)&nbsp</td>
+                <td>男：@(item.m_member)&nbsp <br>女：@(item.f_member) <br> 未填性別：@(item.other_member)</td>             
+                <td>男：@(item.m_num_20.ToString("N0"))<br>女：@(item.f_num_20.ToString("N0"))&nbsp</td>
+                <td>男：@(item.m_num_20_29.ToString("N0"))<br>女：@(item.f_num_20_29.ToString("N0"))&nbsp</td>
+                <td>男：@(item.m_num_30_39.ToString("N0"))<br>女：@(item.f_num_30_39.ToString("N0"))&nbsp</td>
+                <td>男：@(item.m_num_40_49.ToString("N0"))<br>女：@(item.f_num_40_49.ToString("N0"))&nbsp</td>
+                <td>男：@(item.m_num_50_59.ToString("N0"))<br>女：@(item.f_num_50_59.ToString("N0"))&nbsp</td>
+                <td>男：@(item.m_allorder)<br>女：@(item.f_allorder)&nbsp</td>
+                <td>男：@(item.m_order_distinct)<br>女：@(item.f_order_distinct)&nbsp</td>
+                <td>男：@(item.m_member !=0 ? (Math.Round((decimal)item.m_order_distinct / item.m_member ,2)*100) : 0)%<br>女：@(item.f_member !=0 ? (Math.Round((decimal)item.f_order_distinct / item.f_member ,2)*100) : 0)%</td>
+@*                <td>@((item.area_total_member != 0 ? Math.Round((item.m_order_distinct + item.f_order_distinct) / Convert.ToDouble(item.area_total_member),2) : 0)*100)%&nbsp</td>*@
+                <td>@(item.area_buyrate.ToString("N0"))%&nbsp</td>
+            </tr>
+            }
+
+
+
+        </table>
+    </div>
+    <br>
+
+ 
+
+
+</body>
+</html>
+

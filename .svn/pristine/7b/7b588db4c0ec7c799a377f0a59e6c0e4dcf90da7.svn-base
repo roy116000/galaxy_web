@@ -1,0 +1,94 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class news4_data
+    {
+        [Key]
+        public int news_id { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("縣市地區")]
+        public int group_id { get; set; }
+
+        [DisplayName("縣市")]
+        public int city_id { get; set; }
+
+        [DisplayName("店家名稱")]
+        public string title { get; set; }
+
+        [DisplayName("地址")]
+        public string address { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("停車資訊")]
+        public string park { get; set; }
+
+        [DisplayName("營業時間")]
+        public string opentime { get; set; }
+
+        [DisplayName("服務專線")]
+        public string tel { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("公車資訊")]
+        public string cont { get; set; }
+
+        [DisplayName("店別代號")]
+        public string sn { get; set; }
+
+        [UIHint("Number")]
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("點閱率")]
+        public int hits { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage2")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage2 { get; set; }
+
+        //public virtual news4_group news_group { get; set; }
+
+    }
+
+
+
+}

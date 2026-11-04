@@ -1,0 +1,99 @@
+﻿@using MvcPaging
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwPharmacistController._Order>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    //var Flag = (List<ListItem>)ViewData["Flag"];
+    }
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            @*<col class="width4" />*@
+            <col class="width8" />
+            <col class="width8" />
+            @*<col class="width8" />*@
+            <col class="width8" />
+            @*<col class="width8" />*@
+            <col class="" />
+            @*<col class="width15" />*@
+            <col class="width6" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            @*<col class="width8" />*@
+            @*<col class="width10" />*@
+
+        </colgroup>
+        <thead>
+            <tr>
+                @*<th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>*@
+                <th class="center">訂單狀態</th>
+                <th class="center">訂購方</th>
+                @*<th class="center">訂購電話</th>*@
+                <th class="center">寄送方</th>
+                @*<th class="center">寄送電話</th>*@
+                @*<th class="center">寄送地址</th>*@
+                <th class="center">訂購商品</th>
+                <th class="center">數量</th>
+                <th class="center">金額</th>
+                <th class="center">訂購時間</th>
+                <th class="center">出貨時間</th>
+                <th class="center">完成時間</th>
+                @*<th>&nbsp;</th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var O = item.O;
+                var S = item.S;
+
+                int num = Array.IndexOf(Model.Select(m => m.O.order_id).ToArray(), item.O.order_id);
+
+                var ListItems = Gs.sList(NW.Name_flag, O.flag.ToString());
+               
+                <tr class="@NW.echoBool(true, "unread", "visible")" >
+                    @*<td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(O.order_id)" />
+                    </td>*@
+                    <td class="center">@(NW.Name_flag[O.flag])</td>
+                    @*<td class="center">@Html.SelectList("order_flag", ListItems)</td>*@
+                    <td class="center" title="@(O.order_phone)">@Html.DisplayFor(m => O.order_name)</td>
+                    @*<td class="center">@Html.DisplayFor(modelItem => O.order_phone)</td>*@
+                    <td class="center" title="@(O.send_phone) ~ @(O.send_address)">@Html.DisplayFor(m => O.send_name)</td>
+                    @*<td class="center">@Html.DisplayFor(modelItem => O.send_tel) </td>*@
+                    @*<td class="">@Html.DisplayFor(modelItem => O.send_address) </td>*@
+                    <td class="" title="@(S.FirstOrDefault().item_name)">@(NW.word(S.FirstOrDefault().item_name, 20, "..."))</td>
+                    <td class="right">@(S.FirstOrDefault().num)</td>
+                    <td class="right">@(O.total.ToString("N0"))</td>
+                    <td class="center">@(NW.getDate(O.order_datetime))</td>
+                    <td class="center">@(NW.getDate(O.export_datetime))</td>
+                    <td class="center">@(NW.getDate(O.finish_datetime))</td>
+
+                    @*<td class="center">
+                        <a onclick="Save('@(O.order_id)', '@(num)')" style="cursor:pointer">儲存</a>
+                        @Html.ActionLink("儲存", action.IndexOf("_ajax") > -1 ? action.Replace("List_ajax", "Edit") : action.Replace("List", "Edit"), new { id = O.order_id }, new { @class = "title" })
+                    </td>*@
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("sD", ViewBag.sD)
+            .AlwaysAddFirstPageNumber().AddRouteValue("eD", ViewBag.eD)
+            .AlwaysAddFirstPageNumber().AddRouteValue("flag", ViewBag.flag)
+            )
+
+    </div>
+
+</div>

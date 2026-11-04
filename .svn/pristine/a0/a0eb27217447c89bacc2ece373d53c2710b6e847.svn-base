@@ -1,0 +1,3039 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+using ClosedXML.Excel;
+using System.Text.RegularExpressions;
+
+
+
+using h365_web.Models;
+using MvcPaging;
+using System.IO;
+using System.Data.Entity;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwReportController : _BaseController
+    {
+
+        #region"月報表"
+
+        public class Order_All
+        {
+            public int year { get; set; }
+            public int mon { get; set; }
+            public int day { get; set; }
+            public int clear_num { get; set; }
+            public int clear_total { get; set; }
+            public int back_num { get; set; }
+            public int back_total { get; set; }
+            public int finish_num { get; set; }
+            public int finish_total { get; set; }
+            public double gross_total { get; set; }
+            public DateTime? date { get; set; }
+
+        }
+
+        public class Order
+        {
+            public List<order_data> Clear { get; set; }
+            public List<order_data> Back { get; set; }
+            public List<order_data> Finish { get; set; }
+
+        }
+
+        //報表共用
+        public List<Order_All> Monthly_Public(int year, int mon = 0, int day = 0)
+        {
+
+            List<Order_All> Order_All_s = new List<Order_All> { };
+
+            year = year != 0 ? year : DateTime.Today.Year; //年分
+            int[] month = mon == 0 ? Enumerable.Range(1, 12).ToArray() : Enumerable.Range((int)mon, 1).ToArray(); //月份
+            foreach (var item in month)
+            {
+
+                DateTime sD = new DateTime(year, item, 1); //起始日
+                DateTime eD = sD.AddMonths(1); //結束日
+
+                var Order_All = new NwReportController.Order_All { }; //建立新單
+                var Order = new List<order_data> { };
+
+                Order_All.year = year;
+                Order_All.mon = item;
+
+                var Linq = this._DB.order_data.Where(m => m.order_id > 0 && (m.order_datetime >= sD && m.order_datetime < eD)); //當月全部訂單
+
+                #region"取消訂單"
+
+                var Clear = Linq.Where(m => m.visible == false).OrderBy(m => m.order_id).ToList();
+                Order_All.clear_num = Clear.Count(); //訂單數量
+                Order_All.clear_total = Clear.Select(m => m.total).DefaultIfEmpty(0).Sum(); //訂單總計
+
+                //if (month.Count() == 1)
+                //{
+                //    Order = new List<order_data> { };
+
+                //    Order.AddRange(Clear);
+                //    ViewData["Clear"] = Order;
+                //}
+
+                #endregion
+
+                #region"退貨"
+
+                var Back = Linq.Where(m => m.back_datetime != null).OrderBy(m => m.order_id).ToList();
+                Order_All.back_num = Back.Count(); //訂單數量
+                Order_All.back_total = Back.Select(m => m.total).DefaultIfEmpty(0).Sum(); //訂單總計
+
+                //if (month.Count() == 1)
+                //{
+                //    Order = new List<order_data> { };
+                //    Order.AddRange(Back);
+                //    ViewData["Back"] = Order;
+                //}
+
+                #endregion
+
+                #region"完成交易"
+
+                var Finish = Linq.Where(m => m.finish_datetime != null && m.back_datetime == null).OrderBy(m => m.order_id).ToList();
+                Order_All.finish_num = Finish.Count(); //訂單數量
+                Order_All.finish_total = Finish.Select(m => m.total).DefaultIfEmpty(0).Sum(); //訂單總計
+                Order_All.gross_total = Math.Round(Finish.Select(m => m.total).DefaultIfEmpty(0).Sum() - Finish.Select(m => m.cost_total).DefaultIfEmpty(0).Sum()); //毛利總計
+
+                //if (month.Count() == 1)
+                //{
+                //    Order = new List<order_data> { };
+                //    Order.AddRange(Finish);
+                //    ViewData["Finish"] = Order;
+                //}
+
+                #endregion
+
+                if (month.Count() == 1) //月報表
+                {
+                    var Or = new Order();
+                    Or.Clear = Clear;
+                    Or.Back = Back;
+                    Or.Finish = Finish;
+
+                    Monthly_mon(day, sD, eD, Or); //月報表 + 日報表
+                }
+
+                Order_All_s.Add(Order_All);
+            }
+
+            return Order_All_s;
+        }
+
+        //月報表 + 日報表
+        public void Monthly_mon(int day, DateTime sD, DateTime eD, Order Order)
+        {
+            var Order_Mon_S = new List<Order_All> { };
+
+            if (day != 0)
+            {
+                sD = new DateTime(sD.Year, sD.Month, day);
+                eD = sD.AddDays(1);
+            }
+
+            foreach (var item in NW.EachDay(sD, eD.AddDays(-1))) //日期循環
+            {
+                var Order_Mon = new NwReportController.Order_All { }; //建立新單
+
+                Order_Mon.year = item.Year; //年
+                Order_Mon.mon = item.Month; //月
+                Order_Mon.day = item.Day; //日
+
+                #region"取消訂單"
+
+                var Clear = Order.Clear.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                Order_Mon.clear_num = Clear.Count();
+                Order_Mon.clear_total = Clear.Select(m => m.total).DefaultIfEmpty(0).Sum();
+
+                #endregion
+
+                #region"退貨"
+
+                var Back = Order.Back.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                Order_Mon.back_num = Back.Count();
+                Order_Mon.back_total = Back.Select(m => m.total).DefaultIfEmpty(0).Sum();
+
+                #endregion
+
+                #region"完成交易"
+
+                var Finish = Order.Finish.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                Order_Mon.finish_num = Finish.Count();
+                Order_Mon.finish_total = Finish.Select(m => m.total).DefaultIfEmpty(0).Sum();
+                Order_Mon.gross_total = Finish.Select(m => m.total).DefaultIfEmpty(0).Sum() - Finish.Select(m => m.cost_total).DefaultIfEmpty(0).Sum(); //毛利總計
+
+                #endregion
+
+                if (item.Day == day) //日報表
+                {
+                    var Order_Day = new Order();
+                    Order_Day.Clear = Clear;
+                    Order_Day.Back = Back;
+                    Order_Day.Finish = Finish;
+                    ViewData["Order_Day"] = Order_Day;
+                }
+
+                Order_Mon_S.Add(Order_Mon);
+            }
+
+            ViewData["Order_Mon_S"] = Order_Mon_S;
+        }
+
+        public ActionResult MonthlyList(int year = 0)
+        {
+            var data = Monthly_Public(year);
+
+            ViewBag.year = year;
+
+            return View(data);
+        }
+
+        public ActionResult MonthlyAdd(int year, int mon)
+        {
+            var data = Monthly_Public(year, mon);
+
+            return View(data);
+        }
+
+        public ActionResult MonthlyEdit(int year, int mon, int day)
+        {
+            var data = Monthly_Public(year, mon, day);
+
+            return View(data);
+        }
+
+
+        public class order_s
+        {
+            public int order_id { get; set; }
+            public int product_id { get; set; }
+            public int num { get; set; }
+            public int price { get; set; }
+            public int bonus { get; set; }
+            public int h_bonus { get; set; }
+            public DateTime? order_datetime { get; set; }
+            public string send_name { get; set; }
+            public double cost { get; set; }
+            public string item_name { get; set; }
+            public string item_no { get; set; }
+            public string name_company { get; set; }
+        }
+
+        [HttpPost]
+        public ActionResult MonthlyEditSave(int id) //日報表詳細內容
+        {
+            int status = 0;
+            string msg = null;
+
+            var data = this._DB.order_sub.Where(m => m.order_id == id).OrderBy(m => m.sub_id).Select(m => new order_s { order_id = m.order_id, product_id = m.product_id, num = m.num, price = m.price, cost = m.cost, item_name = m.item_name, item_no = m.item_no }).ToList();
+
+
+
+            //var data = this._DB.order_sub.Where(m => m.order_id == id).OrderBy(m => m.sub_id).ToList();
+
+            foreach (var item in data)
+            {
+                var data0 = this._DB.order_data.Where(m => m.order_id == item.order_id).FirstOrDefault();
+                var data1 = this._DB.solt_data.Where(m => m.order_id == data0.order_id).FirstOrDefault();
+                item.order_datetime = data0.order_datetime;
+                item.bonus = data0.bonus;
+                item.send_name = data0.send_name;
+                if (data1 != null)
+                {
+                    item.h_bonus = data1.prize;  //健康紅利
+                }
+                else { item.h_bonus = 0; }
+                var Product = this._DB.product_data.Where(m => m.product_id == item.product_id).FirstOrDefault();
+                if (Product == null) { msg = "查無商品"; }
+                else
+                {
+                    var Com = this._DB.company_data.Where(m => m.company_id == Product.company_id).FirstOrDefault();
+                    if (Com == null) { msg = "查無廠商"; }
+                    else
+                    {
+                        item.name_company = Com.name;
+                    }
+                }
+
+            }
+
+            return Json(new { data = data, msg = msg }, JsonRequestBehavior.AllowGet);
+
+        }
+
+        #endregion
+
+        #region"灌單報表"
+
+        public class order_m
+        {
+            public int id { get; set; } //項次
+            public DateTime? order_datetime { get; set; }
+            public int order_id { get; set; }
+            public string item_name { get; set; }
+            public double sales_total { get; set; }  //訂單業績
+            public string drugstore_name { get; set; }
+            public double drugstore_num { get; set; } //藥局分潤
+            public double partner_member_num { get; set; }  //加盟主分潤
+            public double partner_sales_num { get; set; }  //加盟經銷分潤
+            public double salesman_num { get; set; }  //業務經銷分潤
+            public double net_num { get; set; }   //耐特分潤
+        }
+
+        public ActionResult IrrigationList(string kw, DateTime? start_date, DateTime? end_date)
+        {
+
+            ViewBag.start = start_date;
+            ViewBag.end = end_date;
+            ViewBag.kw = kw;
+            var order = IrrigationEx(null, kw, start_date, end_date);
+            IPagedList order1 = order.OrderBy(m => m.id).ToPagedList(0, 20);
+            // IPagedList order2 = order1.ToPagedList(0, 20);
+
+
+
+            return View(order1);
+        }
+
+        public ActionResult IrrigationList_ajax(int page, string kw, DateTime? start_date, DateTime? end_date)
+        {
+            ViewBag.start = start_date;
+            ViewBag.end = end_date;
+            ViewBag.kw = kw;
+            var order = IrrigationEx(page, kw, start_date, end_date);
+
+            IPagedList order1 = order.OrderBy(m => m.id).ToPagedList(page - 1, 20);
+            // IPagedList order2 = order1.ToPagedList(currentPageIndex, 20);
+
+
+
+            return PartialView(RouteData.Values["action"].ToString(), order1);
+        }
+
+        public List<order_m> IrrigationEx(int? page, string k, DateTime? start, DateTime? end)
+        {
+
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            DateTime eD = DateTime.Today.AddDays(-10); //10天前
+
+
+            int id = 1;
+
+            var data = this._DB.partner_maori.Where(m => m.visible).FirstOrDefault(); //毛利分潤表
+
+            var data0 = this._DB.order_data.Where(m => m.visible && m.pay_visible && m.flag == 5);
+            var sub = this._DB.order_sub.Where(m => m.order_id > 0);
+            var solt = this._DB.solt_data.Where(m => m.order_id > 0);
+            var drug = this._DB.drugstore_data.Where(m => m.drugstore_id > 0);
+
+            var orderz = data0.Where(m => m.goods_datetime < eD && (m.order_name.Contains("XX") && m.order_phone.Contains("XX")));
+
+            if (start.HasValue && end.HasValue)
+            {
+                end = end.Value.AddHours(23).AddMinutes(59);
+                orderz = orderz.Where(m => m.order_datetime > start && m.order_datetime <= end);
+            }
+
+            var order1 = new List<order_m> { };
+
+            foreach (var item in orderz.ToList())
+            {
+                var order = new order_m { }; //新位置
+
+                var data2 = sub.Where(m => m.order_id == item.order_id).FirstOrDefault(); //訂單明細
+                var data3 = solt.Where(m => m.order_id == item.order_id).FirstOrDefault(); //健康紅利
+                var data4 = drug.Where(m => m.drugstore_id == item.drugstore_id).FirstOrDefault(); //藥局
+
+                if (data2 != null)
+                {
+                    order.order_datetime = item.order_datetime; //訂購時間
+                    order.item_name = data2 != null ? data2.item_name : ""; //品名
+                    order.sales_total = ((data2.price - data2.cost) * data2.num) - (data3 != null ? data3.prize : 0) - item.bonus;
+                    order.order_id = item.order_id; //訂單編號
+                    order.drugstore_name = data4.name; //藥局名稱
+
+                    double maori_all = order.sales_total * data.netsourcer_num; //(*1.1)             
+                    order.drugstore_num = Math.Floor(maori_all * (data.drugstore_num * 0.01));
+                    order.salesman_num = 0;
+                    order.partner_member_num = 0;
+                    order.partner_sales_num = 0;
+
+                    //order.partner_member_num = Math.Floor(maori_all * (data.partner_member_num * 0.01));
+                    //order.partner_sales_num = Math.Floor(maori_all * (data.partner_sales_num * 0.01));
+                    //order.salesman_num = Math.Floor(maori_all * (data.salesman_num * 0.01));
+                    order.net_num = Math.Floor(maori_all - (order.drugstore_num + order.partner_member_num + order.partner_sales_num + order.salesman_num));
+
+                    order1.Add(order);
+                }
+            }
+            var order2 = order1.OrderByDescending(m => m.order_datetime);
+            foreach (var item in order2)
+            {
+                item.id = id;
+                id++;
+            }
+
+
+            if (!string.IsNullOrEmpty(k))
+            {
+                order1.Where(m => m.item_name.Contains(k) || m.drugstore_name.Contains(k) || m.order_id.ToString().Contains(k));
+            }
+
+            return order1;
+        }
+
+        #endregion
+
+        #region"開機報表"
+
+        public class drug_list
+        {
+            public int drugstore_id { get; set; }
+            public string zip { get; set; }
+            public string name { get; set; }
+            public string drug_sales { get; set; }
+            public DateTime? date_s { get; set; }
+            public DateTime? date_e { get; set; }
+            public int open_days { get; set; }
+            public int open_num { get; set; }
+            public int open_par { get; set; }
+            public int order_num { get; set; }
+            public int order_total { get; set; }
+            public double order_cost { get; set; }
+            public double gross_profit { get; set; }
+            public double gross_margin { get; set; }
+
+        }
+
+        public IPagedList Public(int? page, string kw, DateTime? date)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+
+
+
+            var Linq = from m in this._DB.drugstore_data.Where(m => m.visible && m.uid != null).Select(m => new { m.drugstore_id, m.name, m.sales_id, m.zip })//藥局
+                       from mm in this._DB.drugstore_datao.Where(x => x.drugstore_id == m.drugstore_id).DefaultIfEmpty()
+                       from m2 in this._DB.drugstore_sales.Where(x => x.sales_id == m.sales_id).DefaultIfEmpty() //藥局業務
+                       from m3 in this._DB.zip_data.Where(z => z.zip == m.zip).DefaultIfEmpty()
+                       join m4 in this._DB.drugstore_loging.Select(x => new { x.id, x.drugstore_id, x.loging_time }) on m.drugstore_id equals m4.drugstore_id into mm4
+                       join m5 in this._DB.order_data on m.drugstore_id equals m5.drugstore_id into mm5
+                       select new h365_web.Areas.newweb.Controllers.NwReportController.drug_list()
+                       {
+                           drugstore_id = m.drugstore_id, //藥局編號
+                           zip = m3.city + "-" + m3.canton,
+                           name = m.name, //藥局名稱
+                           drug_sales = m2.name, //藥局業務
+                           date_s = mm4.OrderBy(x => x.id).FirstOrDefault().loging_time,
+                           date_e = mm4.OrderByDescending(x => x.id).FirstOrDefault().loging_time,
+                           open_num = mm4.Select(x => x.loging_time.Value.Day).Distinct().Count(),
+                           order_num = mm5.Count(),
+                           order_total = mm5.Select(x => x.total).DefaultIfEmpty().Sum(),
+                           order_cost = mm5.Select(x => x.cost_total).DefaultIfEmpty().Sum()
+                       };
+
+
+            #region"分類標籤"
+
+            var gData = Linq.Where(m => m.date_e >= DateTime.Today);
+            ViewBag.count = gData.AsEnumerable().Count();  //從queryable轉Enumerable 計數才正確     
+
+            #endregion
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                //var date1 = kw.Replace("-", "/");
+                Linq = Linq.Where(m => m.name.Contains(kw));
+                ViewBag.kw = kw;
+
+            }
+            else if (date != null)
+            {
+                Linq = gData;
+                ViewBag.status = 1; //分類頁籤用
+            }
+
+            IPagedList data = Linq.OrderByDescending(m => m.date_s != null).ThenByDescending(m => m.order_total).ThenByDescending(m => m.drugstore_id).ToPagedList(currentPageIndex, 500);
+
+
+            return data;
+
+        }
+
+        public ActionResult MList(string kw, DateTime? date)
+        {
+
+            IPagedList data = Public(null, kw, date);
+
+            return View(data);
+        }
+
+        public ActionResult MList_ajax(int? page, string kw, DateTime? date)
+        {
+
+            IPagedList data = Public(page, kw, date);
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult MEdit(string kw0, int? status)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+            Title = "開機報表";
+            Header = "地區,藥局名稱,業務,天數,開機-起,開機-結,開機次數,開機率,訂單數,訂單業績,訂單成本,毛利額,毛利率";
+
+            var Linq = from m in this._DB.drugstore_data.Where(m => m.visible && m.uid != null).Select(m => new { m.drugstore_id, m.name, m.sales_id, m.zip })//藥局
+                       from mm in this._DB.drugstore_datao.Where(x => x.drugstore_id == m.drugstore_id).DefaultIfEmpty()
+                       from m2 in this._DB.drugstore_sales.Where(x => x.sales_id == m.sales_id).DefaultIfEmpty() //藥局業務
+                       from m3 in this._DB.zip_data.Where(z => z.zip == m.zip).DefaultIfEmpty()
+                       join m4 in this._DB.drugstore_loging.Select(x => new { x.id, x.drugstore_id, x.loging_time }) on m.drugstore_id equals m4.drugstore_id into mm4
+                       join m5 in this._DB.order_data on m.drugstore_id equals m5.drugstore_id into mm5
+                       select new h365_web.Areas.newweb.Controllers.NwReportController.drug_list()
+                       {
+                           drugstore_id = m.drugstore_id, //藥局編號
+                           zip = m3.city + "-" + m3.canton,
+                           name = m.name, //藥局名稱
+                           drug_sales = m2.name, //藥局業務
+                           date_s = mm4.OrderBy(x => x.id).FirstOrDefault().loging_time,
+                           date_e = mm4.OrderByDescending(x => x.id).FirstOrDefault().loging_time,
+                           open_num = mm4.Select(x => x.loging_time.Value.Day).Distinct().Count(),
+                           order_num = mm5.Count(),
+                           order_total = mm5.Select(x => x.total).DefaultIfEmpty().Sum(),
+                           order_cost = mm5.Select(x => x.cost_total).DefaultIfEmpty().Sum()
+                       };
+
+            if (!string.IsNullOrEmpty(kw0))
+            {
+                Linq = Linq.Where(m => m.name.Contains(kw0));
+            }
+            else if (status == 1)
+            {
+                Linq = Linq.Where(m => m.date_e >= DateTime.Today);
+            }
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+            int r = 1; //排名
+            foreach (var item in Linq.OrderByDescending(m => m.date_s != null).ThenByDescending(m => m.order_total).ThenByDescending(m => m.drugstore_id))
+            {
+                num = 1; //從第一欄位開始
+
+                item.order_cost = NW.Math_gRound(item.order_cost, 2);
+                item.open_days = DateTime.Now.Subtract((item.date_s.HasValue) ? (DateTime)item.date_s : DateTime.Now).Days;
+                item.open_par = (item.open_num != 0 && item.open_days != 0) ? (item.open_num * 100 / item.open_days) : 0;
+                item.gross_profit = NW.Math_gRound(item.order_total - item.order_cost, 2); //毛利額
+                item.gross_margin = item.gross_profit != 0 ? NW.Math_gRound((item.gross_profit * 100 / item.order_total), 2) : 0; //毛利率
+                string s = NW.getDate(item.date_s);
+                string e = NW.getDate(item.date_e);
+
+
+                List<string> data = new List<string> { };
+
+                data.Add(item.zip);
+                data.Add(item.name);
+                data.Add(item.drug_sales);
+                data.Add(item.open_days.ToString("N0"));
+                data.Add(s);
+                data.Add(e);
+                data.Add(item.open_num.ToString("N0"));
+                data.Add(item.open_par.ToString("N0") + "%");
+                data.Add(item.order_num.ToString("N0"));
+                data.Add("$" + item.order_total.ToString("N0"));
+                data.Add("$" + item.order_cost.ToString("N2"));
+                data.Add("$" + item.gross_profit.ToString("N2"));
+                data.Add(item.gross_margin.ToString("F2") + "%");
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                rowIdx++; //下一筆資料
+                r++;
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+        #endregion
+
+        #region "監控列表"
+
+        public ActionResult List()
+        {
+            var data = new drugstore_data();
+            data.datetime = DateTime.Now;
+
+
+            return View(data);
+        }
+
+
+        public ActionResult Edit(DateTime? datetime)  //監控匯出表
+        {
+
+            var data = this._DB.drugstore_loging.Where(m => DbFunctions.DiffDays(m.loging_time, datetime) == 0).OrderBy(m => m.drugstore_id).Select(m => m.drugstore_id).Distinct().ToList();
+            var onlineddata = new List<drugstore_data>();
+            foreach (var item in data)
+            {
+                var onlineddataget = this._DB.drugstore_data.Where(m => m.drugstore_id == item && m.uid != null && m.visible).OrderBy(m => m.drugstore_id).FirstOrDefault();
+                if (onlineddataget != null)
+                {
+
+                    onlineddata.Add(onlineddataget);
+                }
+
+            }
+
+            //判斷地址是否包含ZIP
+            foreach (var item in onlineddata)
+            {
+                var data2 = this._DB.drugstore_loging.Where(m => m.drugstore_id == item.drugstore_id && DbFunctions.DiffDays(m.loging_time, datetime) == 0).OrderBy(m => m.drugstore_id).Select(m => m.loging_time.Value.Hour).Distinct().ToList();
+
+
+                var zipdata = this._DB.zip_data.Where(m => m.zip == item.zip).FirstOrDefault();
+                string city_canton = zipdata.city + zipdata.canton;
+                item.address = city_canton + item.address.Replace(city_canton, "");
+
+
+
+
+
+
+                //預設X
+                item.a = "X";
+                item.b = "X";
+                item.c = "X";
+                item.d = "X";
+                item.e = "X";
+                item.f = "X";
+                item.g = "X";
+                item.h = "X";
+                item.i = "X";
+                item.j = "X";
+                item.k = "X";
+                item.l = "X";
+                item.m = "X";
+                item.n = "X";
+                item.o = "X";
+                item.p = "X";
+                item.q = "X";
+                item.r = "X";
+                item.s = "X";
+                item.t = "X";
+                item.u = "X";
+                item.v = "X";
+                item.w = "X";
+                item.x = "X";
+
+
+
+
+                foreach (var item2 in data2)
+                {
+
+
+                    switch (item2)
+                    {
+                        case 0:
+                            item.a = "O";
+                            break;
+                        case 1:
+                            item.b = "O";
+                            break;
+                        case 2:
+                            item.c = "O";
+                            break;
+                        case 3:
+                            item.d = "O";
+                            break;
+                        case 4:
+                            item.e = "O";
+                            break;
+                        case 5:
+                            item.f = "O";
+                            break;
+                        case 6:
+                            item.g = "O";
+                            break;
+                        case 7:
+                            item.h = "O";
+                            break;
+                        case 8:
+                            item.i = "O";
+                            break;
+                        case 9:
+                            item.j = "O";
+                            break;
+                        case 10:
+                            item.k = "O";
+                            break;
+                        case 11:
+                            item.l = "O";
+                            break;
+                        case 12:
+                            item.m = "O";
+                            break;
+                        case 13:
+                            item.n = "O";
+                            break;
+                        case 14:
+                            item.o = "O";
+                            break;
+                        case 15:
+                            item.p = "O";
+                            break;
+                        case 16:
+                            item.q = "O";
+                            break;
+                        case 17:
+                            item.r = "O";
+                            break;
+                        case 18:
+                            item.s = "O";
+                            break;
+                        case 19:
+                            item.t = "O";
+                            break;
+                        case 20:
+                            item.u = "O";
+                            break;
+                        case 21:
+                            item.v = "O";
+                            break;
+                        case 22:
+                            item.w = "O";
+                            break;
+                        case 23:
+                            item.x = "O";
+                            break;
+
+                    }
+
+                }
+            }
+
+
+            //為上線藥局
+            var offlineddata = this._DB.drugstore_data.Where(m => m.uid != null && m.visible).OrderBy(m => m.drugstore_id).ToList();
+
+            foreach (var item in data)
+            {
+
+                var ddata = this._DB.drugstore_data.Where(m => m.drugstore_id == item).FirstOrDefault();
+
+                offlineddata.Remove(ddata);
+            }
+            foreach (var item in offlineddata)
+            {
+
+                var zipdata = this._DB.zip_data.Where(m => m.zip == item.zip).FirstOrDefault();
+                string city_canton = zipdata.city + zipdata.canton;
+                item.address = city_canton + item.address.Replace(city_canton, "");
+            }
+
+
+            ViewBag.datetime = datetime;
+            ViewBag.offlineddata = offlineddata.OrderBy(m => m.zip);
+            ViewBag.offlineddatanum = offlineddata.Count();
+            var allnum = this._DB.drugstore_data.Where(m => m.uid != null && m.visible).Count();
+            ViewBag.allnum = allnum;
+
+
+
+            return View(onlineddata.OrderBy(m => m.zip).ToList());
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(drugstore_data drugstore_data, HosTime times, VmImage imgs, HttpPostedFileBase file_name, IEnumerable<string> business_project, IEnumerable<string> holidays)
+        {
+            var data = this._DB.drugstore_data.Find(drugstore_data.drugstore_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                if (data.drug_sn != drugstore_data.drug_sn)
+                {
+                    var drug = this._DB.drugstore_data.Where(m => m.drug_sn == drugstore_data.drug_sn).FirstOrDefault();
+                    if (drug != null) { TempData["jgrowl"] = "機構代碼重複"; return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = drugstore_data.drugstore_id }); }
+                }
+
+
+                var admin = NW.admin(User.Identity.Name);
+
+                data.sales_id = drugstore_data.sales_id;
+                data.name = drugstore_data.name;
+
+                #region "藥局資訊"
+
+                #region "基本資料"
+
+                data.ishealth = drugstore_data.ishealth;
+                data.drug_type = drugstore_data.drug_type;
+                data.drug_sn = drugstore_data.drug_sn;
+                data.boss = drugstore_data.boss;
+                data.tel = drugstore_data.tel;
+                data.fax = drugstore_data.fax;
+                data.zip = drugstore_data.zip;
+                data.address = drugstore_data.address;
+                data.info = drugstore_data.info;
+
+                if (holidays == null)
+                {
+                    data.holidays = "";
+                }
+                else
+                {
+                    data.holidays = string.Join(",", holidays);
+                }
+
+                if (business_project == null)
+                {
+                    data.business_project = "";
+                }
+                else
+                {
+                    data.business_project = string.Join(",", business_project);
+                }
+
+                #endregion
+
+                #region "聯絡人資訊"
+
+                data.contact_name = drugstore_data.contact_name;
+                data.contact_tel = drugstore_data.contact_tel;
+                data.contact_fax = drugstore_data.contact_fax;
+                data.contact_phone = drugstore_data.contact_phone;
+                data.contact_mail = drugstore_data.contact_mail;
+
+                #endregion
+
+                #region "稅籍資料"
+
+                data.taxes = drugstore_data.taxes;
+                data.uniform_numbers = drugstore_data.uniform_numbers;
+                data.invoice_title = drugstore_data.invoice_title;
+                data.invoice_type = drugstore_data.invoice_type;
+                data.facebook = drugstore_data.facebook;
+                data.url = drugstore_data.url;
+
+                #endregion
+
+                #endregion
+
+                #region "方案選擇"
+
+                data.program_flag = drugstore_data.program_flag;
+
+                #endregion
+
+                data.contact_title = drugstore_data.contact_title;
+                data.visible_index = drugstore_data.visible_index;
+                data.start_date = drugstore_data.start_date;
+                data.end_date = drugstore_data.end_date;
+                //data.note = drugstore_data.note;
+                data.drugstore_sn = drugstore_data.drugstore_sn;
+                data.full_name = drugstore_data.full_name;
+                data.open_time = drugstore_data.open_time;
+
+                //data.uid = drugstore_data.uid;
+                //data.pwd = "0000";
+                //data.inx = drugstore_data.inx;
+                //data.mail = drugstore_data.mail;
+                //data.login_pwd = drugstore_data.pwd;
+                //string pwdmd5 = NW.MD5(data.login_pwd);
+                //data.login_pwd_md5 = pwdmd5;
+                //data.create_datetime = DateTime.Now;
+                //data.create_user = User.Identity.Name;
+
+                //data.pay_flag = 1;
+                //data.visible = false;
+
+                #region "歷史備註記錄"
+
+                var data9 = new msg_note { };
+                if (admin.power_id == 2)
+                {
+                    if (!string.IsNullOrEmpty(drugstore_data.note))
+                    {
+
+                        data9.drugstore_id = drugstore_data.drugstore_id;
+                        data9.note = drugstore_data.note;
+                        data9.note_time = DateTime.Now;
+
+                        _DB.msg_note.Add(data9);
+                        this._DB.SaveChanges();
+                    }
+
+                }
+
+                #endregion
+
+                if (data.sales_id != 0 && data.pay_flag == 0)
+                {
+                    data.pay_flag = 1;
+                }
+
+
+                data.contract_start = drugstore_data.contract_start;
+                data.contract_end = drugstore_data.contract_end;
+
+                data.change_datetime = DateTime.Now;
+                data.change_user = User.Identity.Name;
+
+                #region "審核"
+
+                if (admin.power_id == 2)
+                {
+
+                    switch (drugstore_data.pay_flag)
+                    {
+
+                        //裝機中
+                        case 2:
+                            data.pay_flag = Convert.ToInt32(NW.pay_flag.已裝機);
+                            data.mail = data.tel.Trim().Replace("-", "") + "@netsourcer.com.tw";
+                            data.login_pwd = data.pwd;
+                            data.login_pwd_md5 = NW.MD5(data.pwd);
+                            data.visible = true;
+
+                            DateTime pay_start = data.contract_start.Value;
+                            if (data.contract_start.Value.Day < 15)
+                            {
+                                data.pay_start = new DateTime(pay_start.Year, pay_start.Month, 15);
+                            }
+                            else
+                            {
+                                pay_start = pay_start.AddMonths(1);
+                                data.pay_start = new DateTime(pay_start.Year, pay_start.Month, 1);
+                            }
+
+                            TempData["jgrowl"] = "裝機中";
+
+                            if (data.admin_id == 0)
+                            {
+                                var data2 = new sys_admin_data2 { };
+                                data2.power_id = 8;
+                                data2.uid = data.mail;
+                                data2.pwd = data.pwd;
+                                data2.pwd_md5 = NW.MD5(data.pwd);
+                                data2.visible = true;
+                                data2.start_date = DateTime.Now;
+                                data2.name = data.name;
+                                //data2.pharmacist_sn = null;
+                                //data2.tel = partner_data.phone;
+                                //data2.phone = partner_data.phone;
+                                data2.mail = data.mail;
+                                //data2.address = partner_data.address;
+                                data2.create_datetime = DateTime.Now;
+                                data2.create_user = User.Identity.Name;
+
+                                _DB.sys_admin_data1.Add(data2);
+                                this._DB.SaveChanges();
+                            }
+
+                            var adata = this._DB.sys_admin_data1.Where(m => m.uid == data.mail).FirstOrDefault();
+                            if (adata != null)
+                            {
+                                data.admin_id = adata.admin_id;
+                            }
+
+                            break;
+
+
+                        //綁定審核通過
+                        case 0:
+                            if (data.drugstore_id != 0)
+                            {
+                                data.pay_flag = Convert.ToInt32(NW.pay_flag.簽約未完成);
+                            }
+                            else
+                            {
+                                TempData["jgrowl"] = "簽約未完成";
+                            }
+
+                            break;
+
+                        case 1:
+                            data.pay_flag = Convert.ToInt32(NW.pay_flag.已開發);
+                            data.visible = false;
+                            break;
+
+
+                        case 3:
+                            data.pay_flag = Convert.ToInt32(NW.pay_flag.完成簽約);
+                            TempData["jgrowl"] = "完成簽約";
+                            break;
+                    }
+                }
+
+                #endregion
+
+                if (file_name != null && file_name.ContentLength > 0)
+                {
+                    string water = NW.getImgWater();
+
+                    string tmpPath = Server.MapPath("~/Content/images/" + RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower());
+
+                    if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); }
+
+                    //新的檔案名稱
+                    string strFileName = water + "1" + Path.GetExtension(file_name.FileName);
+                    //存放檔案路徑
+                    string strFilePath = tmpPath + "/" + file_name.FileName;
+                    //存放檔案路徑
+                    string strFilePath2 = tmpPath + "/" + strFileName;
+                    //檔案存放在Server
+                    file_name.SaveAs(strFilePath);
+
+                    data.file_name = file_name.FileName;
+
+                }
+
+
+
+                this._DB.SaveChanges();
+
+                #region "現場勘查(圖片)"
+
+                // inx 1 藥局外觀 2 招牌 3 內部環境 4 藥師照片 5 預計安裝位置
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new drug_image();
+                        imgData.drugstore_id = data.drugstore_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = i + 1;
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.drug_image.Add(imgData);
+                            _DB.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        //var imgData = _DB.drug_image.Find(imgs.img_id[i]);
+                        int img_id = imgs.img_id[i];
+                        int img_inx = imgs.img_inx[i];
+                        var imgData = _DB.drug_image.Where(m => m.imgs_id == img_id && m.img_inx == img_inx).FirstOrDefault();
+                        if (imgData != null)
+                        {
+                            if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                            {
+                                _DB.drug_image.Remove(imgData);
+                            }
+                            else
+                            {
+                                imgData.drugstore_id = drugstore_data.drugstore_id;
+                                imgData.s_img = imgs.s_img[i].ToString();
+                                imgData.b_img = imgs.b_img[i].ToString();
+                                imgData.img_info = imgs.img_info[i].ToString();
+                                //imgData.img_inx = imgs.img_inx[i];
+                            }
+                            _DB.SaveChanges();
+                        }
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+
+                #region "營業時間"
+
+                for (int i = 0; i < times.tdrugstore_id.Count; i++)
+                {
+                    if (times.tdrugstore_id[i] == 0)
+                    {
+                        var timeData = new durg_time();
+                        timeData.drugstore_id = data.drugstore_id;
+                        timeData.time_interval = times.time_interval[i];
+                        timeData.sHM_hour = times.sHM_hour[i];
+                        timeData.sHM_minute = times.sHM_minute[i];
+                        timeData.eHM_hour = times.eHM_hour[i];
+                        timeData.eHM_minute = times.eHM_minute[i];
+
+                        timeData.inx = times.inx[i];
+
+                        switch (timeData.inx)
+                        {
+                            case 1:
+                                if (times.day1 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day1);
+                                }
+                                break;
+
+                            case 2:
+                                if (times.day2 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day2);
+                                }
+                                break;
+
+                            case 3:
+                                if (times.day3 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day3);
+                                }
+                                break;
+                        }
+
+                        if (timeData.drugstore_id != 0)
+                        {
+                            //新增
+                            _DB.durg_time.Add(timeData);
+                            _DB.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var timeData = _DB.durg_time.Find(times.time_id[i]);
+                        if (times.tdrugstore_id[i] != 0)
+                        {
+
+                            timeData.time_interval = times.time_interval[i];
+                            timeData.sHM_hour = times.sHM_hour[i];
+                            timeData.sHM_minute = times.sHM_minute[i];
+                            timeData.eHM_hour = times.eHM_hour[i];
+                            timeData.eHM_minute = times.eHM_minute[i];
+                            timeData.inx = times.inx[i];
+
+                            switch (timeData.inx)
+                            {
+                                case 1:
+                                    if (times.day1 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day1);
+                                    }
+                                    break;
+
+                                case 2:
+                                    if (times.day2 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day2);
+                                    }
+                                    break;
+
+                                case 3:
+                                    if (times.day3 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day3);
+                                    }
+                                    break;
+                            }
+
+                            _DB.SaveChanges();
+                        }
+
+                    }
+
+                }
+
+                #endregion
+
+                drugstore_data.drugstore_id = data.drugstore_id;
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = drugstore_data.drugstore_id });
+        }
+
+        public ActionResult Add(int? id)
+        {
+
+            drugstore_data data = new drugstore_data();
+            data.inx = 0;
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+
+
+            //取縣市
+            ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+            //取鄉鎮區
+            ViewData["zip"] = NW.zipData(2, data.zip);
+
+
+            //推廣藥局業務
+            var admin = NW.admin(User.Identity.Name);
+            int pid = NW.partnerID((int)admin.power_id, admin.admin_id);
+            var pdata = this._DB.drugstore_dealer.Where(m => m.dealer_id == pid).FirstOrDefault();
+            switch (admin.power_id)
+            {
+                case 10:
+                    var sdata = this._DB.drugstore_sales.Where(m => m.dealer_id == pid).ToList();
+                    ViewData["sdata"] = sdata;
+                    pdata = this._DB.drugstore_dealer.Where(m => m.dealer_id == pid).FirstOrDefault();
+                    ViewData["pdata"] = pdata;
+                    break;
+
+                case 9:
+                    var sales_data = this._DB.drugstore_sales.Where(m => m.sales_id == pid).FirstOrDefault();
+                    pdata = this._DB.drugstore_dealer.Where(m => m.dealer_id == sales_data.dealer_id).FirstOrDefault();
+                    ViewData["pdata"] = pdata;
+                    ViewData["sales_data"] = sales_data;
+
+                    break;
+            }
+
+            //List<ListItem> ListItems = new List<ListItem> { };
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            //foreach (var item in sdata)
+            //{
+            //    ListItems.Add(new ListItem(item.sales_id.ToString(), item.name, false));
+            //}
+            //ViewData["sales_id"] = ListItems;
+            //取鄉鎮區
+            ViewData["sales_id"] = NW.drugsalesData(2, 0);
+
+            ViewData["sales_id_chained"] = NW.drugsalesData(1, 0);
+
+
+            //ViewData["UploadImage2"] = new List<images_data>();
+
+            for (int i = 1; i <= 5; i++)
+            {
+                images_data imgData = new images_data();
+
+                ViewData["uploadimage" + i.ToString()] = imgData;
+            }
+
+            List<times_data> timeData = new List<times_data>();
+
+            int sflag = 1;
+            List<ListItem> ListItems2 = new List<ListItem> { };
+            foreach (var item in NW.Flag_Drug)
+            {
+
+                ListItems2.Add(new ListItem(sflag.ToString(), NW.Flag_Drug[sflag - 1], data.pay_flag == sflag));
+
+                sflag++;
+            }
+            ViewData["check_flag"] = ListItems2;
+
+
+
+            //多選
+            List<ListItem> ListItems3 = new List<ListItem> { };
+            foreach (string bs in NW.business_project_name)
+            {
+                bool icon = false;
+                if (!string.IsNullOrEmpty(data.business_project))
+                {
+                    icon = (data.business_project.Contains(bs));
+                }
+                ListItems3.Add(new ListItem(bs, bs, icon));
+            }
+            ViewData["business_project"] = ListItems3;
+
+            //方案選擇
+            int sflag2 = 1;
+            List<ListItem> ListItems9 = new List<ListItem> { };
+            ListItems9.Add(new ListItem("", "請選擇", false));
+            foreach (var item in NW.program_flag_name.Reverse())
+            {
+
+                ListItems9.Add(new ListItem(sflag2.ToString(), item, false));
+
+                sflag2++;
+            }
+            ViewData["program_flag"] = ListItems9;
+            ViewData["times"] = timeData;
+
+
+            //公休日
+            List<ListItem> ListItems5555 = new List<ListItem> { };
+            foreach (string bs in NW.holidays)
+            {
+                bool icon = false;
+                if (!string.IsNullOrEmpty(data.holidays))
+                {
+                    icon = (data.holidays.Contains(bs));
+                }
+                ListItems5555.Add(new ListItem(bs, bs, icon));
+            }
+
+            ViewData["holidays"] = ListItems5555;
+
+            data.ishealth = "否";
+            ListItems5555 = new List<ListItem> { };
+            foreach (string ish in NW.ishealth)
+            {
+                string[] healthInd = ish.Split(':');
+
+                string ishealth_value = healthInd[0];
+                string ishealth_name = healthInd[1];
+
+                ListItems5555.Add(new ListItem(ishealth_value, ishealth_name, ishealth_value == data.ishealth));
+            }
+            ViewData["ishealth"] = ListItems5555;
+
+            ListItems5555 = new List<ListItem> { };
+            foreach (string dtype in NW.drug_type)
+            {
+                ListItems5555.Add(new ListItem(dtype, dtype, false));
+            }
+            ViewData["drug_type"] = ListItems5555;
+
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            data.pay_flag = 1;
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult AddSave(drugstore_data drugstore_data, string checkpwd, HosTime times, VmImage imgs, HttpPostedFileBase file_name, IEnumerable<string> business_project, IEnumerable<string> holidays)
+        {
+            //var maildata = this._DB.sys_admin_data.Where(m => m.uid == drugstore_data.mail).FirstOrDefault();
+            //if (maildata != null)
+            //{
+            //    TempData["jgrowl"] = "信箱重複!!";
+            //    return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Add"), new { id = 0 });
+            //}
+
+            if (drugstore_data.pwd != checkpwd)
+            {
+                TempData["jgrowl"] = "密碼有問題!!";
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Add"), new { id = 0 });
+            }
+
+
+            var drug = this._DB.drugstore_data.Where(m => m.drug_sn == drugstore_data.drug_sn).FirstOrDefault();
+            if (drug != null) { TempData["jgrowl"] = "此藥局已存在"; return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Add"), new { id = 0 }); }
+
+            //var drug2 = this._DB.drugstore_data.Where(m => m.uniform_numbers == drugstore_data.uniform_numbers).FirstOrDefault();
+            //if (drug2 != null) { TempData["jgrowl"] = "統一編號重複"; return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Add"), new { id = 0 }); }
+
+            var data = new drugstore_data { };
+            var data2 = new sys_admin_data2 { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+
+                data.sales_id = drugstore_data.sales_id;
+                data.name = drugstore_data.name;
+
+                #region "藥局資訊"
+
+                #region "基本資料"
+
+                data.ishealth = drugstore_data.ishealth;
+                data.drug_type = drugstore_data.drug_type;
+                data.drug_sn = drugstore_data.drug_sn;
+                data.boss = drugstore_data.boss;
+                data.tel = drugstore_data.tel;
+                data.fax = drugstore_data.fax;
+                data.zip = drugstore_data.zip;
+                data.address = drugstore_data.address;
+                data.info = drugstore_data.info;
+
+                if (holidays == null)
+                {
+                    data.holidays = "";
+                }
+                else
+                {
+                    data.holidays = string.Join(",", holidays);
+                }
+
+                if (business_project == null)
+                {
+                    data.business_project = "";
+                }
+                else
+                {
+                    data.business_project = string.Join(",", business_project);
+                }
+
+                #endregion
+
+                #region "聯絡人資訊"
+
+                data.contact_name = drugstore_data.contact_name;
+                data.contact_tel = drugstore_data.contact_tel;
+                data.contact_fax = drugstore_data.contact_fax;
+                data.contact_phone = drugstore_data.contact_phone;
+                data.contact_mail = drugstore_data.contact_mail;
+
+                #endregion
+
+                #region "稅籍資料"
+
+                data.taxes = drugstore_data.taxes;
+                data.uniform_numbers = drugstore_data.uniform_numbers;
+                data.invoice_title = drugstore_data.invoice_title;
+                data.invoice_type = drugstore_data.invoice_type;
+                data.facebook = drugstore_data.facebook;
+                data.url = drugstore_data.url;
+
+                #endregion
+
+                #endregion
+
+                #region "方案選擇"
+
+                data.program_flag = drugstore_data.program_flag;
+
+                #endregion
+
+                data.contact_title = drugstore_data.contact_title;
+                data.visible_index = drugstore_data.visible_index;
+                data.start_date = drugstore_data.start_date;
+                data.end_date = drugstore_data.end_date;
+                //data.note = drugstore_data.note;
+                data.drugstore_sn = drugstore_data.drugstore_sn;
+                data.full_name = drugstore_data.full_name;
+                data.open_time = drugstore_data.open_time;
+
+                //data.uid = drugstore_data.uid;
+                data.pwd = "0000";
+                //data.inx = drugstore_data.inx;
+                data.mail = drugstore_data.mail;
+                //data.login_pwd = drugstore_data.pwd;
+                //string pwdmd5 = NW.MD5(data.login_pwd);
+                //data.login_pwd_md5 = pwdmd5;
+                data.create_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+
+                data.pay_flag = 1;
+                data.visible = false;
+
+                //data.change_datetime = DateTime.Now.AddDays(10);
+                //data.change_user = User.Identity.Name;                
+
+                _DB.drugstore_data.Add(data);
+                this._DB.SaveChanges();
+
+                #region "現場勘查(圖片)"
+
+                // inx 1 藥局外觀 2 招牌 3 內部環境 4 藥師照片 5 預計安裝位置
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new drug_image();
+                        imgData.drugstore_id = data.drugstore_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = i + 1;
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.drug_image.Add(imgData);
+                            _DB.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        //var imgData = _DB.drug_image.Find(imgs.img_id[i]);
+                        var imgData = _DB.drug_image.Where(m => m.imgs_id == imgs.img_id[i] && m.img_inx == imgs.img_inx[i]).FirstOrDefault();
+                        if (imgData != null)
+                        {
+                            if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                            {
+                                _DB.drug_image.Remove(imgData);
+                            }
+                            else
+                            {
+                                imgData.drugstore_id = drugstore_data.drugstore_id;
+                                imgData.s_img = imgs.s_img[i].ToString();
+                                imgData.b_img = imgs.b_img[i].ToString();
+                                imgData.img_info = imgs.img_info[i].ToString();
+                                //imgData.img_inx = imgs.img_inx[i];
+                            }
+                            _DB.SaveChanges();
+                        }
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+
+                #region "營業時間"
+
+                for (int i = 0; i < times.tdrugstore_id.Count; i++)
+                {
+                    if (times.tdrugstore_id[i] == 0)
+                    {
+                        var timeData = new durg_time();
+                        timeData.drugstore_id = data.drugstore_id;
+                        timeData.time_interval = times.time_interval[i];
+                        timeData.sHM_hour = times.sHM_hour[i];
+                        timeData.sHM_minute = times.sHM_minute[i];
+                        timeData.eHM_hour = times.eHM_hour[i];
+                        timeData.eHM_minute = times.eHM_minute[i];
+
+                        timeData.inx = times.inx[i];
+
+                        switch (timeData.inx)
+                        {
+                            case 1:
+                                if (times.day1 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day1);
+                                }
+                                break;
+
+                            case 2:
+                                if (times.day2 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day2);
+                                }
+                                break;
+
+                            case 3:
+                                if (times.day3 != null)
+                                {
+                                    timeData.day = string.Join(",", times.day3);
+                                }
+                                break;
+                        }
+
+                        if (timeData.drugstore_id != 0)
+                        {
+                            //新增
+                            _DB.durg_time.Add(timeData);
+                            _DB.SaveChanges();
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var timeData = _DB.durg_time.Find(times.time_id[i]);
+                        if (times.tdrugstore_id[i] != 0)
+                        {
+
+                            timeData.time_interval = times.time_interval[i];
+                            timeData.sHM_hour = times.sHM_hour[i];
+                            timeData.sHM_minute = times.sHM_minute[i];
+                            timeData.eHM_hour = times.eHM_hour[i];
+                            timeData.eHM_minute = times.eHM_minute[i];
+                            timeData.inx = times.inx[i];
+
+                            switch (timeData.inx)
+                            {
+                                case 1:
+                                    if (times.day1 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day1);
+                                    }
+                                    break;
+
+                                case 2:
+                                    if (times.day2 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day2);
+                                    }
+                                    break;
+
+                                case 3:
+                                    if (times.day3 != null)
+                                    {
+                                        timeData.day = string.Join(",", times.day3);
+                                    }
+                                    break;
+                            }
+
+                            _DB.SaveChanges();
+                        }
+
+                    }
+
+                }
+
+                #endregion
+
+                drugstore_data.drugstore_id = data.drugstore_id;
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = drugstore_data.drugstore_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update drugstore_data set visible = 1 Where drugstore_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update drugstore_data set visible = 0 Where drugstore_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    //sql = "Delete From news_image Where news_id in (" + cb_id + ")";
+                    //_DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From drugstore_data Where drugstore_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region"廣告版位點擊率報表"
+
+        public class hits_rate
+        {
+            public int rank { get; set; }
+            public int impressions { get; set; }
+            public int hit { get; set; }
+            public double rate { get; set; }
+            public string group { get; set; }
+            public string subgroup { get; set; }
+            public string info { get; set; }
+            public string url { get; set; }
+            public DateTime? start_date { get; set; }
+            public DateTime? end_date { get; set; }
+            public string drugstore { get; set; }
+
+        }
+
+        public ActionResult Adhits()
+        {
+
+
+            //var data = this._DB.adv_data.Where(m => m.adv_id > 0).ToList();
+            //var group = this._DB.adv_group.Where(m => m.group_id > 0).ToList();
+            //var drugstore = this._DB.drugstore_data.Where(m => m.drugstore_id > 0).ToList();
+            //var rank = 1;
+            //var all_adv = new List<hits_rate> { };
+
+            //foreach (var item in data)
+            //{ 
+
+            //    var sg_name = data.Where(m => m.g_id == item.adv_id);  //分類名
+            //    var g_name = group.Where(m => m.group_id == item.group_id);  //分區名
+            //    var drugstore_name = drugstore.Where(m => m.drugstore_id == Convert.ToInt32(item.drugstore_id)).FirstOrDefault();
+
+
+            //    var adv = new hits_rate { };
+
+            //    adv.impressions = item.impressions; //曝光數
+            //    adv.hit = item.hits;  //點擊數
+            //    adv.rate = adv.impressions != 0 ? (adv.hit / adv.impressions) : (adv.hit / 1);  //曝光率
+            //    adv.group = g_name.Count() == 0 ? "" : g_name.FirstOrDefault().name; //分區名
+            //    adv.subgroup = sg_name.Count() == 0 ? "" : sg_name.FirstOrDefault().info;  //分類名
+            //    adv.info = item.info;  //廣告標題
+            //    adv.url = item.url;     //連結    
+            //    adv.start_date = item.start_date;    //啟用日
+            //    adv.end_date = item.end_date;        //停用日
+            //    adv.drugstore = drugstore_name == null ? "" : drugstore_name.name;        //顯示藥局
+
+            //    all_adv.Add(adv);
+
+            //}
+            //all_adv = all_adv.OrderByDescending(m => m.rate).ToList();
+            //foreach (var item in all_adv)
+            //{
+            //    item.rank = rank;
+            //    rank++;
+            //}
+
+
+            return View();
+        }
+
+        public List<hits_rate> rate(DateTime? start_date, DateTime? end_date)
+        {
+            var data = this._DB.adv_data.Where(m => m.adv_id > 0 && m.start_date > start_date && m.start_date <= end_date).ToList();
+            var group = this._DB.adv_group.Where(m => m.group_id > 0).ToList();
+            var drugstore = this._DB.drugstore_data.Where(m => m.drugstore_id > 0).ToList();
+            var rank = 1;
+            var all_adv = new List<hits_rate> { };
+
+            foreach (var item in data)
+            {
+
+                var sg_name = data.Where(m => m.g_id == item.adv_id);  //分類名
+                var g_name = group.Where(m => m.group_id == item.group_id);  //分區名
+                var adv = new hits_rate { };
+                if (!string.IsNullOrEmpty(item.drugstore_id))
+                {
+                    var na = item.drugstore_id.Split(',');
+
+                    foreach (var item0 in na)
+                    {
+
+                        var drugstore_name = drugstore.Where(m => m.drugstore_id == Convert.ToInt32(item0)).FirstOrDefault();
+
+                        adv.drugstore = drugstore_name == null ? "" : adv.drugstore + "," + drugstore_name.name;        //顯示藥局
+                    }
+                }
+
+
+
+                adv.impressions = item.impressions; //曝光數
+                adv.hit = item.hits;  //點擊數
+                adv.rate = adv.impressions != 0 ? (adv.hit / adv.impressions) : (adv.hit / 1);  //曝光率
+                adv.group = g_name.Count() == 0 ? "" : g_name.FirstOrDefault().name; //分區名
+                adv.subgroup = sg_name.Count() == 0 ? "" : sg_name.FirstOrDefault().info;  //分類名
+                adv.info = item.info;  //廣告標題
+                adv.url = item.url;     //連結    
+                adv.start_date = item.start_date;    //啟用日
+                adv.end_date = item.end_date;        //停用日
+
+
+                all_adv.Add(adv);
+
+            }
+            all_adv = all_adv.OrderByDescending(m => m.rate).ToList();
+            foreach (var item in all_adv)
+            {
+                item.rank = rank;
+                rank++;
+            }
+
+            return all_adv;
+        }
+
+        public ActionResult AdhitsListDel(DateTime? start_date, DateTime? end_date)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+
+
+            Title = "廣告曝光排名";
+            Header = "排名,廣告曝光次數,點擊數,點擊率,廣告分區,廣告分類,文字說明,連結網址,啟用日期,停用日期,顯示藥局";
+
+            var all_adv = rate(start_date, end_date);
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+
+            foreach (var item in all_adv)
+            {
+                num = 1; //從第一欄位開始
+
+                List<string> data = new List<string> { };
+
+                data.Add(item.rank.ToString());
+                data.Add(item.impressions.ToString("N0"));
+                data.Add(item.hit.ToString("N0"));
+                data.Add(item.rate.ToString("F2"));
+                data.Add(item.group);
+                data.Add(item.subgroup);
+                data.Add(item.info);
+                data.Add(item.url);
+                data.Add(NW.getDate(item.start_date));
+                data.Add(NW.getDate(item.end_date));
+                data.Add(item.drugstore);
+
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                rowIdx++; //下一筆資料
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+
+        #endregion
+
+        #region"設備使用報表"
+
+        public class equip_use
+        {
+            public int id { get; set; }
+            public int rank { get; set; }
+            public string name { get; set; }
+            public double total_time { get; set; }
+            public int act_time { get; set; }
+            public double rate { get; set; }
+
+        }
+
+        public ActionResult Equipment()
+        {
+
+
+            return View();
+        }
+
+        public ActionResult EquipmentEdit(DateTime start_date, DateTime end_date)
+        {
+
+
+            ViewBag.sd = NW.getDate(start_date);
+            ViewBag.ed = NW.getDate(end_date);
+
+            var all = equ(start_date, end_date); //取得購買資料
+
+
+            return View(all);
+        }
+
+        public ActionResult EquipmentEditSave(DateTime start, DateTime end)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+            Title = "設備使用率報表";
+            Header = "排名,藥局名稱,總營業數,實際開機時數,設備使用率";
+
+            var all = equ(start, end); //取得購買資料
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+            int r = 1; //排名
+            foreach (var item in all.OrderByDescending(m => m.rate))
+            {
+                num = 1; //從第一欄位開始
+
+                List<string> data = new List<string> { };
+
+                data.Add(r.ToString());
+                data.Add(item.name);
+                data.Add(item.total_time.ToString());
+                data.Add(item.act_time.ToString());
+                data.Add(item.rate.ToString("F2") + "%");
+
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                rowIdx++; //下一筆資料
+                r++;
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+        public List<equip_use> equ(DateTime start_date, DateTime end_date)
+        {
+            var all = new List<equip_use> { };
+
+            var tmpdata = this._DB.drugstore_loging;
+            //var days = new TimeSpan(end_date.Value.Ticks - start_date.Value.Ticks).Days;    //計算相距天數
+
+            //找出輸入區間日有開機的藥局資料(id)
+            var data = tmpdata.Where(m => start_date < m.loging_time && m.loging_time <= end_date).OrderBy(m => m.drugstore_id).Select(m => m.drugstore_id).Distinct().ToList();
+
+            var open_time = this._DB.drugstore_time.Where(m => m.time_id > 0);
+            var store = this._DB.drugstore_data.Where(m => m.drugstore_id > 0 && m.visible).ToList();
+
+            var onlineddata = new List<drugstore_data>();
+            foreach (var item in data)
+            {
+                var onlineddataget = store.Where(m => m.drugstore_id == item && m.uid != null && m.visible).OrderBy(m => m.drugstore_id).FirstOrDefault();
+                if (onlineddataget != null)
+                {
+                    onlineddata.Add(onlineddataget);
+                }
+
+            }
+
+            foreach (var item in onlineddata)
+            {
+
+
+                int ts = new TimeSpan().Hours;
+
+                var one = new equip_use { };
+
+                //var data2 = this._DB.drugstore_loging.Where(m => m.drugstore_id == item.drugstore_id && DbFunctions.DiffDays(m.loging_time, end_date) == days).Select(m => m.loging_time.Value.Hour).Distinct().ToList();
+                var open = open_time.Where(m => m.drugstore_id == item.drugstore_id).FirstOrDefault();
+                TimeSpan? day = end_date - start_date;    //相差幾天
+                DateTime? start = start_date;
+
+                one.id = item.drugstore_id;
+                one.name = item.name;  //塞藥局名稱
+
+                if (open != null)
+                {
+                    for (int a = 0; a <= day.Value.Days; a++)  //起始日開始加
+                    {
+                        var dd = (int)start.Value.DayOfWeek;   //星期幾  數字顯示  星期日為0
+                        if (!string.IsNullOrEmpty(open.day_a))
+                        {
+                            var h = open.day_a.IndexOf(dd.ToString());  //搜尋星期幾
+                            if (h != -1)  //如果這天的上午時段有營業
+                            {
+                                DateTime a1 = DateTime.ParseExact(open.time_as, "HHmm", System.Globalization.CultureInfo.InvariantCulture); //開店時間  (早上)
+                                DateTime a2 = DateTime.ParseExact(open.time_ae == "2400" ? "2359" : open.time_ae, "HHmm", System.Globalization.CultureInfo.InvariantCulture);  //關店時間
+                                TimeSpan ts1 = a2 - a1;   //時間相減
+                                ts += ts1.Hours;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(open.day_p))
+                        {
+                            var k = open.day_p.IndexOf(dd.ToString());  //搜尋星期幾
+                            if (k != -1)  //如果這天的中午時段有營業
+                            {
+                                DateTime p1 = DateTime.ParseExact(open.time_ps, "HHmm", System.Globalization.CultureInfo.InvariantCulture); //開店時間  (下午)
+                                DateTime p2 = DateTime.ParseExact(open.time_pe == "2400" ? "2359" : open.time_pe, "HHmm", System.Globalization.CultureInfo.InvariantCulture);  //關店時間
+                                TimeSpan ts2 = p2 - p1;   //時間相減
+                                ts += ts2.Hours;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(open.day_n))
+                        {
+                            var l = open.day_n.IndexOf(dd.ToString());  //搜尋星期幾
+                            if (l != -1)  //如果這天的晚上時段有營業
+                            {
+                                DateTime n1 = DateTime.ParseExact(open.time_ns, "HHmm", System.Globalization.CultureInfo.InvariantCulture); //開店時間  (晚上)
+                                DateTime n2 = DateTime.ParseExact(open.time_ne == "2400" ? "2359" : open.time_ne, "HHmm", System.Globalization.CultureInfo.InvariantCulture);  //關店時間
+                                TimeSpan ts3 = n2 - n1;   //時間相減
+                                ts += ts3.Hours;
+                            }
+                        }
+
+                        var data2 = new List<int> { };
+                        var da2 = tmpdata.Where(m => m.drugstore_id == item.drugstore_id && DbFunctions.DiffDays(m.loging_time, start) == 0).Select(m => m.loging_time.Value.Hour).Distinct().ToList();
+                        start = start.Value.AddDays(1);
+                        one.act_time += da2.Count();
+
+                    }
+                    one.total_time = ts;
+                }
+
+                one.rate = one.total_time == 0 ? 0 : (one.act_time / one.total_time) * 100;
+
+                all.Add(one);
+            }
+
+            return all;
+        }
+
+
+        #endregion
+
+        #region"藥局分布報表*"
+
+        public class drugstore
+        {
+            public int rank { get; set; }
+            public string city { get; set; }
+            public string canton { get; set; }
+            public int num { get; set; }
+            //public int total { get; set; }
+            //public decimal percent { get; set; }
+        }
+
+        public ActionResult Drugstoreswhere()
+        {
+            //var dr = new List<Dictionary<string, int>> { };
+            //int s = 1;
+            var data = store();
+            //
+            //.Select(m => new drugstore { city = m.city, canton = m.canton, num = m.num, rank = num++, percent = (num / m.total) * 100 }).ToList() ;
+
+            //var zip = this._DB.zip_data.Where(m => m.zip != 0).ToList();
+            //var total = 0;
+            //foreach (var item in zip)
+            //{
+            //    var con = new Dictionary<string, int> { };
+            //    string name = item.city + "," + item.canton;  //城市+區域
+            //    var data = this._DB.drugstore_data.Where(m => m.zip == item.zip).Count();  // 店家數
+            //    total += data;   //總數
+            //    con.Add(name, data);
+            //    dr.Add(con);
+            //}
+            ViewData["where"] = data;
+            ViewBag.total = data.Select(m => m.num).Sum();
+            //ViewData["dr"] = dr;
+
+            return View();
+            //return View(dr);
+        }
+
+        public List<drugstore> store()
+        {
+            int s = 1;
+            var data = (from a in this._DB.zip_data.Where(m => m.visible)
+                        join b in this._DB.drugstore_data.Where(m => m.visible && m.uid != null) on a.zip equals b.zip into mm
+                        select new drugstore
+                        {
+                            city = a.city,
+                            canton = a.canton,
+                            num = mm.Count(),
+                        }).OrderByDescending(m => m.num).ToList()
+                        .Select(m => new drugstore { rank = s++, city = m.city, canton = m.canton, num = m.num }).ToList();
+            //var dr = new List<Dictionary<string, int>> { };
+
+            //    var zip = this._DB.zip_data.Where(m => m.zip != 0).ToList();
+            //    var total = 0;
+            //    foreach (var item in zip)
+            //    {
+            //        var con = new Dictionary<string, int> { };
+            //        string name = item.city + "," + item.canton;  //城市+區域
+            //        var data = this._DB.drugstore_data.Where(m => m.zip == item.zip).Count();  // 店家數
+            //        total += data;   //總數
+            //        con.Add(name, data);
+            //        dr.Add(con);
+            //    }
+
+            return data;
+
+
+        }
+
+        public ActionResult DrugstoreswhereListDel(int total)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+            Title = "藥局分布排名";
+            Header = "排名,縣市名稱,地區名稱,店家數,地區占比";
+
+            var dr = store();
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+            var k = 1;
+
+            foreach (var item in dr.OrderBy(m => m.rank))
+            {
+                num = 1; //從第一欄位開始
+
+                List<string> data = new List<string> { };
+
+                string c = ((decimal)(item.num * 100) / total).ToString("N2") + "%";
+
+                data.Add(item.rank.ToString());
+                data.Add(item.city);
+                data.Add(item.canton);
+                data.Add(item.num.ToString());
+                data.Add(c);
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                k++;
+                rowIdx++; //下一筆資料
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+        #endregion
+
+        #region 會員人數分析報表
+
+        public class search_data
+        {
+            public int id { get; set; }
+            public string search_word { get; set; }
+            public DateTime? creat_date { get; set; }
+            public int member_id { get; set; }
+            public int member_group { get; set; }
+            public DateTime? start_date { get; set; }
+            public DateTime? end_date { get; set; }
+            public int count { get; set; }
+
+        }
+
+        public class Member_Buy
+        {
+
+
+            public string area { get; set; }
+            public string drugstore { get; set; }
+            public string sex { get; set; }
+            public int num_15_24 { get; set; }
+            public int num_25_34 { get; set; }
+            public int num_35_44 { get; set; }
+            public int num_45_54 { get; set; }
+            public int num_55_64 { get; set; }
+            public int no_brithday { get; set; }
+            public int area_total_member { get; set; }
+            public int f_buynum { get; set; }
+            public int m_buynum { get; set; }
+
+            public int f_member { get; set; }
+            public int m_member { get; set; }
+            public int other_member { get; set; }
+
+
+            public int m_num_20 { get; set; }
+            public int m_num_20_29 { get; set; }
+            public int m_num_30_39 { get; set; }
+            public int m_num_40_49 { get; set; }
+            public int m_num_50_59 { get; set; }
+            public int m_num_60 { get; set; }
+            public int f_num_20 { get; set; }
+            public int f_num_20_29 { get; set; }
+            public int f_num_30_39 { get; set; }
+            public int f_num_40_49 { get; set; }
+            public int f_num_50_59 { get; set; }
+
+            public int m_allorder { get; set; }    //總訂單數
+            public int f_allorder { get; set; }
+            public int m_order_distinct { get; set; }   //不重複訂單數
+            public int f_order_distinct { get; set; }
+
+            public double buy_rate { get; set; }   //購買率 
+            public double area_buyrate { get; set; } //地區購買率
+
+
+            public int other_buynum { get; set; }
+            public double f_order_change { get; set; }
+            public double m_order_change { get; set; }
+            public double area_change { get; set; }
+
+            //總表
+            public int new_mamber { get; set; }
+            public int old_mamber { get; set; }
+            public DateTime? last_logintime { get; set; }
+            public int jump_par { get; set; }
+            public int total_order_num { get; set; }
+            public int total_order_money { get; set; }
+
+        }
+
+        public ActionResult MemberBuy()
+        {
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View();
+        }
+
+
+
+        public ActionResult MemberBuyEdit(search_data search_data)  //檢視
+        {
+
+
+            string erro = "查無資料";
+            string nowsearch = "全部資料";
+            nowsearch = "一般會員";
+
+            var memberbuy = mem(search_data);
+
+            ViewBag.nowsearch = nowsearch;
+            ViewBag.sd = search_data.start_date;
+            ViewBag.ed = search_data.end_date;
+
+
+
+            return View(memberbuy);
+        }
+
+        public ActionResult MemberBuyEditSave(search_data search_data)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+            Title = "會員購買分析報表";
+            Header = "地區,藥局名稱,總人數,性別,18-24歲,25-34歲,35-44歲,45-54歲,55-64歲,總訂單數,不重複訂單數,購買率,地區購買率";
+
+            var memberbuy = mem(search_data); //取得購買資料
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+
+            foreach (var item in memberbuy)
+            {
+                num = 1; //從第一欄位開始
+                var orm = item.m_member != 0 ? (Math.Round((decimal)item.m_order_distinct / item.m_member, 2) * 100) : 0;
+                var orf = item.f_member != 0 ? (Math.Round((decimal)item.f_order_distinct / item.f_member, 2) * 100) : 0;
+
+
+                List<string> data = new List<string> { };
+
+                data.Add(item.area);
+                data.Add(item.drugstore);
+                data.Add("男：" + item.m_member + "，女：" + item.f_member + "，未填性別：" + item.other_member);
+                data.Add("男：" + item.m_num_20.ToString("N0") + "，女：" + item.f_num_20.ToString("N0"));
+                data.Add("男：" + item.m_num_20_29.ToString("N0") + "，女：" + item.f_num_20_29.ToString("N0"));
+                data.Add("男：" + item.m_num_30_39.ToString("N0") + "，女：" + item.f_num_30_39.ToString("N0"));
+                data.Add("男：" + item.m_num_40_49.ToString("N0") + "，女：" + item.f_num_40_49.ToString("N0"));
+                data.Add("男：" + item.m_num_50_59.ToString("N0") + "，女：" + item.f_num_50_59.ToString("N0"));
+                data.Add("男：" + item.m_allorder + "，女：" + item.f_allorder);
+                data.Add("男：" + item.m_order_distinct + "，女：" + item.f_order_distinct);
+                data.Add("男：" + orm + "%，女：" + orf + "%");
+                data.Add(item.area_buyrate.ToString("N0"));
+
+
+
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                rowIdx++; //下一筆資料
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+        public List<Member_Buy> mem(search_data search_data)
+        {
+            //var data2 = this._DB.member_data.Where(m => m.create_datetime >= search_data.start_date && m.create_datetime <= search_data.end_date && m.visible).ToList();
+            var data2 = this._DB.member_data.Where(m => m.visible && m.member_id != 0);
+            // var data = this._DB.member_data.Where(m => && m.visible).GroupBy(m => m.zip).ToList();
+            int year = DateTime.Now.Year;
+
+            data2 = data2.Where(m => m.group_id == 1);
+
+
+
+            var drugstore = this._DB.drugstore_data.Where(m => m.visible).ToList();
+            var zip = this._DB.zip_data.Where(m => m.visible);
+            var order = this._DB.order_data.Where(m => m.visible && m.flag == 5);
+            var memberbuy = new List<Member_Buy>();
+
+            foreach (var item in drugstore)
+            {
+                var zz = zip.Where(m => m.zip == item.zip).FirstOrDefault();  //地區
+                var orders = order.Where(m => m.drugstore_id == item.drugstore_id && m.member_id != 0 && m.order_name.IndexOf("XX") == -1 && m.order_datetime >= search_data.start_date && m.order_datetime <= search_data.end_date);
+                //var orders_distinct = order.Where(m => m.drugstore_id == item.drugstore_id).Select(m => m.send_name).Distinct();
+                string ct = "";
+                var mdata = new Member_Buy();
+
+                var mem = data2.Where(m => m.drugstore_id == item.drugstore_id && m.visible).ToList();  //會員數
+
+                mdata.area_total_member = mem.Count();
+                mdata.m_member = mem.Where(m => m.sex == "男").Count();
+                mdata.f_member = mem.Where(m => m.sex == "女").Count();
+                mdata.other_member = mem.Where(m => string.IsNullOrEmpty(m.sex)).Count();
+
+
+                if (orders != null)
+                {
+                    foreach (var t in mem)
+                    {
+                        var b = t.birthday.ToString().Substring(0, 4);
+                        var c = Convert.ToInt32(b);
+
+
+                        if (!string.IsNullOrEmpty(t.birthday.ToString()))
+                        {
+
+                            if (year - c >= 18 && year - c <= 24)
+                            {
+                                if (t.sex == "男")
+                                {
+                                    mdata.m_num_20++;
+                                }
+                                else if (t.sex == "女")
+                                {
+                                    mdata.f_num_20++;
+                                }
+                                else { break; }
+                            }
+                            if (year - c >= 25 && year - c <= 34)
+                            {
+                                if (t.sex == "男")
+                                {
+                                    mdata.m_num_20_29++;
+                                }
+                                else if (t.sex == "女")
+                                {
+                                    mdata.f_num_20_29++;
+                                }
+                                else { break; }
+                            }
+                            if (year - c >= 35 && year - c <= 44)
+                            {
+                                if (t.sex == "男")
+                                {
+                                    mdata.m_num_30_39++;
+                                }
+                                else if (t.sex == "女")
+                                {
+                                    mdata.f_num_30_39++;
+                                }
+                                else { break; }
+                            }
+                            if (year - c >= 45 && year - c <= 54)
+                            {
+                                if (t.sex == "男")
+                                {
+                                    mdata.m_num_40_49++;
+                                }
+                                else if (t.sex == "女")
+                                {
+                                    mdata.f_num_40_49++;
+                                }
+                                else { break; }
+                            }
+                            if (year - c >= 55 && year - c <= 64)
+                            {
+                                if (t.sex == "男")
+                                {
+                                    mdata.m_num_50_59++;
+                                }
+                                else if (t.sex == "女")
+                                {
+                                    mdata.f_num_50_59++;
+                                }
+                                else { break; }
+                            }
+
+                        }
+
+                        mdata.m_allorder = orders.Where(m => m.order_sex == "男").Count();
+                        mdata.f_allorder = orders.Where(m => m.order_sex == "女").Count();
+
+                        mdata.m_order_distinct = orders.Where(m => m.order_sex == "男").Select(m => m.send_name).Distinct().Count();  //以收件人名 過濾重複
+                        mdata.f_order_distinct = orders.Where(m => m.order_sex == "女").Select(m => m.send_name).Distinct().Count();
+
+
+                        var f = (mdata.area_total_member != 0 ? Math.Round((mdata.m_order_distinct + mdata.f_order_distinct) / Convert.ToDouble(mdata.area_total_member), 2) : 0) * 100;
+                        mdata.area_buyrate = f;
+                    }
+                }
+
+
+                mdata.drugstore = !string.IsNullOrEmpty(item.name) ? item.name : "";   //加入藥局名稱
+                if (ct != zz.city)
+                {
+                    mdata.area = zz.city + zz.canton;
+                    memberbuy.Add(mdata);
+                }
+                ct = zz.city;
+
+            }
+
+
+            return memberbuy;
+        }
+
+
+
+
+        #endregion
+
+        #region"銷售排名報表"
+
+        public class rank_detail  //所需欄位
+        {
+            public int rank { get; set; }
+            public string city { get; set; }
+            public string drugstore { get; set; }
+            public string group { get; set; }
+            public string item_no { get; set; }
+            public string item_name { get; set; }
+            public int num { get; set; }
+            public int price { get; set; }
+            public double cost { get; set; }
+            public double maori_rate { get; set; }
+            public double maori { get; set; }
+            public int bonus { get; set; }
+            public int bonus_p { get; set; }
+            public double net_maori { get; set; }
+            public string name_company { get; set; }
+            public int pro_flag { get; set; }
+            public DateTime? order_date { get; set; }
+        }
+
+        public ActionResult Salesrank(string kw, DateTime? start_date, DateTime? end_date)
+        {
+            var salesall = sale(kw, start_date, end_date);
+
+            ViewBag.start = start_date;
+            ViewBag.end = end_date;
+            ViewBag.kw = kw;
+
+            IPagedList sales_data = salesall.OrderByDescending(m => m.num).ToPagedList(0, 20);
+
+            return View(sales_data);
+        }
+
+        public ActionResult Salesrank_ajax(string kw, int? page, DateTime? start_date, DateTime? end_date)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            ViewBag.start = start_date;
+            ViewBag.end = end_date;
+            ViewBag.kw = kw;
+
+            var salesall = sale(kw, start_date, end_date);
+
+            IPagedList sales_data = salesall.OrderByDescending(m => m.num).ToPagedList(currentPageIndex, 20);
+
+            return PartialView(RouteData.Values["action"].ToString(), sales_data);
+        }
+
+        public List<rank_detail> sale(string kw, DateTime? start_date, DateTime? end_date)
+        {
+            //int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var pro_data = this._DB.product_data.Where(m => m.product_id != 0); //抓出所有商品
+            var pro_g = this._DB.product_group.Where(m => m.group_id != 0);
+            var data = this._DB.order_sub.Where(m => m.order_id > 0); //先抓出所有商品訂單明細
+
+            var order = start_date != null && end_date != null ? this._DB.order_data.Where(m => m.order_id > 0 && m.send_name.IndexOf("XX") == -1 && m.flag == 5 && m.order_datetime <= end_date && m.order_datetime > start_date) : this._DB.order_data.Where(m => m.order_id > 0 && m.send_name.IndexOf("XX") == -1 && m.flag == 5);
+
+            var com = this._DB.company_data.Where(m => m.company_id > 0);
+            var city = this._DB.zip_data.Where(m => m.zip > 0);
+            var drugs = this._DB.drugstore_data.Where(m => m.drugstore_id > 0);
+            int rank = 1;
+
+            var salesall = new List<rank_detail> { };
+
+            foreach (var item in order.ToList())
+            {
+                var sales = new rank_detail { };
+
+                var ordata = data.Where(m => m.order_id == item.order_id).FirstOrDefault();
+                var pro = ordata == null ? null : pro_data.Where(m => m.product_id == ordata.product_id).FirstOrDefault();
+                var group = pro == null ? null : pro_g.Where(m => m.group_id == pro.group_id).FirstOrDefault();
+                var drug = drugs.Where(m => m.drugstore_id == item.drugstore_id).FirstOrDefault();
+                var zip = drug == null ? null : city.Where(m => m.zip == drug.zip).FirstOrDefault();
+                var com_name = com.Where(m => m.company_id == item.company_id).FirstOrDefault();
+
+
+                sales.city = zip == null ? "" : zip.city + zip.canton;   //藥局地址XX市XX區  
+                sales.drugstore = drug == null ? "" : drug.name;  //藥局名稱
+                sales.group = group == null ? "" : group.name;  //銷售分類
+                sales.item_no = pro == null ? "" : pro.item_no; //商品貨號
+                sales.item_name = pro == null ? "" : pro.item_name;  //商品名稱
+                sales.num = ordata == null ? 0 : ordata.num;  //銷售數量
+                sales.price = ordata == null ? 0 : sales.num * ordata.price;  //銷售業績
+                sales.cost = ordata == null ? 0 : sales.num * ordata.cost;   //成本
+                sales.maori_rate = (sales.price - sales.cost) / sales.price;   //毛利率
+                sales.maori = sales.price - sales.cost;  //毛利
+                sales.bonus = item.bonus;    //紅利
+                sales.bonus_p = sales.bonus / sales.price;   //紅利佔比
+                sales.net_maori = sales.maori - Convert.ToDouble(sales.bonus);  //淨毛利
+                sales.name_company = com_name == null ? "" : com_name.name;   //供貨廠商名
+                sales.pro_flag = pro == null ? 0 : pro.status_flag;
+                sales.order_date = item.order_datetime;  //查詢區間用  訂單日期
+
+                salesall.Add(sales);
+
+
+
+            }
+
+            //if (start_date != null && end_date != null)
+            //{
+
+            //    salesall = salesall.Where(m => m.order_date <= end_date && m.order_date > start_date).ToList();
+            //}
+
+            if (!(string.IsNullOrEmpty(kw)))
+            {
+                salesall = salesall.Where(m => m.drugstore.Contains(kw) || m.name_company.Contains(kw) || m.group.Contains(kw) || m.item_no.Contains(kw) || m.item_name.Contains(kw)).ToList();
+                ViewBag.kw = kw;
+            }
+
+            //IPagedList sales_data = .ToPagedList(currentPageIndex, 20);
+
+            salesall = salesall.OrderByDescending(m => m.num).ToList();
+            foreach (var item in salesall)
+            {
+                item.rank = rank;
+                rank++;
+            }
+            // ViewData["salesall"] = salesall;
+
+
+            return salesall;
+
+        }
+
+        public ActionResult SalesrankListDel(int cb_flag, string k, DateTime? start, DateTime? end)   //報表匯出
+        {
+            string value = "";
+            string Title = "";
+            string Header = "";
+
+
+
+            Title = "銷售排名";
+            Header = "排名,縣市地區,藥局名稱,銷售分類,貨號,品名,銷售數量,銷售業績,成本,毛利率,毛利額,紅利點數,紅利點數占比,淨毛利額(扣除紅利),供貨廠商,商品狀態";
+
+            var salesall = sale(k, start, end);
+
+
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add(Title);
+            int colIdx = 1, rowIdx = 2, num = 0; //標頭、資料行、欄位
+
+            //標頭
+            string[] cols = Header.Split(',');
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //內容 
+            string p = "'";
+
+            foreach (var item in salesall)
+            {
+                num = 1; //從第一欄位開始
+
+                List<string> data = new List<string> { };
+
+                data.Add(item.rank.ToString());
+                data.Add(item.city);
+                data.Add(item.drugstore);
+                data.Add(item.group);
+                data.Add(item.item_no);
+                data.Add(item.item_name);
+                data.Add(item.num.ToString());
+                data.Add(item.price.ToString("F2"));
+                data.Add(item.cost.ToString("F2"));
+                data.Add(item.maori_rate.ToString("F2"));
+                data.Add(item.maori.ToString("F2"));
+                data.Add(item.bonus.ToString("F2"));
+                data.Add(item.bonus_p.ToString("F2"));
+                data.Add(item.net_maori.ToString("F2"));
+                data.Add(item.name_company);
+                data.Add(item.pro_flag == 3 ? "上架中" : "下架中");
+
+                foreach (var item2 in data)
+                {
+
+                    sheet.Cell(rowIdx, num).Value = p + item2;
+
+                    num++;
+                }
+                rowIdx++; //下一筆資料
+            }
+
+            //自動伸縮欄寬
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+                sheet.Column(i).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+
+            value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+
+            return File(value, "application/vnd.ms-excel", DateTime.Now.ToString("yyyyMMdd") + Title + ".xlsx");
+
+        }
+
+        #endregion
+
+        #region"匯出銷售報表"
+
+        public ActionResult MonthlyListDel(int cb_flag, int year1, int mon = 0, int day = 0, string start = null, string end = null)   //cb_flag = 1 銷售報表  2 分潤報表 0 指定區段詳細報表
+        {
+            string[] jgrowl_msg = new string[] { "選擇匯出", "全部匯出", "作廢" };
+            string msg = "匯出失敗，請洽系統工程師，謝謝!!";
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+            string sql = "";
+            string FileName = "";
+            string downloadFileName = "";
+            if (mon != 0 && cb_flag == 1)  //銷售月報表
+            {
+                FileName = Export(year1, cb_flag, mon);
+                downloadFileName = DateTime.Today.ToString("yyyyMMdd") + "銷售月報表(" + year1 + "年" + mon + "月)";
+            }
+            else if (cb_flag == 1)  //銷售年報表
+            {
+                FileName = Export(year1, cb_flag);
+                downloadFileName = DateTime.Today.ToString("yyyyMMdd") + "銷售年報表(" + year1 + "年)";
+            }
+            else if (cb_flag == 2)  //分潤報表
+            {
+                FileName = Export(year1, cb_flag, 0, start, end);
+                downloadFileName = DateTime.Today.ToString("yyyyMMdd") + "分潤報表(" + year1 + "年)";
+            }
+            else if (cb_flag == 0)   //區間匯出
+            {
+                FileName = Export(year1, cb_flag, 0, start, end);
+                start = start.Replace("/", "");
+                end = end.Replace("/", "");
+                downloadFileName = DateTime.Today.ToString("yyyyMMdd") + "銷售報表(" + start + "~" + end + ")";
+            }
+
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                var admin = NW.admin(this.User.Identity.Name);
+                //sql = "Update order_data set export_datetime = getDate(), export_info='網站匯入：" + this.User.Identity.Name + "' Where visible=1 and export_datetime is null  and flag=1 and company_id=" + admin.company_id.ToString();
+                //1為全部匯出
+                //if (cb_flag != 1) { sql += " And order_id in (" + cb_id + ")"; }
+
+                // if (sql != "")
+                //{
+                //     _DB.Database.ExecuteSqlCommand(sql);
+                // }
+                return File(FileName, "application/vnd.ms-excel", downloadFileName);
+                //Server.UrlPathEncode(DateTime.Today.ToString("yyyyMMdd") + "銷售報表.xlsx")
+            }
+            else
+            {
+                return Content(msg);
+            }
+
+            //TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        }
+
+        private string Export(int year1, int cb_flag, int mon = 0, string start = null, string end = null)
+        {
+            string value = "";
+            string[] cols = "".Split(',');
+
+            int year = year1;
+            List<Order_All> Linq1 = new List<Order_All> { };
+            List<order_m> order1 = new List<order_m> { };
+            List<order_s> order0 = new List<order_s> { };
+
+            if (cb_flag == 0 && !string.IsNullOrEmpty(start) && !string.IsNullOrEmpty(end))   //區間匯出報表
+            {
+                cols = "訂購時間,訂單編號,產品編號,產品名稱,收件人,貨號,廠商,購買數量,紅利,健康紅利,成本,售價".Split(',');
+                DateTime st = Convert.ToDateTime(start);  //起始日 字串轉日期
+                DateTime en = Convert.ToDateTime(end).AddHours(23).AddMinutes(59);      //結束日 
+                var Order_Mon_S = new List<Order_All> { };
+                var Linq = this._DB.order_data.Where(m => m.order_id > 0 && (m.order_datetime >= st && m.order_datetime <= en && m.finish_datetime != null && m.back_datetime == null)).OrderBy(m => m.order_datetime).ToList(); //區間內全部訂單
+                foreach (var item in Linq)
+                {
+                    var data = this._DB.order_sub.Where(m => m.order_id == item.order_id).Select(m => new order_s { order_id = m.order_id, product_id = m.product_id, num = m.num, price = m.price, cost = m.cost, item_name = m.item_name, item_no = m.item_no }).ToList();
+
+                    foreach (var item1 in data)
+                    {
+                        var data0 = this._DB.order_data.Where(m => m.order_id == item1.order_id).FirstOrDefault();
+                        var data1 = this._DB.solt_data.Where(m => m.order_id == data0.order_id).FirstOrDefault();
+                        item1.order_datetime = data0.order_datetime;
+                        item1.bonus = data0.bonus;
+                        item1.send_name = data0.send_name;
+                        if (data1 != null)
+                        {
+                            item1.h_bonus = data1.prize;  //健康紅利
+                        }
+                        else { item1.h_bonus = 0; }
+                        var Product = this._DB.product_data.Where(m => m.product_id == item1.product_id).FirstOrDefault();
+                        if (Product != null)
+                        {
+                            var Com = this._DB.company_data.Where(m => m.company_id == Product.company_id).FirstOrDefault();
+                            if (Com != null)
+                            {
+                                item1.name_company = Com.name;
+                            }
+                        }
+                        order0.Add(item1);
+
+                    }
+
+                }
+
+            }
+            else if (mon != 0 && cb_flag == 1)  //銷售月報表
+            {
+
+                cols = "日,完成-訂單總計,完成-毛利總計,退貨-金額總計,退貨-訂單總數,作廢-金額總計,作廢-訂單總數".Split(',');
+                DateTime sD = new DateTime(year, mon, 1); //起始日
+                DateTime eD = sD.AddMonths(1); //結束日
+                var Order_Mon_S = new List<Order_All> { };
+                var Linq = this._DB.order_data.Where(m => m.order_id > 0 && (m.order_datetime >= sD && m.order_datetime < eD)); //當月全部訂單
+
+                var Clear = Linq.Where(m => m.visible == false).OrderBy(m => m.order_id).ToList();
+                var Back = Linq.Where(m => m.back_datetime != null).OrderBy(m => m.order_id).ToList();
+                var Finish = Linq.Where(m => m.finish_datetime != null && m.back_datetime == null).OrderBy(m => m.order_id).ToList();
+                foreach (var item in NW.EachDay(sD, eD.AddDays(-1))) //日期循環
+                {
+                    var Order_Mon = new NwReportController.Order_All { }; //建立新單
+
+                    Order_Mon.year = item.Year; //年
+                    Order_Mon.mon = item.Month; //月
+                    Order_Mon.day = item.Day; //日
+
+                    #region"取消訂單"
+
+                    var Clear1 = Clear.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                    Order_Mon.clear_num = Clear1.Count();
+                    Order_Mon.clear_total = Clear1.Select(m => m.total).DefaultIfEmpty(0).Sum();
+
+                    #endregion
+
+                    #region"退貨"
+
+                    var Back1 = Back.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                    Order_Mon.back_num = Back1.Count();
+                    Order_Mon.back_total = Back1.Select(m => m.total).DefaultIfEmpty(0).Sum();
+
+                    #endregion
+
+                    #region"完成交易"
+
+                    var Finish1 = Finish.Where(m => (m.order_datetime >= item && m.order_datetime < item.AddDays(1))).ToList();
+                    Order_Mon.finish_num = Finish1.Count();
+                    Order_Mon.finish_total = Finish1.Select(m => m.total).DefaultIfEmpty(0).Sum();
+                    Order_Mon.gross_total = Math.Round(Finish1.Select(m => m.total).DefaultIfEmpty(0).Sum() - Finish1.Select(m => m.cost_total).DefaultIfEmpty(0).Sum()); //毛利總計
+
+                    #endregion
+
+                    Order_Mon_S.Add(Order_Mon);
+                }
+
+                Linq1 = Order_Mon_S;
+
+            }
+            else if (cb_flag == 1 && mon == 0)     //銷售年報表
+            {
+                cols = "月份,完成-訂單總計,完成-毛利總計,退貨-金額總計,退貨-訂單總數,作廢-金額總計,作廢-訂單總數".Split(',');
+
+                Linq1 = Monthly_Public(year);
+            }
+            else if (cb_flag == 2)   //分潤報表
+            {
+
+                cols = "項次,訂單日期,訂單編號,商品名稱,訂單業績,藥局名稱,藥局分潤,加盟主分潤,加盟經銷分潤,業務經銷分潤,耐特分潤".Split(',');
+
+                var a = 1; //項次
+                var data = this._DB.partner_maori.Where(m => m.visible).FirstOrDefault(); //毛利分潤表
+                var data1 = this._DB.order_data.Where(m => m.visible && m.pay_visible && m.flag == 5 && (m.order_name.Contains("XX") && m.order_phone.Contains("XX"))).OrderBy(m => m.order_id).ToList();
+
+                if (!string.IsNullOrEmpty(start) && !string.IsNullOrEmpty(end))
+                {
+                    DateTime st = Convert.ToDateTime(start);  //起始日 字串轉日期
+                    DateTime en = Convert.ToDateTime(end).AddHours(23).AddMinutes(59);      //結束日  因輸入日期會判定至當日凌晨0時 故+1日
+                    data1 = data1.Where(m => m.order_datetime > st && m.order_datetime <= en).OrderBy(m => m.order_id).ToList();
+                }
+
+                foreach (var item in data1)
+                {
+                    var order = new order_m { }; //新位置
+
+                    var data2 = this._DB.order_sub.Where(m => m.order_id == item.order_id).FirstOrDefault(); //訂單明細
+                    var data3 = this._DB.solt_data.Where(m => m.order_id == item.order_id).FirstOrDefault(); //健康紅利
+                    var data4 = this._DB.drugstore_data.Where(m => m.drugstore_id == item.drugstore_id).FirstOrDefault(); //藥局
+
+                    if (data2 != null)
+                    {
+                        order.id = a;  //項次
+                        order.order_datetime = item.order_datetime; //訂購時間
+                        order.item_name = data2.item_name; //品名
+                        order.sales_total = ((data2.price - data2.cost) * data2.num) - (data3 != null ? data3.prize : 0) - item.bonus; //訂單業績
+                        order.order_id = item.order_id; //訂單編號
+                        order.drugstore_name = data4 != null ? data4.name : ""; //藥局名稱
+
+                        double maori_all = order.sales_total * data.netsourcer_num; //(*1.1)             
+                        order.drugstore_num = Math.Floor(maori_all * (data.drugstore_num * 0.01));//藥局分潤
+                        order.salesman_num = 0;//業務經銷分潤
+                        order.partner_member_num = 0;//加盟主分潤
+                        order.partner_sales_num = 0;//加盟經銷分潤
+
+                        order.net_num = Math.Floor(maori_all - (order.drugstore_num + order.partner_member_num + order.partner_sales_num + order.salesman_num));//耐特分潤
+
+                        order1.Add(order);
+                        a++;
+                    }
+                }
+
+            }
+
+
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+            //if (admin.power_id > 2) { Linq1 = Linq1.Where(m => m.company_id == admin.company_id); }
+
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("報表");
+            int colIdx = 1;
+            int rowIdx = 2;
+
+
+
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            //sheet.Cell(1, 15).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            //sheet.Cell(1, 16).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            //sheet.Cell(1, 17).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            //sheet.Cell(1, 18).Style.Fill.BackgroundColor = XLColor.PaleTurquoise;
+
+            string p = "'";
+
+            if (cb_flag == 1)
+            {
+                foreach (var item in Linq1)
+                {
+
+                    if (item.day != 0)
+                    {
+                        sheet.Cell(rowIdx, 1).Value = p + item.day;
+                    }
+                    else
+                    {
+                        sheet.Cell(rowIdx, 1).Value = p + item.mon;
+                    }
+                    sheet.Cell(rowIdx, 2).Value = p + item.finish_num;
+                    sheet.Cell(rowIdx, 3).Value = p + item.gross_total;
+                    sheet.Cell(rowIdx, 4).Value = p + item.back_total;
+                    sheet.Cell(rowIdx, 5).Value = p + item.back_num;
+                    sheet.Cell(rowIdx, 6).Value = p + item.clear_total;
+                    sheet.Cell(rowIdx, 7).Value = p + item.clear_num;
+
+                    rowIdx += 1;
+                }
+            }
+            else if (cb_flag == 2)
+            {
+                foreach (var item in order1)
+                {
+                    sheet.Cell(rowIdx, 1).Value = p + "#" + item.id;
+                    sheet.Cell(rowIdx, 2).Value = p + item.order_datetime;
+                    sheet.Cell(rowIdx, 3).Value = p + item.order_id;
+                    sheet.Cell(rowIdx, 4).Value = p + item.item_name;
+                    sheet.Cell(rowIdx, 5).Value = p + item.sales_total;
+                    sheet.Cell(rowIdx, 6).Value = p + item.drugstore_name;
+                    sheet.Cell(rowIdx, 7).Value = p + item.drugstore_num;
+                    sheet.Cell(rowIdx, 8).Value = p + item.partner_member_num;
+                    sheet.Cell(rowIdx, 9).Value = p + item.partner_sales_num;
+                    sheet.Cell(rowIdx, 10).Value = p + item.salesman_num;
+                    sheet.Cell(rowIdx, 11).Value = p + item.net_num;
+
+                    rowIdx += 1;
+                }
+
+            }
+            else if (cb_flag == 0)
+            {
+                foreach (var item in order0)
+                {
+                    sheet.Cell(rowIdx, 1).Value = p + item.order_datetime;
+                    sheet.Cell(rowIdx, 2).Value = p + item.order_id;
+                    sheet.Cell(rowIdx, 3).Value = p + item.product_id;
+                    sheet.Cell(rowIdx, 4).Value = p + item.item_name;
+                    sheet.Cell(rowIdx, 5).Value = p + item.send_name;
+                    sheet.Cell(rowIdx, 6).Value = p + item.item_no;
+                    sheet.Cell(rowIdx, 7).Value = p + item.name_company;
+                    sheet.Cell(rowIdx, 8).Value = p + item.num;
+                    sheet.Cell(rowIdx, 9).Value = p + item.bonus;
+                    sheet.Cell(rowIdx, 10).Value = p + item.h_bonus;
+                    sheet.Cell(rowIdx, 11).Value = p + item.cost;
+                    sheet.Cell(rowIdx, 12).Value = p + item.price;
+
+                    rowIdx += 1;
+                }
+            }
+
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+            }
+
+
+
+            value = Server.MapPath("~/Content/files/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+            return value;
+        }
+
+        #endregion
+
+    }
+}

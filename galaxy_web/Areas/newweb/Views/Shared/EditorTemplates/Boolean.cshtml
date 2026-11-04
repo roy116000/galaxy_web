@@ -1,0 +1,23 @@
+﻿@model bool?
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    //htmlAttributes2.Add("class", "span5");
+
+   
+   string id = ViewData.ModelMetadata.PropertyName;
+
+   var o = ViewData.ModelMetadata;
+   bool model = false;
+   if (ViewData.Model != null) { model = (bool)ViewData.Model; }
+    
+}
+<div class="control-group">
+    @Html.Label("",htmlAttributes)
+    <div class="controls">
+    @Html.CheckBox("", model, htmlAttributes2)
+    <span class="help-inline"></span>
+    </div>
+</div>

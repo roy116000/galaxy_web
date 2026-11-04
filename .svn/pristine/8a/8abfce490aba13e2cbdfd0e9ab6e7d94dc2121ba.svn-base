@@ -1,0 +1,108 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.drugstore_data>
+
+
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+
+    var admin = NW.admin(User.Identity.Name);
+
+    List<h365_web.Models.zip_data> zipData = (List<h365_web.Models.zip_data>)ViewData["zipData"];
+    List<h365_web.Models.drugstore_sales> sData = (List<h365_web.Models.drugstore_sales>)ViewData["sData"];   
+   
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width6" />
+            <col class="width12" />
+            <col class="width8" />
+            <col class="width10" />
+            <col class="width8" />
+            <col />
+            <col class="width10" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">縣市</th>
+                <th class="center">加盟經銷商 </th>
+                <th class="center">業務 </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().name) </th>
+                <th class="center">負責人 </th>
+                <th>@Html.DisplayNameFor(model => model.First().address) </th>
+                <th class="center">狀態 </th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                string city = "";
+                var zip = zipData.Where(m => m.zip == item.zip).FirstOrDefault();
+                if (zip != null)
+                {
+                    city = zip.city;
+                }
+
+                string sales_name = "";
+                var sales = sData.Where(m => m.sales_id == item.sales_id).FirstOrDefault();
+                if (sales != null)
+                {
+                    sales_name = sales.name;
+                }
+
+                item.visible = true;
+
+                string dealer_name = "";
+                if (item.drugstore_sales != null && item.drugstore_sales.drugstore_dealer != null)
+                {
+                    dealer_name = item.drugstore_sales.drugstore_dealer.name;
+                }
+                
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td>
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.drugstore_id" />
+                    </td>
+                    <td class="center">@(city)&nbsp;</td>
+                    <td class="center">@(dealer_name)&nbsp;</td>
+                    <td class="center">@(sales_name)&nbsp;</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.name)</td>
+
+                    <td class="center">@Html.DisplayFor(modelItem => item.boss)</td>
+                    <td>@Html.DisplayFor(modelItem => item.address)</td>
+                    <td class="center">@(NW.pay_name[item.pay_flag])&nbsp;</td>
+                    <td>
+                        @Html.ActionLink("前往藥局", "Edit", new { id = item.drugstore_id }, new { @class = "name" })
+                        @* @if ((item.sales_id == 0 && item.pay_flag==0) || admin.power_id==2 || action=="MineList" || action=="MineList_ajax" )
+                        {
+                            @Html.ActionLink("前往藥局", "Edit", new { id = item.drugstore_id }, new { @class = "name" })
+                        }
+                        else
+                        {
+                            @:已被開發
+                        }*@
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid))
+    </div>
+
+</div>
+<!--pagination-->

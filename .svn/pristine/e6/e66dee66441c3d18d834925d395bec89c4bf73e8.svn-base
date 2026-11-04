@@ -1,0 +1,73 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.member_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    //var gData = (List<ListItem>)ViewData["gData"];
+
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "span2");
+                //var fData = (List<ListItem>)ViewData["fData"];
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            @Html.Partial("template_select")
+
+            <form action="@(Url.Action(action, controller))" method="post" id="form1">
+
+                <div>
+
+                    <span style="text-align: left">註冊時間：
+                    <input type="text" value="@ViewBag.sD" name="sD" id="sD" class="span2">
+                        ～
+                    <input type="text" value="@ViewBag.eD" name="eD" id="eD" class="span2">
+
+                        <script type="text/javascript">$(function () { $('#sD').datepicker(); $('#eD').datepicker(); })</script>
+                    </span>
+                    @*當前狀態： @Html.SelectList("flag", fData, htmlAttributes)</span>*@
+
+                    @Html.CheckBox("isExport", false) 
+
+                    <span style="float: right">
+                        <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+
+                        <button type="button" onclick="oExport('0')" class="btn btn-primary">查詢</button>
+                        <button type="button" onclick="oExport('1')" class="btn">匯出</button>
+
+
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <br />
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax", Model)
+
+    </div>
+    <!--contentinner-->
+</div>
+
+<script>
+    $(function () {
+        $('#uniform-isExport').hide();
+    })
+
+    function oExport(o) {
+        var s = $('#isExport');
+        o == 1 ? s.prop("checked", true) : s.prop("checked", false);
+
+        $('#form1').submit();
+    }
+</script>

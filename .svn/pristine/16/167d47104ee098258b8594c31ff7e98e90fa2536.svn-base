@@ -1,0 +1,1579 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+
+using NPOI.SS.UserModel;
+
+//using System.IO;
+using ClosedXML.Excel;
+
+using System.IO;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwProductController : _BaseController
+    {
+
+        //public  static string[] Flag = { "0,草搞區", "1,審核中", "2,審核完成", "3,上架", "4,下架", "作廢", "申請退回" };
+        public static string[] Flag = { "草搞區", "審核中", "審核完成", "上架", "下架" };
+
+        #region"商品專區"
+
+        public ActionResult PList(int? page, int? flag, int? gid, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            //flag = flag.HasValue ? flag : 3; //預設上架區
+
+            var aData = NW.admin(User.Identity.Name); //登入資料
+            ViewData["aData"] = aData;
+
+            var linq = this._DB.product_data.Where(m => m.product_id > 0);
+            if (flag.HasValue)
+            {
+                if (flag == 99)
+                {
+                    linq = linq.Where(m => m.visible == false);
+                }
+                else
+                {
+                    linq = linq.Where(m => m.status_flag == flag);
+                }
+
+            }
+
+
+            #region"篩選條件"
+
+            if (aData.power_id > 2) //權限
+            {
+                //Flag = new string[] { "0,草搞區", "1,審核中", "2,審核完成", "3,上架", "4,下架" };
+                //Flag = new string[] { "草稿區", "送審" };
+                linq = linq.Where(m => m.company_id == aData.company_id);
+            }
+            else
+            {
+                // Flag = new string[] { "草搞區", "審核中", "審核完成", "上架", "下架" };
+            }
+
+            Flag = new string[] { "草搞區", "審核中", "審核完成", "上架", "下架" };
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                kw = kw.ToLower();
+
+                //廠商
+                var C = this._DB.company_data.Where(m => m.name.ToLower().Contains(kw) || m.inv_sn == kw).Select(m => m.company_id).ToArray();
+
+                linq = linq.Where(m => m.item_name.Contains(kw) || m.web_name.Contains(kw) || m.item_no.Contains(kw) || m.product_id.ToString() == kw || C.Contains(m.company_id));
+
+            }
+
+            if (gid.HasValue)
+            {
+                ViewBag.gid = gid;
+                linq = linq.Where(m => ("," + m.group_id + ",").Contains("," + gid + ","));
+            }
+
+            #endregion
+
+            IPagedList data = linq.OrderByDescending(m => m.create_datetime).ThenByDescending(m => m.change_datetime).ToPagedList(currentPageIndex, 50);
+
+            ViewData["gD"] = this._DB.product_group.Where(m => m.parent_id != 0).ToList();
+            ViewData["cData"] = this._DB.company_data.Where(m => m.visible).ToList();
+
+            #region"選單"
+
+            #region"狀態"
+
+            int num = 0;
+            var af = (from a in Flag.Select(m => m)
+                      select new data_group
+                      {
+                          name = a,
+                      }).ToList()
+                      .Select(m => new data_group()
+                      {
+                          counts = this._DB.product_data.Where(x => x.status_flag == num && (aData.power_id > 2 ? x.company_id == aData.company_id : true)).Count(),
+                          group_id = num++,
+                          name = m.name
+                      }).ToList();
+
+
+            var fal = new data_group() { group_id = 99, name = "作廢", counts = this._DB.product_data.Where(m => m.visible == false && (aData.power_id > 2 ? m.company_id == aData.company_id : true)).Count() };
+            af.Add(fal);
+
+            ViewData["F"] = af;
+            ViewBag.flag = flag;
+
+            //var ListItems = new List<ListItem> { };
+            //ListItems.AddRange(NW.sList(Flag, flag.ToString()));
+            //ViewData["fData"] = ListItems;
+
+            #endregion
+
+            #endregion
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        #region"新增修改區"
+
+        public ActionResult PAdd(int id)
+        {
+            var data = this._DB.product_data.Where(m => m.product_id == id).FirstOrDefault();
+            if (data == null && id != 0) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "List").Replace("Edit", "List")); }
+            else
+            {
+                #region"登入者"
+
+                var aData = NW.admin(User.Identity.Name);
+                ViewData["aData"] = aData;
+
+                #endregion
+
+                data = data != null ? data : new product_data();
+                if (data.product_id == 0)
+                {
+                    data.visible = true;
+                    data.visible_index = false;
+                    data.price = 1; //建議售價
+                    data.sprice = 1; //售價
+                    data.inx = 0;
+                    data.sales_eD = DateTime.Now;
+                    data.sales_sD = data.sales_eD;
+                    data.company_id = aData.company_id;
+                    data.order_style = 1;
+                    data.inventory_num = 999;
+                    data.inx = 999;
+                    data.once_num = 10;
+                    data.sms_visible = true; //是否簡訊寄送
+                }
+                else
+                {
+                    data.img = NW.Path_Img(data.img, "product");
+                }
+
+                #region"廠商"
+
+                var Company = this._DB.company_data.Where(m => m.company_id == data.company_id).FirstOrDefault();
+                ViewBag.company_name = Company != null ? Company.name : "查無廠商";
+                if (Company == null) { TempData["jgrowl"] = "查無廠商，無法建檔"; return RedirectToAction("PList"); };
+
+                #endregion
+
+                #region"下拉選單"
+
+                List<ListItem> ListItems = new List<ListItem> { };
+
+                #region"分類"
+
+                string[] data_group = data.group_ids != null ? data.group_ids.Split(',') : new string[] { };
+                var Group = this._DB.product_group.Where(m => m.visible && m.parent_id != 0).Select(m => new { m.group_id, m.name, m.parent_id }).OrderBy(m => m.group_id).ToLookup(m => (data_group).Contains(m.group_id.ToString()));
+                var Y = Group[true].ToDictionary(m => m.group_id, m => m.name); //目前已有
+                var N = Group[false].Select(m => m.group_id + "," + m.name + "," + m.parent_id).ToArray(); //選單列表
+                ViewData["group_ids_s"] = Y;
+
+                ListItems.Add(new ListItem("", "請選擇", false));
+                ListItems.AddRange(NW.sList_chained2(N));
+                ViewData["group_ids"] = ListItems;
+
+
+                var group = this._DB.product_group.Where(m => m.parent_id == 0).OrderBy(m => m.inx).Select(m => m.group_id + "," + m.name).ToArray();
+                ListItems = new List<ListItem> { };
+                ListItems.Add(new ListItem("", "請選擇", false));
+                ListItems.AddRange(NW.sList_chained1(group));
+                ViewData["group_ids_chained"] = ListItems;
+
+                #endregion
+
+                #region"稅別"
+
+                ListItems = new List<ListItem> { };
+                ListItems.AddRange(NW.sList(NW.Flag_Tax, data.tax_flag.ToString()));
+                ViewData["tax_flag"] = ListItems;
+
+                #endregion
+
+                #region"購物狀況"
+
+                ListItems = new List<ListItem> { };
+                ListItems.AddRange(NW.sList(NW.Flag_Order_Stype, data.order_style.ToString()));
+                ViewData["order_style"] = ListItems;
+
+                #endregion
+
+                #region"症狀關聯"
+
+                string[] data_tag = data.tag != null ? data.tag.Split(',') : new string[] { };
+                var Tags = this._DB.tag_data.Where(m => m.visible).ToLookup(m => data_tag.Contains(m.tag_id.ToString()));
+                var Tags_Y = Tags[true].ToDictionary(m => m.tag_id, m => m.tag_name);
+
+                var Tags_N = Tags[false].Select(m => m.tag_id + "," + m.tag_name).ToArray();
+
+                ListItems = new List<ListItem> { };
+                ListItems.Add(new ListItem("", "請選擇", false));
+                ListItems.AddRange(NW.sList(Tags_N));
+
+                ViewData["tag_s"] = Tags_Y;
+                ViewData["tag"] = ListItems;
+
+                #endregion
+
+                #region"產品狀態"
+
+                ListItems = new List<ListItem> { };
+
+                if (aData.power_id > 2)
+                {
+                    Flag = new string[] { "草稿區", "送審" };
+                    //ListItems.AddRange(NW.sList(Flag, data.status_flag.ToString()));
+                }
+                else
+                {
+                    Flag = new string[] { "草搞區", "審核中", "審核完成", "上架", "下架" };
+                }
+                //else 
+                //{
+                //    ListItems.AddRange(NW.sList(Flag, data.status_flag.ToString()));
+                //}
+
+                ListItems.AddRange(NW.sList(Flag, data.status_flag.ToString()));
+
+                ViewData["status_flag"] = ListItems;
+
+                #endregion
+
+                #endregion
+
+                #region"成分"
+
+                var ingredient = this._DB.product_ingredient.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                ingredient = ingredient != null ? ingredient : new product_ingredient();
+                ViewData["ingredient"] = ingredient;
+
+                #endregion
+
+                #region"規格"
+
+                var specification = this._DB.product_specification.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                specification = specification != null ? specification : new product_specification();
+                ViewData["specification"] = specification;
+
+                //配送
+                ListItems = NW.sList(NW.Flag_Send, specification.send_flag.ToString());
+                ViewData["send_flag"] = ListItems;
+
+                //服用說明
+                ListItems = NW.sList(NW.Taking, specification.taking);
+                ViewData["taking_x"] = ListItems;
+
+                //保存方式
+                ListItems = NW.sList(NW.Preservation, specification.preservation);
+                ViewData["preservation_x"] = ListItems;
+
+                //素食
+                ListItems = NW.sList(NW.Vegetarian, specification.vegetarian);
+                ViewData["vegetarian_x"] = ListItems;
+
+                //劑型
+                ListItems = NW.sList(NW.Dosage_Form, specification.dosage_form);
+                ViewData["dosage_form_x"] = ListItems;
+
+                #endregion
+
+                #region"促銷活動"
+
+                var sData = this._DB.product_sales.Where(m => m.product_id == id).OrderByDescending(m => m.create_datetime).ToList();
+                ViewData["sData"] = sData;
+
+                #endregion
+
+                #region"分潤機制"
+
+                var Maori = this._DB.partner_maori.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                Maori = Maori != null ? Maori : new partner_maori() { };
+                ViewData["Maori"] = Maori;
+
+                #endregion
+
+                if (data.status_flag > 1 && aData.power_id > 2)
+                {
+                    return View("_product_data", data);
+                }
+                else
+                {
+
+                    ViewBag.jgrowl = TempData["jgrowl"];
+                    return View(data);
+
+                }
+
+            }
+
+        }
+
+        public ActionResult PEdit(int id)
+        {
+            return PAdd(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult PEditSave(product_data product_data, product_ingredient product_ingredient, product_specification product_specification, HttpPostedFileBase img, partner_maori partner_maori, bool Maori_visible = true)
+        {
+            var data = this._DB.product_data.Where(m => m.product_id == product_data.product_id).FirstOrDefault();
+            data = data != null ? data : new product_data();
+            if (data.product_id == 0 && product_data.product_id != 0) { RedirectToAction(RouteData.Values["action"].ToString().Replace("Edit", "List").Replace("Save", "")); }
+            else
+            {
+
+                data.visible = product_data.visible;
+                data.group_ids = product_data.group_ids_s != null ? product_data.group_ids_s.Trim(',') : null; //分類
+                data.web_name = product_data.web_name; //品牌
+                data.item_name = product_data.item_name; //品名
+                data.order_style = product_data.order_style; //購物狀況
+                data.tax_flag = product_data.tax_flag; //稅別
+                data.status_flag = product_data.status_flag; //狀態
+                data.inventory_num = product_data.inventory_num; //庫存量
+                data.inx = product_data.inx; //排序
+                data.once_num = product_data.once_num; //單次購買數量
+                data.sms_visible = product_data.sms_visible; //簡訊寄送
+
+                #region"產品價格"
+
+
+                data.price = product_data.price; //建議售價
+                data.sprice = product_data.sprice; //售價
+                data.cost = product_data.cost; //成本
+                data.back_bonus = product_data.back_bonus; //紅利回饋
+
+
+                data.sales_sD = product_data.sales_sD; //促銷起始
+                data.sales_eD = product_data.sales_eD; //促銷結束
+                data.sales_money = product_data.sales_money; //促銷價格
+                data.sales_cost = product_data.sales_cost; //促銷成本
+
+                #endregion
+
+                #region"產品資訊"
+
+                data.sold = product_data.sold; //販售數量
+                data.info = product_data.info; //產品簡介
+                data.introduce = product_data.introduce; //產品內容
+                data.tag = product_data.tag != null ? product_data.tag.Trim(',') : null; //相關資訊
+
+                #endregion
+
+                #region"產品圖檔"
+
+                if (img != null && img.ContentLength > 0 && NW.getFileType(img, 1)) //有無上傳
+                {
+
+                    string tmpPath = Server.MapPath("~/Content/images/product"); //存放路徑
+                    if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); } //建資料夾
+
+                    //string water = NW.getImgWater();
+                    //string strFileName = water + "1" + Path.GetExtension(img.FileName);  //新的檔案名稱
+                    //string strFilePath = tmpPath + "/" + img.FileName; //存放檔案路徑
+                    //string strFilePath2 = tmpPath + "/" + strFileName; //存放檔案路徑
+                    //img.SaveAs(strFilePath); //檔案存放在Server
+                    //data.img = Images.Helps.ImageHelper.Rebmp(strFileName, strFilePath, strFilePath2, 500, 500); 
+
+                    data.img = Images.Helps.ImageHelper.Rebmp(img, tmpPath, 500, 500);
+
+                    //var Drug_Img = this._DB.pharmacist_data.Where(m => m.pharmacist_id == data.product_id).FirstOrDefault();
+                    //if (Drug_Img != null)
+                    //{
+                    //    Drug_Img.b_img = Images.Helps.ImageHelper.Rebmp(strFileName, strFilePath, strFilePath2, 500, 500);  //取得group的寬/高
+
+                    //}
+
+
+                }
+
+                #endregion
+
+                #region"產品週期"
+
+                data.Cycle_Visible = product_data.Cycle_Visible; //週期啟用
+                data.Unit = product_data.Unit; //產品單位
+                data.ProductTotle = product_data.ProductTotle; //產品總量
+                data.Product_day = product_data.Product_day; //產品消耗
+                data.Product_once = product_data.Product_once; //產品消耗次數
+                data.Cycle_Totle = (data.ProductTotle != 0 && data.Product_day != 0 && data.Product_once != 0) ? data.ProductTotle / (data.Product_day * data.Product_once) : 0;
+
+                #endregion
+
+                #region"分潤"
+
+                var Maori = this._DB.partner_maori.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                Maori = Maori != null ? Maori : new partner_maori() { };
+                Maori.product_id = data.product_id;
+                Maori.visible = Maori_visible;
+                //Maori.netsourcer_num = partner_maori.netsourcer_num;
+                Maori.drugstore_num = partner_maori.drugstore_num;
+                Maori.salesman_num = partner_maori.salesman_num;
+                Maori.partner_member_num = partner_maori.partner_member_num;
+                Maori.partner_sales_num = partner_maori.partner_sales_num;
+
+                if (Maori.maori_id == 0)
+                {
+                    Maori.create_user = User.Identity.Name;
+                    Maori.create_datetime = DateTime.Now;
+
+                    this._DB.partner_maori.Add(Maori);
+                    this._DB.SaveChanges();
+                }
+                else
+                {
+                    Maori.change_user = User.Identity.Name;
+                    Maori.change_datetime = DateTime.Now;
+
+                    this._DB.SaveChanges();
+                }
+
+
+
+
+                #endregion
+
+
+                if (data.product_id == 0)
+                {
+
+                    data.visible = true;
+                    data.status_flag = 0; //進草搞區
+                    data.item_no = product_data.item_no != null ? product_data.item_no : "NW" + data.company_id + DateTime.Now.ToString("MMddHHmmss"); //貨號
+                    data.product_id = product_data.product_id;
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+                    data.company_id = product_data.company_id; //廠商編號
+
+                    this._DB.product_data.Add(data);
+
+                    TempData["jgrowl"] = "資料新增成功";
+                }
+                else
+                {
+                    if (!data.post_datetime.HasValue && data.status_flag == 1)
+                    {
+                        data.post_user = User.Identity.Name;
+                        data.post_datetime = DateTime.Now;
+                    }
+
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "資料更新成功";
+                }
+
+                this._DB.SaveChanges();
+
+                #region"產品成分"
+
+                var ingredient = this._DB.product_ingredient.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                ingredient = ingredient != null ? ingredient : new product_ingredient();
+                ingredient.ingredient_visible = product_ingredient.ingredient_visible; //成分啟用
+                ingredient.summary_table = product_ingredient.summary_table; //成分表
+
+                if (ingredient.ingredient_id == 0)
+                {
+                    ingredient.product_id = data.product_id; //產品編號
+
+                    ingredient.create_user = User.Identity.Name;
+                    ingredient.create_datetime = DateTime.Now;
+                    this._DB.product_ingredient.Add(ingredient);
+                }
+                else
+                {
+                    ingredient.change_user = User.Identity.Name;
+                    ingredient.change_datetime = DateTime.Now;
+                }
+
+                this._DB.SaveChanges();
+
+                #endregion
+
+                #region"產品規格"
+
+                var specification = this._DB.product_specification.Where(m => m.product_id == data.product_id).FirstOrDefault();
+                specification = specification != null ? specification : new product_specification();
+
+                specification.specification_visible = product_specification.specification_visible; //啟用
+                specification.send_flag = product_specification.send_flag; //寄送方式
+                specification.taking = product_specification.taking_x != null ? string.Join(",", product_specification.taking_x) : null; //服用說明
+                specification.preservation = product_specification.preservation_x != null ? string.Join(",", product_specification.preservation_x) : null; //保存方式
+                specification.vegetarian = product_specification.vegetarian_x != null ? string.Join(",", product_specification.vegetarian_x) : null; //素食
+                specification.dosage_form = product_specification.dosage_form_x != null ? string.Join(",", product_specification.dosage_form_x) : null; //劑型
+
+                specification.piece = product_specification.piece; //產品單位
+                specification.place_origin = product_specification.place_origin; //產地
+                specification.barcode = product_specification.barcode; //國際條碼
+
+                specification.pcontent = product_specification.pcontent; //產品規格
+                specification.deadline = product_specification.deadline; //保存期限
+                specification.company_name = product_specification.company_name; //廠商名稱
+                specification.tel = product_specification.tel; //廠商電話
+                specification.address = product_specification.address; //廠商地址
+                specification.insurance_famous = product_specification.insurance_famous; //投保
+                specification.log_famous = product_specification.log_famous; //食品
+                specification.ingredients = product_specification.ingredients; //成分標示
+                specification.precautions = product_specification.precautions; //注意事項
+
+
+                if (specification.specification_id == 0)
+                {
+                    specification.product_id = data.product_id; //產品編號
+
+                    specification.create_user = User.Identity.Name;
+                    specification.create_datetime = DateTime.Now;
+                    this._DB.product_specification.Add(specification);
+                }
+                else
+                {
+                    specification.change_user = User.Identity.Name;
+                    specification.change_datetime = DateTime.Now;
+                }
+
+                this._DB.SaveChanges();
+
+                #endregion
+
+            }
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "Edit").Replace("Save", ""), new { id = data.product_id });
+        }
+
+        #endregion
+
+        [HttpPost]
+        public ActionResult PListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢", "首頁顯示", "首頁停用", "送審" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update product_data set visible = 1 Where product_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update product_data set visible = 0 Where product_id in (" + cb_id + ")";
+                    break;
+                case 3: //首頁啟用
+                    sql = "Update product_data set visible_index = 1 Where product_id in (" + cb_id + ")";
+                    break;
+                case 4: //首頁停用
+                    sql = "Update product_data set visible_index = 0 Where product_id in (" + cb_id + ")";
+                    break;
+                case 5: //送審
+                    sql = "Update product_data set status_flag = 1 , post_user = '" + User.Identity.Name + "' , post_datetime = cast('" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "' as datetime ) Where product_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From product_image Where product_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From product_data Where product_id in (" + cb_id + ")";
+                    break;
+
+                #region""
+
+                default:
+                    cb_flag -= 999;
+                    product_price product_price = this._DB.product_price.Find(cb_flag);
+                    if (product_price != null)
+                    {
+                        foreach (string s in cb_id.Split(','))
+                        {
+                            int product_id = Convert.ToInt32(s);
+                            product_data pdata = this._DB.product_data.Find(product_id);
+                            product_price ppdata = this._DB.product_price.Where(m => m.product_id == product_id && m.group_name == product_price.group_name).FirstOrDefault();
+                            if (pdata != null && ppdata == null)
+                            {
+                                double cal = pdata.sprice * product_price.price / 100;
+                                int price = product_price.fix_price > 0 ? product_price.fix_price : Convert.ToInt32(Math.Floor(cal));
+
+                                product_price data = new product_price { };
+                                //data.price_id = product_price.price_id;
+                                data.group_name = product_price.group_name;
+                                data.subject = product_price.subject;
+                                data.product_id = product_id;
+                                data.product_name = pdata.web_name;
+                                data.price = price;
+                                data.stock = product_price.stock;
+                                data.limit = product_price.limit;
+                                data.start_date = product_price.start_date;
+                                data.end_date = product_price.end_date;
+                                data.countback_visible = product_price.countback_visible;
+
+                                data.cost = pdata.cost;
+                                data.org_cost = pdata.cost;
+                                data.org_price = pdata.sprice;
+
+                                //data.inx = product_price.inx;
+
+                                // data.change_user = User.Identity.Name;
+                                // data.change_datetime = DateTime.Now;
+                                data.create_user = User.Identity.Name;
+                                data.create_datetime = DateTime.Now;
+
+                                this._DB.product_price.Add(data);
+                                this._DB.SaveChanges();
+                            }
+                        }
+                    }
+                    cb_flag = 1;
+                    break;
+
+                #endregion
+
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #region"複製商品"
+
+        [HttpPost]
+        public ActionResult Copy(int pid)
+        {
+            var data = this._DB.product_data.Where(m => m.product_id == pid).FirstOrDefault();
+            if (data != null)
+            {
+                var data_new = new product_data() { };
+                data_new = data;
+                data_new.item_no = data.item_no + "c";
+                data_new.create_user = User.Identity.Name;
+                data_new.create_datetime = DateTime.Now;
+                data_new.check_user = null;
+                data_new.check_datetime = null;
+                data_new.post_user = null;
+                data_new.post_datetime = null;
+
+
+                this._DB.product_data.Add(data_new);
+                this._DB.SaveChanges();
+
+                TempData["jgrowl"] = "商品複製成功";
+            }
+
+
+            return View();
+        }
+
+        #endregion
+
+        #region"促銷專區"
+
+        #region"新增修改"
+
+        public ActionResult SalesAoE(int sid, int pid)
+        {
+            var data = this._DB.product_sales.Where(m => m.sales_id == sid && m.product_id == m.product_id).FirstOrDefault();
+            if (sid != 0 && data == null) { TempData["jgrowl"] = "查無此筆紀錄"; return RedirectToAction("PEdit", new { id = pid }); }
+
+            data = data != null ? data : new product_sales() { };
+            if (data.sales_id == 0)
+            {
+                data.product_id = pid;
+                data.price = 1;
+                data.cost = 1;
+                data.start_datetime = DateTime.Now.AddDays(1);
+                data.end_datetime = data.start_datetime.Value.AddDays(1);
+            }
+
+            return View(data);
+        }
+
+        public ActionResult SalesAdd(int sid, int pid)
+        {
+            return SalesAoE(sid, pid);
+        }
+
+        public ActionResult SalesEdit(int sid, int pid)
+        {
+            return SalesAoE(sid, pid);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult SalesEditSave(product_sales product_sales)
+        {
+            var data = this._DB.product_sales.Where(m => m.sales_id == product_sales.sales_id && m.product_id == product_sales.product_id).FirstOrDefault();
+            if (product_sales.sales_id != 0 && data == null) { }
+
+            data = data != null ? data : new product_sales() { };
+
+            data.price = product_sales.price; //售價
+            data.cost = product_sales.cost; //成本
+            data.visible_num = product_sales.visible_num;
+            data.num = product_sales.num;
+            data.visible_date = product_sales.visible_date;
+            data.start_datetime = product_sales.start_datetime;
+            data.end_datetime = product_sales.end_datetime;
+
+            if (data.sales_id == 0)
+            {
+                data.product_id = product_sales.product_id;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                this._DB.product_sales.Add(data);
+            }
+            else
+            {
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+            }
+
+            this._DB.SaveChanges();
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "Edit").Replace("Save", ""), new { sid = data.sales_id, pid = data.product_id });
+        }
+
+
+        #endregion
+
+        #endregion
+
+        #endregion
+
+        #region "分區分類"
+
+        #region "分區列表"
+
+        #region"列表"
+
+        public ActionResult GroupList(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var All = this._DB.product_group.Where(m => m.group_id > 0);
+
+            var linq = All.Where(m => m.parent_id == 0).OrderBy(m => m.inx).ToList();
+
+            linq.ForEach(m => 
+            {
+                var S = All.Where(x => x.parent_id == m.group_id).Select(x => x.name).ToList();
+                m.counts = S.Count();
+                m.name_sub = string.Join(",", S);
+            });
+
+           
+
+            IPagedList data = linq.OrderBy(m => m.inx).ToPagedList(currentPageIndex, 50);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult P_G_AoE(int id)
+        {
+            var data = this._DB.product_group.Where(m => m.group_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { return RedirectToAction("GroupList"); }
+            else
+            {
+                data = data != null ? data : new product_group();
+
+                if (data.group_id == 0)
+                {
+                    data.visible = true;
+                    data.inx = 0;
+                }
+
+            }
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupAdd(int id)
+        {
+            return P_G_AoE(id);
+        }
+
+        public ActionResult GroupEdit(int id)
+        {
+            return P_G_AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupEditSave(product_group product_group)
+        {
+            var data = this._DB.product_group.Where(m => m.group_id == product_group.group_id).FirstOrDefault();
+            if (product_group.group_id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new product_group();
+                data.name = product_group.name; //名稱
+                data.inx = product_group.inx; //排序
+                data.visible = product_group.visible;
+
+                if (data.group_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+
+                    this._DB.product_group.Add(data);
+                }
+                else
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+                }
+
+                this._DB.SaveChanges();
+
+                //更新
+                TempData["jgrowl"] = "資料更新成功";
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "Edit").Replace("Save", ""), new { id = data.group_id });
+
+            }
+        }
+
+        #endregion
+
+        [HttpPost]
+        public ActionResult GroupListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update product_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update product_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From product_group Where parent_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+                    sql = " Delete From product_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+
+
+        #region "分類列表"
+
+        #region"列表"
+
+        public ActionResult GroupSubList(int? page, int id, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var All = this._DB.product_group.Where(m => m.parent_id != 0);
+
+            var linq = All.Where(m => m.parent_id == id);
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                linq = linq.Where(m => m.name.Contains(kw));
+            }
+
+            var Product = this._DB.product_data.Where(m => m.product_id > 0);
+            foreach (var item in linq.ToList())
+            {
+
+                var Pro = Product.Where(m => ("," + m.group_ids + ",").Contains("," + item.group_id + ",")).Select(m => m.item_name).ToArray();
+                item.counts = Pro.Count(); //數量
+                item.name_sub = string.Join(",", Pro); //內容
+            }
+
+            IPagedList data = linq.OrderByDescending(m => m.visible).ThenBy(m => m.inx).ToPagedList(currentPageIndex, 50);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult P_G_S_AoE(int id)
+        {
+            var data = this._DB.product_group.Where(m => m.group_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { return RedirectToAction("GroupList"); }
+            else
+            {
+                data = data != null ? data : new product_group();
+
+                if (data.group_id == 0)
+                {
+                    data.visible = true;
+                    data.inx = 0;
+                }
+
+                var ListItems = new List<ListItem> { };
+
+                var Parent = this._DB.product_group.Where(m => m.parent_id == 0).OrderBy(m => m.inx).Select(m => m.group_id + "," + m.name).ToArray();
+                ListItems.AddRange(NW.sList(Parent, data.parent_id.ToString()));
+                ViewData["parent_id"] = ListItems;
+
+            }
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupSubAdd(int id)
+        {
+            return P_G_S_AoE(id);
+        }
+
+        public ActionResult GroupSubEdit(int id)
+        {
+            return P_G_S_AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupSubEditSave(product_group product_group)
+        {
+            var data = this._DB.product_group.Where(m => m.group_id == product_group.group_id).FirstOrDefault();
+            if (product_group.group_id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new product_group();
+                data.name = product_group.name; //名稱
+                data.inx = product_group.inx; //排序
+                data.visible = product_group.visible;
+                data.parent_id = product_group.parent_id; //分區編號
+
+                if (data.group_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+
+                    this._DB.product_group.Add(data);
+                }
+                else
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+                }
+
+                this._DB.SaveChanges();
+
+                //更新
+                TempData["jgrowl"] = "資料更新成功";
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "Edit").Replace("Save", ""), new { id = data.group_id });
+
+            }
+        }
+
+        #endregion
+
+        [HttpPost]
+        public ActionResult GroupSubListDel(int cb_flag, string cb_id, int gid)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update product_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update product_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From product_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""), new { id = gid });
+        }
+
+        #endregion
+
+        #endregion
+
+        #region "商品關聯"
+
+        public ActionResult TagList(int? gid, string kw, int? order_style)
+        {
+            int currentPageIndex = 0;
+
+            int flag = 3;
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+
+            var tmpData = (from m in _DB.product_data
+                           join m2 in _DB.product_group on m.group_id equals m2.group_id into mm
+                           where m.status_flag == flag && m.visible == true
+                           orderby m.create_datetime
+                           select new data_list()
+                           {
+                               data_id = m.product_id,
+                               group_id = m.group_id,
+                               title = m.item_name,
+                               cont = m.item_no,
+                               info = m.web_name,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               visible_index = m.visible_index,
+                               item_no = m.item_no,
+                               sprice = m.sprice,
+                               cost = m.cost,
+                               gross = Math.Round((((double)m.sprice - m.cost) / m.sprice) * 100, 2).ToString(),
+                               company_id = m.company_id.ToString(),
+                               g_name = mm.FirstOrDefault().name,
+                               post_datetime = m.post_datetime,
+                               status_flag = m.status_flag,
+                               company = m.company_data.name,
+                               order_style = m.order_style
+                           });
+
+            //大權限
+            if (admin.power_id <= 2)
+            {
+                tmpData = (from m in _DB.product_data
+                           join m2 in _DB.product_group on m.group_id equals m2.group_id into mm
+                           where m.status_flag == flag && m.visible == true
+                           orderby m.inx, m.start_date descending
+                           select new data_list()
+                           {
+                               data_id = m.product_id,
+                               group_id = m.group_id,
+                               title = m.item_name,
+                               cont = m.item_no,
+                               info = m.web_name,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               visible_index = m.visible_index,
+                               item_no = m.item_no,
+                               sprice = m.sprice,
+                               cost = m.cost,
+                               gross = Math.Round((((double)m.sprice - m.cost) / m.sprice) * 100, 2).ToString(),
+                               g_name = mm.FirstOrDefault().name,
+                               company_id = m.company_id.ToString(),
+                               post_datetime = m.post_datetime,
+                               status_flag = m.status_flag,
+                               company = m.company_data.name,
+                               order_style = m.order_style
+                           });
+            }
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                var data3 = this._DB.company_data.Where(m => m.visible && m.name.Contains(kw)).ToList();
+                string cid = "";
+                foreach (var item in data3)
+                {
+                    cid += item.company_id.ToString() + ",";
+                }
+
+                string[] _cid = { };
+                if (!string.IsNullOrEmpty(cid))
+                {
+                    cid = cid.TrimEnd(',');
+                    _cid = cid.Split(',');
+                }
+
+                tmpData = tmpData.Where(m => m.title.Contains(kw) || m.cont.Contains(kw) || m.info.Contains(kw) || _cid.Contains(m.company_id));
+            }
+
+
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            if (order_style.HasValue)
+            {
+                if (order_style != 2)
+                {
+                    tmpData = tmpData.Where(m => m.order_style == order_style);
+                }
+            }
+            ViewBag.order_style = order_style;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            List<data_group2> data2 = (from m in this._DB.product_group
+                                       where m.parent_id.Equals(0)
+                                       orderby m.inx, m.create_datetime descending
+                                       select new data_group2()
+                                       {
+                                           group_id = m.group_id,
+                                           name = m.name
+                                       }).ToList();
+
+            foreach (var rs in data2)
+            {
+                List<data_group> data22 = (from m in this._DB.product_group
+                                           where m.parent_id.Equals(rs.group_id)
+                                           orderby m.inx, m.create_datetime descending
+                                           select new data_group()
+                                           {
+                                               group_id = m.group_id,
+                                               name = m.name,
+                                               counts = 0
+                                           }).ToList();
+                //大權限
+                if (admin.power_id <= 2)
+                {
+                    data22 = (from m in this._DB.product_group
+                              where m.parent_id.Equals(rs.group_id)
+                              orderby m.inx, m.create_datetime descending
+                              select new data_group()
+                              {
+                                  group_id = m.group_id,
+                                  name = m.name,
+                                  counts = 0
+                              }).ToList();
+                }
+                if (data22.Count > 0)
+                {
+                    rs.data_group = data22;
+                }
+            }
+
+            var ppdata = this._DB.product_price.Where(m => m.product_id == 0 && m.start_date <= DateTime.Now && m.end_date >= DateTime.Now).OrderByDescending(m => m.start_date).ToList();
+            ViewData["product_price"] = ppdata;
+
+            ViewData["product_group2"] = data2;
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult TagList_ajax(int? gid, int? page, string kw, int? order_style)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            int flag = 3;
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+
+            var tmpData = (from m in _DB.product_data
+                           join m2 in _DB.product_group on m.group_id equals m2.group_id into mm
+                           where m.status_flag == flag && m.visible == true
+                           orderby m.create_datetime
+                           select new data_list()
+                           {
+                               data_id = m.product_id,
+                               group_id = m.group_id,
+                               title = m.item_name,
+                               cont = m.item_no,
+                               info = m.info,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               visible_index = m.visible_index,
+                               item_no = m.item_no,
+                               sprice = m.sprice,
+                               cost = m.cost,
+                               gross = Math.Round((((double)m.sprice - m.cost) / m.sprice) * 100, 2).ToString(),
+                               company_id = m.company_id.ToString(),
+                               g_name = mm.FirstOrDefault().name,
+                               post_datetime = m.post_datetime,
+                               status_flag = m.status_flag,
+                               company = m.company_data.name,
+                               order_style = m.order_style
+                           });
+
+            //大權限
+            if (admin.power_id <= 2)
+            {
+                tmpData = (from m in _DB.product_data
+                           join m2 in _DB.product_group on m.group_id equals m2.group_id into mm
+                           where m.status_flag == flag && m.visible == true
+                           orderby m.inx, m.start_date descending
+                           select new data_list()
+                           {
+                               data_id = m.product_id,
+                               group_id = m.group_id,
+                               title = m.item_name,
+                               cont = m.item_no,
+                               info = m.web_name,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               visible_index = m.visible_index,
+                               item_no = m.item_no,
+                               sprice = m.sprice,
+                               cost = m.cost,
+                               gross = Math.Round((((double)m.sprice - m.cost) / m.sprice) * 100, 2).ToString(),
+                               //gross = ((((double)m.sprice - m.cost) / m.sprice) * 100).ToString().Substring(0, 4),
+                               g_name = mm.FirstOrDefault().name,
+                               company_id = m.company_id.ToString(),
+                               post_datetime = m.post_datetime,
+                               status_flag = m.status_flag,
+                               company = m.company_data.name,
+                               order_style = m.order_style
+                           });
+            }
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                var data3 = this._DB.company_data.Where(m => m.visible && m.name.Contains(kw)).ToList();
+                string cid = "";
+                foreach (var item in data3)
+                {
+                    cid += item.company_id.ToString() + ",";
+                }
+
+                string[] _cid = { };
+                if (!string.IsNullOrEmpty(cid))
+                {
+                    cid = cid.TrimEnd(',');
+                    _cid = cid.Split(',');
+                }
+
+
+                tmpData = tmpData.Where(m => m.title.Contains(kw) || m.cont.Contains(kw) || m.info.Contains(kw) || _cid.Contains(m.company_id));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+
+            if (order_style.HasValue)
+            {
+                if (order_style != 2)
+                {
+                    tmpData = tmpData.Where(m => m.order_style == order_style);
+                }
+            }
+            ViewBag.order_style = order_style;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult TagEdit(int id)
+        {
+            var data = this._DB.product_data.Find(id);
+            int p_id = data.product_group == null ? 0 : data.product_group.parent_id;
+            if (data.product_group != null)
+            {
+                if (data.product_group.parent_id == 0)
+                {
+                    p_id = data.group_id;
+                }
+            }
+
+            ViewBag.title = data.item_name;
+
+            //分類名稱
+            var gname = this._DB.product_group.Where(m => m.group_id == data.group_id).FirstOrDefault();
+            ViewBag.gname = gname.name;
+
+            //圖片
+            var image = _DB.product_image.Where(m => m.product_id.Equals(id)).FirstOrDefault();
+            images_data imgData = new images_data();
+            if (image != null)
+            {
+                imgData.imgs_id = image.imgs_id;
+                imgData.s_img = image.s_img;
+                imgData.b_img = image.b_img;
+            }
+            ViewData["uploadimage"] = imgData;
+
+            //sys_admin_data admin = NW.admin(User.Identity.Name);
+            var data2 = this._DB.company_data.Where(m => m.company_id == data.company_id).FirstOrDefault();
+            ViewBag.company_name = data2.name;
+
+            //tag用
+            var tag = this._DB.tag_data.Where(m => m.visible).ToList();
+            ViewData["tag"] = tag;
+
+            //當前tag
+            string tag_s = "- - -";
+            if (!string.IsNullOrEmpty(data.tagz))
+            {
+                tag_s = data.tagz;
+            }
+            ViewBag.tag_s = tag_s;
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            //編輯器用
+            NW.product_id = id.ToString();
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult TagEditSave(product_data product_data)
+        {
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+
+            var data = this._DB.product_data.Find(product_data.product_id);
+            //var data1 = this._DB.product_data.Where(m => m.product_id.Equals(product_data.product_id)).Select(m => m).SingleOrDefault();
+
+
+            data.tagz = product_data.tagz;
+
+            data.change_user = User.Identity.Name;
+            data.change_datetime = DateTime.Now;
+
+            this._DB.SaveChanges();
+
+            //更新
+            TempData["jgrowl"] = "產品關聯成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = product_data.product_id });
+        }
+
+        [HttpPost]
+        public ActionResult TagListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢", "首頁顯示", "首頁停用", "下架", "退回草稿區" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update product_data set visible = 1 Where product_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update product_data set visible = 0 Where product_id in (" + cb_id + ")";
+                    break;
+                case 3: //首頁啟用
+                    sql = "Update product_data set visible_index = 1 Where product_id in (" + cb_id + ")";
+                    break;
+                case 4: //首頁停用
+                    sql = "Update product_data set visible_index = 0 Where product_id in (" + cb_id + ")";
+                    break;
+                case 5: //下架
+                    sql = "Update product_data set status_flag = 4 Where product_id in (" + cb_id + ")";
+                    break;
+                case 6: //退回草稿區
+                    sql = "Update product_data set status_flag = 0 Where product_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From product_image Where product_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From product_data Where product_id in (" + cb_id + ")";
+                    break;
+                default:
+                    cb_flag -= 999;
+                    product_price product_price = this._DB.product_price.Find(cb_flag);
+                    if (product_price != null)
+                    {
+                        foreach (string s in cb_id.Split(','))
+                        {
+                            int product_id = Convert.ToInt32(s);
+                            product_data pdata = this._DB.product_data.Find(product_id);
+                            product_price ppdata = this._DB.product_price.Where(m => m.product_id == product_id && m.group_name == product_price.group_name).FirstOrDefault();
+                            if (pdata != null && ppdata == null)
+                            {
+                                double cal = pdata.sprice * product_price.price / 100;
+                                int price = product_price.fix_price > 0 ? product_price.fix_price : Convert.ToInt32(Math.Floor(cal));
+
+                                product_price data = new product_price { };
+                                //data.price_id = product_price.price_id;
+                                data.group_name = product_price.group_name;
+                                //data.subject = product_price.subject;
+                                data.product_id = product_id;
+                                data.product_name = pdata.item_name;
+                                //data.price = price;
+                                //data.stock = product_price.stock;
+                                //data.limit = product_price.limit;
+                                data.start_date = product_price.start_date;
+                                data.end_date = product_price.end_date;
+                                //data.countback_visible = product_price.countback_visible;
+
+                                data.cost = pdata.cost;
+                                data.org_cost = pdata.cost;
+                                data.org_price = pdata.sprice;
+
+                                //data.inx = product_price.inx;
+
+                                // data.change_user = User.Identity.Name;
+                                // data.change_datetime = DateTime.Now;
+                                data.create_user = User.Identity.Name;
+                                data.create_datetime = DateTime.Now;
+
+                                this._DB.product_price.Add(data);
+                                this._DB.SaveChanges();
+                            }
+                        }
+                    }
+                    cb_flag = 1;
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+
+        public ActionResult TagAdd(int id, int type)
+        {
+
+            tag_data data = new tag_data();
+            data.visible = true;
+            data.type = type;
+            ViewBag.type = type;
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult TagAddSave(tag_data tag_data, int id)
+        {
+            //var data = this._DB.news_data.Find(news_data.news_id);
+            //var data1 = this._DB.news_data.Where(m => m.news_id.Equals(news_data.news_id)).Select(m => m).SingleOrDefault();
+            var data = new tag_data { };
+
+            var data2 = this._DB.tag_data.Where(m => m.tag_name == tag_data.tag_name).FirstOrDefault();
+
+            if (data2 != null)
+            {
+                data2.type = tag_data.type;
+                data2.inx = tag_data.inx;
+                data2.visible = tag_data.visible;
+                data2.change_user = User.Identity.Name;
+                data2.change_datetime = DateTime.Now;
+
+                this._DB.SaveChanges();
+
+                //新增
+                TempData["jgrowl"] = "關聯修改成功!!";
+
+            }
+            else
+            {
+                // data.news_id = news_data.news_id;
+                data.tag_name = tag_data.tag_name;
+                data.type = tag_data.type;
+                data.inx = tag_data.inx;
+                data.visible = tag_data.visible;
+
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.tag_data.Add(data);
+                this._DB.SaveChanges();
+
+                //新增
+                TempData["jgrowl"] = "關聯新增成功!!";
+
+            }
+
+            string back = "";
+            string contr = "";
+
+            if (tag_data.type == 1)
+            {
+                back = RouteData.Values["action"].ToString().Replace("TagAddSave", "NewsEdit");
+                contr = RouteData.Values["controller"].ToString().Replace("NwProduct", "NwHealth");
+            }
+            else
+            {
+                back = RouteData.Values["action"].ToString().Replace("AddSave", "Edit");
+            }
+
+            return RedirectToAction(back, contr, new { id = id });
+
+        }
+
+        #endregion
+
+    }
+}

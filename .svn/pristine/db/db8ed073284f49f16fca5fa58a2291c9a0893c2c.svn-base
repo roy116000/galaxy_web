@@ -1,0 +1,106 @@
+﻿@model h365_web.Models.sys_admin_data
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm("", "", FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.inv_sn, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.inv_sn&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.name, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.name&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.boss, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.boss&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.address, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.address&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.tel, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.tel&nbsp;&nbsp;
+                    </div>
+                </div>
+              
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.fax, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.fax&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.contact, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.contact&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.contact_tel, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.contact_tel&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.mail, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.mail&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.tel, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.tel&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                  <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.bills_flag, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @switch (Model.company_data.bills_flag)
+                        {
+                            case 0: 
+                                @:月結
+                                break;
+                            case 1: 
+                                @:半月結
+                                break;
+                        }
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    @Html.LabelFor(model => model.company_data.freight, new { @class = "control-label" })
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.company_data.freight&nbsp;&nbsp;
+                    </div>
+                </div>
+              
+            </div>
+        }
+    </div>
+</div>
+

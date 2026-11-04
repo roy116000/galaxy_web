@@ -1,0 +1,114 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.data_list>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width5" />
+            <col class="width8" />
+            <col class="width8" />
+            <col />
+            <col class="width20" />
+            <col class="width16" />
+            <col class="width8" />
+            <col class="width18" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">清帳月份 </th>
+                <th class="center">處理狀態 </th>
+                <th>藥局 </th>
+                <th>最新訂單日期</th>
+                <th class="center">清帳日期 </th>
+                <th class="center">清帳金額 </th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                string bills = "";
+                switch (item.group_id)
+                {
+                    case 1:
+                        bills = "-上";
+                        break;
+                    case 2:
+                        bills = "-下";
+                        break;
+                }
+                        
+                <tr class="unread">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" /></td>
+                    <td class="center">@(item.hits.ToString() + bills)</td>
+                    <td class="center">
+                        @switch (item.status_flag)
+                        {
+                            case 0: 
+                            <span class="label" style="background-color: #d9534f;">未清帳</span>
+                                break;
+                            case 1: 
+                            <span class="label" style="background-color: #337ab7;">處理中</span>
+                                break;
+                            case 2:                                  
+                            <span class="label label-success">清帳完成</span>
+                                break;
+                        }
+
+                    </td>
+                    <td>@(item.create_user)</td>
+
+                    <td><span style="color:green">@(item.post_datetime.Value.ToString("yyyy/MM/dd"))</span> &nbsp<span style="color:red">(@(item.mail))</span></td>
+                    <td class="center">
+                        @if (item.create_datetime != null)
+                        {
+                            @(((DateTime)item.create_datetime).ToString("yyyy/MM/dd"))
+                        }
+                    </td>
+                    <td class="center">$ @(item.cost.ToString("N0"))</td>
+                    <td>
+                        @if (item.visible)
+                        {
+                         @*   string stringArray = "";
+                            stringArray += item.mail + ",";
+                            stringArray += item.order_style.ToString() + ",";
+                            stringArray += item.hits.ToString() + ",";
+                            stringArray += item.group_id.ToString() + ",";
+                            stringArray += item.start_date.Value.ToString() + ",";
+                            stringArray += item.end_date.Value.ToString();
+                            
+                            <a onclick="checkclear('@(stringArray)')">4564</a>*@ 
+                        @Html.ActionLink("清帳", "StayAdd", new { id = item.order_style, yymm = item.hits, bills_flag = item.group_id, sD = item.start_date, eD = item.end_date }) @: |
+                        }
+                        else
+                        {
+                            @:尚有貨品未出貨 |
+                        }
+                        @Html.ActionLink("檢視", "StayEdit", new { id = item.data_id,cid=item.order_style, sD = item.start_date, eD = item.end_date }) | 
+                        @Html.ActionLink("匯出清帳", "BillsExport", new { id = item.data_id,cid=item.order_style, yymm = item.hits, sD = item.start_date, eD = item.end_date })
+                       
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    <div>@ViewBag.total</div>
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+</div>
+<!--pagination-->

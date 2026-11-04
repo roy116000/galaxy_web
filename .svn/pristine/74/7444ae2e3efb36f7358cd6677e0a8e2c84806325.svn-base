@@ -1,0 +1,622 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class health_part
+    {
+        [Key]
+        public int part_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_admin_id")]
+        public string create_user { get; set; }
+
+        [DisplayName("change_branch_id")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯數量")]
+        public int counts { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯")]
+        public string related_name { get; set; }
+
+
+    }
+
+    public class health_organ
+    {
+        [Key]
+        public int organ_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("選擇部位")]
+        public int parent_id { get; set; }
+
+        [DisplayName("部位")]
+        public string parent_ids { get; set; }
+
+        [NotMapped]
+        [DisplayName("部位")]
+        public string parent_idx { get; set; }
+
+        [DisplayName("器官名稱")]
+        public string name { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("創建人")]
+        public string create_user { get; set; }
+
+        [DisplayName("創建時間")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("修改人")]
+        public string change_user { get; set; }
+
+        [DisplayName("修改時間")]
+        public DateTime? change_datetime { get; set; }
+    }
+
+    public class health_data
+    {
+        [Key]
+        public int health_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("選擇部位")]
+        public int parent_id { get; set; }
+
+        [DisplayName("器官")]
+        public string parent_ids { get; set; }
+
+        [NotMapped]
+        [DisplayName("器官")]
+        public string parent_idx { get; set; }
+
+        [DisplayName("specialty_id")]
+        public int specialty_id { get; set; }
+
+        [DisplayName("症狀名稱")]
+        public string title { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("簡介")]
+        public string info { get; set; }
+
+        [DisplayName("Symptom1")]
+        public string Symptom1 { get; set; }
+
+        [DisplayName("Symptom2")]
+        public string Symptom2 { get; set; }
+
+        [DisplayName("Symptom3")]
+        public string Symptom3 { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("關鍵字-商品對應")]
+        public string tag { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [NotMapped]
+        public int pid { get; set; }
+
+        [NotMapped]
+        public int oid { get; set; }
+        
+
+    }
+
+    public class health_news
+    {
+        [Key]
+        public int news_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("選擇症狀")]
+        public int parent_id { get; set; }
+
+        [DisplayName("症狀")]
+        public string parent_ids { get; set; }
+
+        [NotMapped]
+        [DisplayName("症狀")]
+        public string parent_idx { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("作者")]
+        public int author_id { get; set; }
+
+        [DisplayName("分類")]
+        public string health_id { get; set; }
+        [NotMapped]
+        [UIHint("CheckBoxList")]
+        [DisplayName("分類")]
+        public string[] health_id_x { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("關鍵字")]
+        public string tag { get; set; }
+
+        [DisplayName("簡介")]
+        [UIHint("Info")]
+        [Display(Prompt = "此欄位僅能填入文字，且限255個字，此內容會在列表出現")]
+        public string info { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("內容")]
+        public string cont { get; set; }
+
+        [DisplayName("報導")]
+        public string cont2 { get; set; }
+
+        [UIHint("Number")]
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("文章分區")]
+        public int flag { get; set; }
+
+        [DisplayName("點閱率")]
+        public int hits { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("專題Tag")]
+        public string tags { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("列表圖片")]
+        public string uploadimage { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage2")]
+        [DisplayName("列表與內頁圖片")]
+        public string uploadimage2 { get; set; }
+
+        //public virtual author_data author_data { get; set; }
+
+
+        //public virtual ICollection<news2_image> news2_image { get; set; }
+
+    }
+
+    public class author_group
+    {
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [DisplayName("parent_id")]
+        public int parent_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public virtual ICollection<author_data> author_data { get; set; }
+    }
+
+    public class author_data
+    {
+        [Key]
+        [DisplayName("author_id")]
+        public int author_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("作者")]
+        public string title { get; set; }
+
+        [DisplayName("簡介")]
+        [UIHint("Info")]
+        [Display(Prompt = "此欄位僅能填入文字，且限255個字，此內容會在列表出現")]
+        public string info { get; set; }
+
+        [DisplayName("職稱")]
+        public string cont { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("點擊")]
+        public int hits { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("作者介紹")]
+        [UIHint("Html")]
+        public string cont2 { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("Tag")]
+        public string tags { get; set; }
+
+        [DisplayName("單位名稱")]
+        public string place { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage2")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage2 { get; set; }
+
+        //public virtual ICollection<health_news> health_news { get; set; }
+
+        public virtual ICollection<author_image> author_image { get; set; }
+
+        public virtual author_group author_group { get; set; }
+
+    }
+
+    public class author_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("author_id")]
+        public int author_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+        public virtual author_data author_data { get; set; }
+
+    }
+
+    public class health_sub
+    {
+
+        [Key]
+        public int sub_id { get; set; }
+
+        [DisplayName("health_id")]
+        public int health_id { get; set; }
+
+        [DisplayName("title")]
+        public string title { get; set; }
+
+        [DisplayName("info")]
+        public string info { get; set; }
+
+        [DisplayName("yes_inx")]
+        public int yes_inx { get; set; }
+
+        [DisplayName("no_inx")]
+        public int no_inx { get; set; }
+
+        [DisplayName("inx")]
+        public int inx { get; set; }
+
+        [DisplayName("visible")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("specialtys")]
+        public string specialtys { get; set; }
+
+    }
+
+    public class health_specialty
+    {
+
+        [Key]
+        public int specialty_id { get; set; }
+
+        [DisplayName("name")]
+        public string name { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("inx")]
+        public int inx { get; set; }
+
+        [DisplayName("create_admin_id")]
+        public int create_admin_id { get; set; }
+
+        [DisplayName("create_branch_id")]
+        public int create_branch_id { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_admin_id")]
+        public int change_admin_id { get; set; }
+
+        [DisplayName("change_branch_id")]
+        public int change_branch_id { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("del_visible")]
+        public string del_visible { get; set; }
+
+    }
+
+    public class health_symptom_group
+    {
+        [Key]
+        [DisplayName("分類編號")]
+        public int group_id { get; set; }
+
+        [UIHint("Select_Tags")]
+        [DisplayName("部位編號")]
+        public string part_id { get; set; }
+
+        [DisplayName("標題")]
+        public string name { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯數量")]
+        public int counts { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯")]
+        public string related_name { get; set; }
+
+        [NotMapped]
+        public string part_id_s { get; set; }
+    }
+
+    public class health_symptom_data
+    {
+        [Key]
+        [DisplayName("症狀編號")]
+        public int symptom_id { get; set; }
+
+        [UIHint("Select_Tags")]
+        [DisplayName("分類編號")]
+        public string group_id { get; set; }
+
+        [DisplayName("分科編號")]
+        public int position_id { get; set; }
+
+        [DisplayName("標題")]
+        public string title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("概述")]
+        public string cont { get; set; }
+
+        [DisplayName("原因-問")]
+        public string d1_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("原因-答")]
+        public string d1_content { get; set; }
+
+        [DisplayName("症狀-問")]
+        public string d2_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("症狀-答")]
+        public string d2_content { get; set; }
+
+        [DisplayName("飲食-問")]
+        public string d3_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("飲食-答")]
+        public string d3_content { get; set; }
+
+        [DisplayName("預防-問")]
+        public string d4_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("預防-答")]
+        public string d4_content { get; set; }
+
+        [DisplayName("治療-問")]
+        public string d5_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("治療-答")]
+        public string d5_content { get; set; }
+
+        [DisplayName("檢查-問")]
+        public string d6_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("檢查-答")]
+        public string d6_content { get; set; }
+
+        [DisplayName("鑑別診斷-問")]
+        public string d7_title { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("鑑別診斷-答")]
+        public string d7_content { get; set; }
+
+        [UIHint("Select_Tags")]
+        [DisplayName("關聯")]
+        public string tag { get; set; }
+
+        [NotMapped]
+        public string tag_s { get; set; }
+
+        [DisplayName("hits")]
+        public int hits { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯數量")]
+        public int counts { get; set; }
+
+        [NotMapped]
+        [DisplayName("關聯")]
+        public string related_name { get; set; }
+
+        [NotMapped]
+        public string group_id_s { get; set; }
+
+
+
+    }
+
+}

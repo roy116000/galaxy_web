@@ -1,0 +1,89 @@
+﻿@using MvcPaging
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwPharmacistController._Order>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Flag = (List<ListItem>)ViewData["Flag"];
+}
+
+<div class="maincontent animate4 fadeInUp">
+    <div class="contentinner content-dashboard">
+        <div class="row-fluid">
+
+            <form id="form1" action="@(Url.Action(action, controller))">
+
+                <span>時間選擇：
+                        <input id="sD" name="sD" class="span2" value="@(ViewBag.sD)" />
+                    ～
+                        <input id="eD" name="eD" class="span2" value="@(ViewBag.eD)" />
+
+                    訂單狀態：
+                    @Html.SelectList("flag", Flag)
+
+                </span>
+
+                <span style="float: right">
+                    <input type="text" id="kw" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                    <input type="submit" value="查詢" class="btn btn-primary" />
+
+                    @if (Model.Any())
+                    {
+                        <input type="button" onclick="Export('')" value="匯出" class="btn" />
+                    }
+
+                </span>
+
+            </form>
+
+            @*<ul class="msghead_menu">
+                <li>
+                    <div class="btn-group">
+
+                        <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                        <ul class="dropdown-menu">
+                            <li><a onclick="cbHandel(1);" href="#"><span class="icon-ok-sign"></span>已出貨</a></li>
+                            <li><a onclick="cbHandel(2);" href="#"><span class="icon-ban-circle"></span>訂單完成</a></li>
+
+                        </ul>
+
+                    </div>
+                </li>
+            </ul>*@
+
+            <br />
+
+            @*先跑View，再跑資料*@
+            @Html.Partial(action + "_ajax")
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        jQuery("#sD").datepicker();
+        jQuery("#eD").datepicker();
+    })
+</script>
+
+<script>
+    function Export()
+    {
+
+        var o = '@(Model.Count())';
+
+        if (o != 0) {
+
+            $('#form1').attr('action', '@(Url.Action("Export"))');
+
+            $('#form1').submit();
+        } else {
+            swal("無資料需匯出，請確認查詢條件")
+        }
+
+        $('#form1').attr('action', '@(Url.Action("OrderList"))');
+
+    }
+</script>

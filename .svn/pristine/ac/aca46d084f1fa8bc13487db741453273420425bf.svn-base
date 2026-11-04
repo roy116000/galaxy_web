@@ -1,0 +1,87 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.drugstore_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                    //List<h365_web.Models.news4_data> marData = (List<h365_web.Models.news4_data>)ViewData["marData"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width6" />
+        
+            <col class="width12" />
+            <col />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">藥局編號 </th>               
+                <th class="center">藥局名稱 </th>
+                <th class="center">藥局帳號</th>  
+                <th class="center">藥局電話</th>
+                <th class="center">藥局合約</th>                        
+                <th class="center">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                           
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.drugstore_id" /></td>
+                    <td class="center"><span class="label label-info" title="前台單號：@(item.drugstore_id)">@Html.DisplayFor(modelItem => item.drugstore_id)</span></td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.uid)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.tel)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => NW.drug_flag[item.flag])</td>
+                    
+                   
+                    <td class="center">@Html.ActionLink("編輯", "Edit", new { id = item.drugstore_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>@ViewBag.total</div>
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("start_date", ViewBag.start_date)
+            .AddRouteValue("end_date", ViewBag.end_date)
+            .AddRouteValue("flag", ViewBag.vflag)
+            .AddRouteValue("pay_visible", ViewBag.vpay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("pay_id", ViewBag.vpay_id)
+            )
+    </div>
+</div>
+<!--pagination-->
+
+
+<style>
+    .label-default {
+      background-color:red;
+    }
+    .label-success1 {
+      background-color:seagreen;
+    }
+        .label-success2 {
+       background-color:green;
+    }
+    .label-success5 {
+        background-color:blue;
+    }
+
+
+</style>

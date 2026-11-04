@@ -1,0 +1,79 @@
+﻿@model h365_web.Models.contact_drugstore
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+
+                @Html.EditorFor(model => model.name)
+
+                @Html.EditorFor(model => model.sex)
+
+                @Html.EditorFor(model => model.mail)
+
+                @Html.EditorFor(model => model.inv_sn)
+
+                @Html.EditorFor(model => model.drug_name)
+
+                @Html.EditorFor(model => model.drug_tel)
+
+                @Html.EditorFor(model => model.drug_phone)
+
+                @Html.EditorFor(model => model.zip)
+
+                @Html.EditorFor(model => model.snormal_hour)
+                @Html.EditorFor(model => model.snormal_minute)
+                @Html.EditorFor(model => model.enormal_hour)
+                @Html.EditorFor(model => model.enormal_minute)
+                @Html.EditorFor(model => model.sholiday_hour)
+                @Html.EditorFor(model => model.sholiday_minute)
+                @Html.EditorFor(model => model.eholiday_hour)
+                @Html.EditorFor(model => model.eholiday_minute)
+                @Html.EditorFor(model => model.drug_holiday)
+                @Html.EditorFor(model => model.isholiday)
+                @Html.EditorFor(model => model.visible)
+                @Html.EditorFor(model => model.reply)
+
+
+
+
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        @*<button type="reset" class="btn">取消</button>*@
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                name: "required",
+                drug_name: "required"
+            },
+            messages: {
+                name: "姓名，必需填寫",
+                drug_name: "藥局，必須填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

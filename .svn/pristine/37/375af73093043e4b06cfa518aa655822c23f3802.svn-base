@@ -1,0 +1,36 @@
+﻿@model h365_web.Models.product_sales
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => Model.sales_id)
+            @Html.HiddenFor(m => Model.product_id)
+
+            @Html.EditorFor(m => Model.cost)
+            @Html.EditorFor(m => Model.price)
+
+            @Html.EditorFor(m => Model.visible_num)
+            @Html.EditorFor(m => Model.num)
+
+            @Html.EditorFor(m => Model.visible_date)
+            @Html.EditorFor(m => Model.start_datetime)
+            @Html.EditorFor(m => Model.end_datetime)
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    <button type="button" onclick="location.href = '@Url.Action("PEdit", new {id = Model.product_id })'" class="btn">回商品</button>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

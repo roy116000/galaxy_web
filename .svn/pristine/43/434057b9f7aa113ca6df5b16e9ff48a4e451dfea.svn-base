@@ -1,0 +1,100 @@
+﻿@model h365_web.Models.product_group2
+@{
+  //string id = ViewContext.RouteData.Values["id"].ToString();
+  string controller = ViewContext.RouteData.Values["controller"].ToString();
+  string action = ViewContext.RouteData.Values["action"].ToString();
+
+  string groupname = ViewBag.groupname;
+
+  h365_web.Models.product_group_act2 product_group_act = (h365_web.Models.product_group_act2)ViewData["product_group_act"];
+}
+<div class="maincontent">
+    <div class="contentinner">
+         <ul class="nav nav-pills">
+            <li>@Html.ActionLink("回分類列表", "GroupSubList", "NwProduct", new { gid = Model.parent_id }, null)</li>
+        </ul>
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.group_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                @Html.EditorFor(model => model.parent_id)
+
+                @Html.EditorFor(model => model.name)
+
+                @Html.EditorFor(model => model.inx)
+
+                @Html.EditorFor(model => model.visible)
+
+
+                <h4 class="widgettitle">@(groupname)</h4>
+
+                @Html.HiddenFor(model => product_group_act.act_id) 
+
+                @Html.HiddenFor(model => product_group_act.group_id) 
+
+                @Html.EditorFor(model => product_group_act.name) 
+
+                @if (Model.parent_id == 426) {
+
+                  @Html.EditorFor(model => product_group_act.total) 
+
+                  @Html.EditorFor(model => product_group_act.freight) 
+                
+                }else{
+                  @Html.EditorFor(model => product_group_act.num) 
+
+                  @Html.EditorFor(model => product_group_act.money) 
+                }
+                
+
+                @Html.EditorFor(model => product_group_act.max_buy) 
+
+                @Html.EditorFor(model => product_group_act.start_date) 
+
+                @Html.EditorFor(model => product_group_act.end_date) 
+
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+  $(function () {
+    $("#product_group_act_total").spinner({ min: 0, max: 9999999999, increment: 1 });
+    $("#product_group_act_freight").spinner({ min: 0, max: 9999999999, increment: 1 });
+    $("#product_group_act_num").spinner({ min: 0, max: 9999999999, increment: 1 });
+    $("#product_group_act_money").spinner({ min: 0, max: 9999999999, increment: 1 });
+    $("#product_group_act_max_buy").spinner({ min: 0, max: 9999999999, increment: 1 });
+    $("#product_group_act_start_date").datepicker();
+    $("#product_group_act_end_date").datepicker();
+  })
+
+</script>
+<script type="text/javascript">
+  $(function () {
+    // With Form Validation
+    $("#form1").validate({
+      rules: {
+        name: "required"
+      },
+      messages: {
+        name: "分類標題，必需填寫！"
+      },
+      highlight: function (label) {
+        jQuery(label).closest('.control-group').addClass('error');
+      }
+    });
+
+  })
+</script>

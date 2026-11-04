@@ -1,0 +1,43 @@
+﻿@model galaxy_web.Models.product_erp_group
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => m.group_id)
+
+            <h4 class="widgettitle">分類</h4>
+
+            @Html.EditorFor(m => m.name)
+
+            @Html.EditorFor(m => m.pre)
+
+            @Html.EditorFor(m => m.nation)
+
+            @Html.EditorFor(m => m.inx)
+
+            @Html.EditorFor(m => m.visible)
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    <button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#name, #pre').attr('required', true);
+    })
+</script>

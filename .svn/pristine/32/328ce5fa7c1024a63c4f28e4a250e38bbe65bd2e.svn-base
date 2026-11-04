@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace h365_web.Models
+{
+
+    public class images_data
+    {
+        public int imgs_id { get; set; }
+        public string s_img { get; set; }
+        public string b_img { get; set; }
+        public string img_src { get; set; }
+        public int img_inx { get; set; }
+        public string img_info { get; set; }
+    }
+
+    public class VmImage
+    {
+        
+        private List<int> _img_id = new List<int>();
+        [Key]
+        public List<int> img_id { get { return this._img_id; } set { this._img_id = value; } }
+
+        private List<int> _news_id = new List<int>();
+        public List<int> news_id { get { return this._news_id; } set { this._news_id = value; } }
+
+        private List<string> _img_info = new List<string>();
+        public List<string> img_info { get { return this._img_info; } set { this._img_info = value; } }
+
+        private List<int> _img_inx = new List<int>();
+        public List<int> img_inx { get { return this._img_inx; } set { this._img_inx = value; } }
+
+        private List<string> _s_img = new List<string>();
+        public List<string> s_img { get { return this._s_img; } set { this._s_img = value; } }
+
+        private List<string> _b_img = new List<string>();
+        public List<string> b_img { get { return this._b_img; } set { this._b_img = value; } }
+
+    }
+
+
+}

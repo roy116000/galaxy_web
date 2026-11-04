@@ -1,0 +1,57 @@
+﻿@model h365_web.Areas.newweb.Controllers.NwBillsController._Bill
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();  
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <div class="stdform">
+
+            <div class="widgetcontent">
+                <h4 class="widgettitle">請款資訊</h4>
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬廠商</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(Model.c_name)</span>
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(m => m.bill.invoice_datetime)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        <span>@(NW.getDate(Model.bill.invoice_datetime))&nbsp;</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(m => m.bill.invoice_no)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        <span>@Html.DisplayFor(m => m.bill.invoice_no)&nbsp;</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(m => m.bill.pay_datetime)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        <span>@(NW.getDate(Model.bill.pay_datetime))&nbsp;</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="" class="control-label">請款總額</label>
+
+                    <h2 class="field" style="font-size: 200%;">@(Model.order.Select(m => m.cost_total).DefaultIfEmpty(0).Sum().ToString("N0"))</h2>
+
+                </div>
+
+                @{Html.RenderPartial("_Order_data", Model.order);}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

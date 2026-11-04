@@ -1,0 +1,495 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class medicines_approve
+    {
+        [Key]
+        public int approve_id { get; set; }
+
+        [DisplayName("許可證字號")]
+        public string atc_code { get; set; }
+
+        [DisplayName("分類")]
+        public int? group_id { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [DisplayName("註銷狀態")]
+        public string off_status { get; set; }
+
+        [DisplayName("註銷日期")]
+        public DateTime? off_date { get; set; }
+
+        [DisplayName("註銷理由")]
+        public string off_note { get; set; }
+
+        [DisplayName("有效日期")]
+        public DateTime? on_datet { get; set; }
+
+        [DisplayName("發證日期")]
+        public DateTime? card_date { get; set; }
+
+        [DisplayName("許可證種類")]
+        public string card_type { get; set; }
+
+        [DisplayName("舊證字號")]
+        public string no_old { get; set; }
+
+        [DisplayName("通關簽審文件編號")]
+        public string paper_sn { get; set; }
+
+        [DisplayName("中文品名")]
+        public string name { get; set; }
+
+        [DisplayName("英文品名")]
+        public string name_en { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("適應症")]
+        public string sick { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("適應症(藥師)")]
+        public string sick_pharmacist { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("適應症(民眾)")]
+        public string sick_people { get; set; }
+
+        [DisplayName("劑型")]
+        public string medicine { get; set; }
+
+        [DisplayName("包裝")]
+        public string pack { get; set; }
+
+        [DisplayName("藥品類別")]
+        public string medicine_group { get; set; }
+
+        [DisplayName("管制藥品分類級別")]
+        public string medicine_level { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("主成分略述")]
+        public string introduce { get; set; }
+
+        [DisplayName("申請商名稱")]
+        public string apply_name { get; set; }
+
+        [DisplayName("申請商地址")]
+        public string apply_address { get; set; }
+
+        [DisplayName("申請商統一編號")]
+        public string apply_inv_sn { get; set; }
+
+        [DisplayName("製造商名稱")]
+        public string made_name { get; set; }
+
+        [DisplayName("製造廠廠址")]
+        public string made_address { get; set; }
+
+        [DisplayName("製造廠公司地址")]
+        public string made_company_address { get; set; }
+
+        [DisplayName("製造廠國別")]
+        public string made_country { get; set; }
+
+        [DisplayName("製程")]
+        public string made_step { get; set; }
+
+        [DisplayName("用法")]
+        public string use_method { get; set; }
+
+        [DisplayName("劑量")]
+        public string barcode { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("副作用")]
+        public string side_effect { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("注意事項")]
+        public string notes { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+
+        //public virtual medicines_atccode medicines_atccode { get; set; }
+        //public virtual medicines_data medicines_data { get; set; }
+        //public virtual medicines_price medicines_price { get; set; }
+
+    }
+
+    public class medicines_atccode
+    {
+        [Key]
+        public int code_id { get; set; }
+
+        [DisplayName("許可證字號")]
+        public string atc_code { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [DisplayName("主或次項")]
+        public string main_child { get; set; }
+
+        [DisplayName("代碼")]
+        public string code { get; set; }
+
+        [DisplayName("group_name_en")]
+        public string group_name_en { get; set; }
+
+        [DisplayName("group_name")]
+        public string group_name { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+
+        //public virtual medicines_approve medicines_approve { get; set; }
+        //public virtual medicines_data medicines_data { get; set; }
+        //public virtual medicines_price medicines_price { get; set; }
+
+
+    }
+
+    public class medicines_data
+    {
+
+        [Key]
+        public int medicine_id { get; set; }
+
+        [DisplayName("許可證字號")]
+        public string atc_code { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [DisplayName("中文品名")]
+        public string name { get; set; }
+
+        [DisplayName("英文品名")]
+        public string name_en { get; set; }
+
+        [DisplayName("形狀")]
+        public string shape { get; set; }
+
+        [DisplayName("特殊劑型")]
+        public string spec { get; set; }
+
+        [DisplayName("顏色")]
+        public string color { get; set; }
+
+        [DisplayName("特殊氣味")]
+        public string smell { get; set; }
+
+        [DisplayName("刻痕")]
+        public string cut { get; set; }
+
+        [DisplayName("外觀尺寸")]
+        public string size { get; set; }
+
+        [DisplayName("標註一")]
+        public string note1 { get; set; }
+
+        [DisplayName("標註二")]
+        public string note2 { get; set; }
+
+        [UIHint("File")]
+        [DisplayName("外觀圖檔")]
+        public string img_url { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage")]
+        [DisplayName("藥品圖")]
+        public string uploadimage { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+
+        //public virtual medicines_approve medicines_approve { get; set; }
+        //public virtual medicines_atccode medicines_atccode { get; set; }
+        //public virtual medicines_price medicines_price { get; set; }
+
+    }
+
+    public class medicines_price
+    {
+
+        [Key]
+        public int price_id { get; set; }
+
+        [DisplayName("許可證字號")]
+        public string atc_code { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [DisplayName("健保代碼")]
+        public string health_code { get; set; }
+
+        [DisplayName("規格量")]
+        public int? num { get; set; }
+
+        [DisplayName("規格單位")]
+        public string piece { get; set; }
+
+        [DisplayName("起期")]
+        public string start_time { get; set; }
+
+        [DisplayName("終期")]
+        public string end_time { get; set; }
+
+        //[DisplayName("參考價")]
+        //public float price { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        //public virtual medicines_approve medicines_approve { get; set; }
+        //public virtual medicines_atccode medicines_atccode { get; set; }
+        //public virtual medicines_data medicines_data { get; set; }
+    }
+
+    public class medicines_group
+    {
+
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("劑型")]
+        public string name { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+
+        public virtual ICollection<medicines_main> medicines_main { get; set; }
+    }
+
+    public class medicines_main
+    {
+        [Key]
+        public int main_id { get; set; }
+
+        public int group_id { get; set; }
+
+        public string code { get; set; }
+
+        [DisplayName("中文名稱")]
+        public string name { get; set; }
+
+        [DisplayName("英文名稱")]
+        public string name_en { get; set; }
+
+        [DisplayName("許可證字號")]
+        public string atc_code { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("藥品關聯")]
+        public string tag { get; set; }
+
+        [UIHint("Img")]
+        [DisplayName("藥品圖片")]
+        public string img { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改形狀為")]
+        public int shape_id { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改顏色為")]
+        public int color_id { get; set; }
+
+        [NotMapped]
+        [UIHint("RadioBoxList")]
+        //[UIHint("SelectList")]
+        [DisplayName("圖片")]
+        public int picture_id { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改適應症(藥師)為")]
+        public int pharmacist_id { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改適應症(民眾)為")]
+        public int people_id { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改副作用為")]
+        public int effect_id { get; set; }
+
+        [NotMapped]
+        //[UIHint("RadioBoxList")]
+        [UIHint("SelectList")]
+        [DisplayName("同意修改注意事項為")]
+        public int notes_id { get; set; }
+
+        public virtual medicines_group medicines_group { get; set; }
+        public ICollection<medicines_image> medicines_image { get; set; }
+
+    }
+
+    public class medicines_image
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("main_id")]
+        public int main_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }        
+
+        public virtual medicines_main medicines_main { get; set; }
+
+
+    }
+
+    public class medicines_check
+    {
+        [Key]
+        public int check_id { get; set; }
+
+        [DisplayName("main_id")]
+        public int main_id { get; set; }
+
+        [DisplayName("審核名稱")]
+        public string check_name { get; set; }
+
+        [DisplayName("審核內容")]
+        public string check_info { get; set; }
+
+        [DisplayName("文獻來源")]
+        public string literature { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("期限啟用")]
+        public Boolean deadline_visible { get; set; }
+
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+    }
+}

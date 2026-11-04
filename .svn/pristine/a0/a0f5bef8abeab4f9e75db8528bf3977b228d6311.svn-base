@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+   
+    //public class company_data
+    //{
+    //    [Key]
+    //    public int company_id { get; set; }
+
+    //    [DisplayName("藥局名稱")]
+    //    public string name { get; set; }
+
+    //    [DisplayName("藥局全名")]
+    //    public string full_name { get; set; }
+
+    //    [DisplayName("聯絡電話")]
+    //    public string tel { get; set; }
+
+    //    [DisplayName("傳真號碼")]
+    //    public string fax { get; set; }
+
+    //    [DisplayName("地區")]
+    //    public string zip { get; set; }
+
+    //    [DisplayName("聯絡地址")]
+    //    public string address { get; set; }
+
+    //    [DisplayName("帳號")]
+    //    public string uid { get; set; }
+
+    //    [DisplayName("密碼")]
+    //    public string pwd { get; set; }
+
+    //    [DisplayName("啟用")]
+    //    public Boolean visible { get; set; }
+
+    //    [UIHint("Number")]
+    //    [DisplayName("排序")]
+    //    public int inx { get; set; }
+
+    //    [DisplayName("啟用日期")]
+    //    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+    //    public DateTime? start_date { get; set; }
+
+    //    [DisplayName("停用日期")]
+    //    [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+    //    public DateTime? end_date { get; set; }
+
+    //    [DisplayName("create_datetime")]
+    //    public DateTime? create_datetime { get; set; }
+
+    //    [DisplayName("create_user")]
+    //    public string create_user { get; set; }
+
+    //    [DisplayName("change_datetime")]
+    //    public DateTime? change_datetime { get; set; }
+
+    //    [DisplayName("change_user")]
+    //    public string change_user { get; set; }
+
+    //}
+   
+
+}

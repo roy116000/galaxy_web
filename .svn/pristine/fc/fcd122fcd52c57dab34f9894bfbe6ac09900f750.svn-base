@@ -1,0 +1,407 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+using System.IO;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwAdvController : _BaseController
+    {
+        //
+        // GET: /newweb/NwAdv/
+
+        #region "廣告列表"
+
+        #region"列表"
+
+        public ActionResult List(int? page, int? gid, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var linq = this._DB.adv_data.Where(m => m.adv_id > 0);
+            ViewData["Adv"] = linq.ToList();
+
+            if (gid.HasValue)
+            {
+                linq = linq.Where(m => m.group_id == gid);
+            }
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                linq = linq.Where(m => m.url.Contains(kw) || m.info.Contains(kw));
+            }
+
+            var data = linq.OrderByDescending(m => m.change_datetime).ThenByDescending(m => m.start_date).ToPagedList(currentPageIndex, 50);
+
+            var gData = this._DB.adv_group.Where(m => m.visible).ToList();
+            ViewData["gData"] = gData;
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {            
+                return View(data);
+            }
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult AoE(int id)
+        {
+            var data = this._DB.adv_data.Where(m => m.adv_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "") + "List"); }
+            else 
+            {
+                data = data != null ? data : new adv_data();
+                if (data.adv_id == 0)
+                {
+                    data.visible = true;
+                    data.inx = 0;
+                    data.start_date = DateTime.Now;
+                    data.end_date = data.start_date.Value.AddMonths(3).AddDays(-1);
+                }
+
+
+                data.s_img = NW.Path_Img(data.s_img, "adv");
+
+                #region"選單"
+
+                List<ListItem> ListItems = new List<ListItem> { };
+
+                #region"分類"
+
+                var gData = this._DB.adv_group.Where(m => m.visible).Select(m => m.group_id + "," + m.name + "［" + m.size_width + "*" + m.size_height + "］").ToArray();
+                ListItems.Add(new ListItem("", "請選擇", false));
+                ListItems.AddRange(NW.sList(gData, data.group_id.ToString()));
+                ViewData["group_id"] = ListItems;
+
+                #endregion
+
+                #region"主題分類"
+
+                if (data.group_id == 11)
+                {
+                    ListItems = new List<ListItem> { };
+
+                    //主題分類
+                    var G = this._DB.product_group.Where(m => m.visible && m.parent_id == -1).OrderBy(m => m.inx).Take(4).Select(m => m.group_id + "," + m.name).ToArray();
+                    ListItems.AddRange(NW.sList(G, data.g_id.ToString()));
+                    ViewData["g_id"] = ListItems;
+                }
+
+                #endregion
+
+                #region"指定藥局"
+
+                if (data.adv_id != 0)
+                {                  
+     
+                    ListItems = new List<ListItem> { };
+
+                    string[] S_Id = data.drugstore_id != null? data.drugstore_id.Split(',') : new string[]{};
+                    var G = this._DB.drugstore_data.Where(m => m.visible).OrderBy(m => m.name.Length).ToLookup(m => S_Id.Contains(m.drugstore_id.ToString()));
+                    var Y = G[true].ToDictionary(m => m.drugstore_id, m => m.name);
+                    ViewData["drugstore_id_s"] = Y;
+
+                    var N = G[false].Select(m => m.drugstore_id + "," + m.name).ToArray();
+                    ListItems.Add(new ListItem("", "請選擇", false));
+                    ListItems.AddRange(NW.sList(N));
+                    ViewData["drugstore_id"] = ListItems;
+
+                }
+
+                #endregion
+
+                #region"種類"
+
+                ListItems = new List<ListItem>() { };
+                ListItems.AddRange(NW.sList(NW.Flag_Adv, data.flag.ToString()));
+                ViewData["flag"] = ListItems;
+                
+                #endregion
+
+                #endregion
+
+                ViewBag.jgrowl = TempData["jgrowl"];
+                return View(data);
+            }
+        
+        }
+
+        public ActionResult Add(int id) 
+        {
+            return AoE(id);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            return AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(adv_data adv_data, HttpPostedFileBase s_img)
+        {
+            var data = this._DB.adv_data.Where(m => m.adv_id == adv_data.adv_id).FirstOrDefault();
+            if (adv_data.adv_id != 0 && data == null) 
+            { 
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "").Replace("Save", "") + "List"); 
+            }
+            else 
+            {
+                
+                data = data != null ? data : new adv_data();
+          
+                data.visible = adv_data.visible;
+                data.flag = adv_data.flag;
+                data.url = adv_data.url;             
+                data.info = adv_data.info;
+                data.inx = adv_data.inx;
+                data.start_date = adv_data.start_date;
+                data.end_date = adv_data.end_date;
+                //data.s_img = adv_data.s_img;
+                data.g_id = adv_data.g_id;
+                data.group_id = adv_data.group_id;
+                data.drugstore_id = adv_data.drugstore_id_s != null ? adv_data.drugstore_id_s.Trim(',') : null;
+
+                #region"圖片專區"
+
+                if (s_img != null && s_img.ContentLength > 0 && NW.getFileType(s_img, 1)) //有無上傳
+                {
+
+                    string tmpPath = Server.MapPath("~/Content/images/" + RouteData.Values["controller"].ToString().Replace("Nw", "")); //存放路徑
+                    if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); } //建資料夾
+
+                    var Group = this._DB.adv_group.Where(m => m.group_id == adv_data.group_id).FirstOrDefault();
+
+                    data.s_img = Images.Helps.ImageHelper.Rebmp(s_img, tmpPath, Group.size_width, Group.size_height);
+                }
+
+                #endregion
+
+                if (data.adv_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+
+                    this._DB.adv_data.Add(data);
+
+                    TempData["jgrowl"] = "新增成功";
+                }
+                else 
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "修改成功";
+                }
+
+                this._DB.SaveChanges();
+
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Edit", "").Replace("Save", "") + "Edit", new { id = data.adv_id });
+            }
+ 
+        }
+
+        #endregion
+
+        #region"刪除"
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string DB = "adv_data";
+            string Id = "adv_id";
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update " + DB + " set visible = 1 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update " + DB + " set visible = 0 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    sql = " Delete From  " + DB + " Where " + Id + " in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #endregion
+
+        #region"首頁文字影片"
+
+        public IPagedList IList(int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            var data = this._DB.index_data;
+
+            IPagedList vdata = data.OrderByDescending(m => m.vid).ToPagedList(currentPageIndex, 20);
+
+            return vdata;
+        }
+
+        public ActionResult IndexVideo(string kw)
+        {
+            IPagedList data = IList(null, kw);
+
+            ViewBag.kw = kw;
+
+            return View(data);
+        }
+
+        public ActionResult IndexVideo_ajax(int? page, string kw)
+        {
+            IPagedList data = IList(page, kw);
+
+            ViewBag.kw = kw;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult IndexVideoAdd(int id)
+        {
+            index_data data = new index_data();
+
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+            data.visible = true;
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult IndexVideoAddSave(index_data index_data)
+        {
+            var data = new index_data { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+
+                data.url = index_data.url;
+                data.text_eng = index_data.text_eng;
+                data.text_cht = index_data.text_cht;
+                data.start_date = index_data.start_date;
+                data.end_date = index_data.end_date;
+
+                data.visible = index_data.visible;
+
+                _DB.index_data.Add(data);
+
+                this._DB.SaveChanges();
+
+                index_data.vid = data.vid;
+            }
+
+            //更新
+
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = index_data.vid });
+        }
+
+        public ActionResult IndexVideoEdit(int id)
+        {
+
+            var data = this._DB.index_data.Find(id);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult IndexVideoEditSave(index_data index_data)
+        {
+            var data = this._DB.index_data.Find(index_data.vid);
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+
+
+                data.url = index_data.url;
+                data.text_eng = index_data.text_eng;
+                data.text_cht = index_data.text_cht;
+                data.start_date = index_data.start_date;
+                data.end_date = index_data.end_date;
+                data.visible = index_data.visible;
+
+                index_data.vid = data.vid;
+
+                this._DB.SaveChanges();
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = index_data.vid });
+        }
+
+        [HttpPost]
+        public ActionResult IndexVideoListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update index_data set visible = 1 Where vid in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update index_data set visible = 0 Where vid in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    sql = " Delete From index_data Where vid in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("ListDel", ""));
+        }
+
+        #endregion
+
+
+    }
+}

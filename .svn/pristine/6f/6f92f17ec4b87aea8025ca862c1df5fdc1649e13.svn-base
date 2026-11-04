@@ -1,0 +1,79 @@
+﻿@model List<h365_web.Models.order_invoice_time>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+
+
+@if (Model != null)
+{ 
+    <div class="maincontent">
+        <div class="contentinner">
+
+            <form style="float:left" method="post" id="form2" name="form2" action="@(Url.Action(action, controller))">
+
+                 @Html.AntiForgeryToken()
+
+                <select name="yymm" id="yymm" class="in6">
+                    <option value="">請選擇</option>
+                    @for (var a = 0; a <= 5; a++)
+                    {
+                        DateTime dd = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddYears(-a);
+
+                        //選擇哪一個 顯示哪一個 語法
+                        <option  value="@(dd)" @(dd.ToString("yyyy") == ViewBag.yyyy ? "selected=selected" : "") >@(dd.ToString("yyyy"))年</option>
+                    }
+                </select>
+                <input type="submit" value="查詢" class="btn btn-primary" />
+            </form>
+
+            @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+            {
+                 @Html.AntiForgeryToken()
+                
+                <input style="display:none"  id="year" name="year" value="@(ViewBag.yyyy)" />
+                if (!string.IsNullOrEmpty(ViewBag.yyyy))
+                { 
+                  <button class="btn btn-primary">儲存本次設定</button>
+                }
+
+                <table class="table table-bordered mailinbox">
+                    <colgroup>
+                        <col class="width10" />
+                        <col class="width10" />
+                        <col class="width10" />
+                        @*<col class="width5" />*@
+                    </colgroup>
+                    <thead>
+                        <tr>
+
+                            <th class="center">@Html.DisplayNameFor(model => model.First().year) </th>
+                            <th class="center">@Html.DisplayNameFor(model => model.First().month) </th>
+                            <th class="center">@Html.DisplayNameFor(model => model.First().day) </th>
+
+                            @*<th>&nbsp;</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {               
+                            <tr class="@NW.echoBool(true, "unread", "visible")">
+
+                                <td class="center">@Html.DisplayFor(modelItem => item.year)</td>
+                                <td class="center">@Html.DisplayFor(modelItem => item.month)</td>
+                                @*<td>@Html.EditorFor(modelItem => item.day)</td>*@
+                                <td class="center">
+                                    <input type="text" value="@(item.day)" name="item_day" maxlength="10" id="item_day" class="span2 input-spinner"></td>
+                                @*<td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.time_id }, new { @class = "title" })</td>*@
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            
+            }
+
+        </div>
+    </div>
+}
+

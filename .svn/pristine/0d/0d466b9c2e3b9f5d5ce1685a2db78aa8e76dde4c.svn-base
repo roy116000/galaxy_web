@@ -1,0 +1,114 @@
+﻿@model h365_web.Models.order_invoice2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<h365_web.Models.order_data> in_data = (List<h365_web.Models.order_data>)ViewData["in_data"];
+
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.invoice_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">發票資訊</h4>
+
+                @*藥局帳號*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.drug_uid)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.drug_uid)&nbsp;                   
+                    </div>
+                </div>
+                @*藥局名稱*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.name)&nbsp;                 
+                    </div>
+                </div>
+                @*結算月份*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.clearing_date)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.clearing_date)&nbsp;
+                   
+                    </div>
+                </div>
+                @*結算週期*@
+                @*<div class="control-group">
+                    <label class="control-label">結算週期</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(ViewBag.Datetime)&nbsp;
+                   
+                    </div>
+                </div>*@
+
+                @*發票種類*@
+                @Html.EditorFor(model => model.invoice_type)
+                @*稅籍單位*@
+                @Html.EditorFor(model => model.taxes)
+                @*統一編號*@
+                @Html.EditorFor(model => model.uniform_numbers)
+                @*發票抬頭*@
+                @Html.EditorFor(model => model.invoice_title)
+                @*寄送發票地址*@
+                @Html.EditorFor(model => model.invoice_address)
+                @*發票號碼*@
+                @Html.EditorFor(model => model.invoice_no)
+
+                @*寄送發票時間*@
+                @Html.EditorFor(model => model.invoice_datetime)
+
+
+                @if (Model.invoice_datetime != null)
+                {
+                    @*藥局付款日*@
+                    @Html.EditorFor(model => model.pay_datetime)
+                    @*藥局起訖日*@
+                    @Html.EditorFor(model => model.return_datetime)
+                }
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        @*<button onclick="history.back()" type="button" class="btn">取消</button>*@
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div style="display:none">@(ViewBag.ID = Model.invoice_id)</div> 
+        @Html.Partial("template_Invoice", in_data)
+
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                invoice_no: "required",
+                invoice_address: "required",
+                invoice_datetime: "required"
+            },
+            messages: {
+                invoice_no: "發票，必須填寫！",
+                invoice_address: "寄送發票地址，必需填寫",
+                invoice_datetime: "寄送發票時間，必須填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

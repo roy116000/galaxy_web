@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+
+    public class solt_data
+    {
+        [Key]
+        public int solt_id { get; set; }
+
+        [DisplayName("藥局ID")]
+        public int drougstor_id { get; set; }
+
+        [DisplayName("手機號碼")]
+        public string phone { get; set; }  
+
+        [DisplayName("solt_datetime")]
+        public DateTime? solt_datetime { get; set; }
+
+        [DisplayName("購物金")]
+        public int prize { get; set; }
+
+        [DisplayName("兌換序號")]
+        public string number { get; set; }
+
+        [DisplayName("購物金")]
+        public bool visible { get; set; }
+
+        public int order_id { get; set; }
+
+        public int flag { get; set; }
+ 
+
+    }
+
+    
+}

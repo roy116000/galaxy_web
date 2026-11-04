@@ -1,0 +1,47 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Mon_S = (List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>)ViewData["Order_Mon_S"];
+
+}
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        //flag=1 銷售報表用
+        var url = location.search; //取網址問號之後那一段
+        var a = url.split('&');  //分開網址中的year跟mon
+        var b = a[0].split('=');  //分開等號 取值 年份b[1]
+        var c = a[1].split('=');  //分開等號 取值 月份c[1]
+        $('#cb_flag').val(flag);
+        $('#year1').val(parseInt(b[1]));
+        $('#mon').val(parseInt(c[1]));
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm("MonthlyListDel", controller, FormMethod.Post, new { @id = "frmCheckbox", @target = "_blank" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="year1" name="year1" value="" />
+    <input type="hidden" id="mon" name="mon" value="" />
+}
+<div class="maincontent">
+    <div class="contentinner">
+        <div class="msghead">
+            @using (Html.BeginRouteForm("", FormMethod.Get))
+            {
+                
+                        <a onclick="cbHandel(1);" href="#" class="btn">以Excel匯出</a>
+                    
+            }
+            <span class="clearall"></span>
+        </div>
+
+        @Html.Partial("template_year", Model)
+
+        @Html.Partial("template_mon", Mon_S)
+
+    </div>
+</div>

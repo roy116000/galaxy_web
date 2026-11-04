@@ -1,0 +1,293 @@
+﻿@model h365_web.Models.order_bills2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<h365_web.Models.order_data2> order_data = (List<h365_web.Models.order_data2>)ViewData["data2"];
+
+    double sTotal = ViewBag.ctotal;
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.bills_id)
+            
+            <div class="widgetcontent">
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬藥局</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.cname)</span>
+                    </span>
+                </div>
+
+
+               @* <div class="control-group">
+                    <label for="" class="control-label">收款行帳號</label>
+                    <span class="field">
+                        @if (!string.IsNullOrEmpty(ViewBag.receivingbankaccount))
+                        {
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.receivingbankaccount)</span>
+                        }
+                        else
+                        { <span class="label label-info" style="font-size: 150%;">目前無資料</span>}
+
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    <label for="" class="control-label">收款行代號</label>
+                    <span class="field">
+                        @if (!string.IsNullOrEmpty(ViewBag.receivingbankcode))
+                        {
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.receivingbankcode)</span>
+                        }
+                        else
+                        { <span class="label label-info" style="font-size: 150%;">目前無資料</span>}
+
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    <label for="" class="control-label">銀行別</label>
+                    <span class="field">
+                        @if (!string.IsNullOrEmpty(ViewBag.bankunmber))
+                        {
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.bankunmber)</span>
+                        }
+                        else
+                        { <span class="label label-info" style="font-size: 150%;">目前無資料</span>}
+
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    <label for="" class="control-label">分行別</label>
+                    <span class="field">
+                        @if (!string.IsNullOrEmpty(ViewBag.ranchunmber))
+                        {
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.ranchunmber)</span>
+                        }
+                        else
+                        { <span class="label label-info" style="font-size: 150%;">目前無資料</span>}
+
+                    </span>
+                </div>*@
+
+
+                @if (Model.flag != 2)
+                {
+                    @Html.EditorFor(model => model.bills_datetime)
+
+                    @Html.EditorFor(model => model.invoice_datetime)
+
+                    @Html.EditorFor(model => model.invoice_no)
+
+                    @Html.EditorFor(model => model.info)
+                }
+                else
+                {
+                    <div class="control-group">
+                        @Html.LabelFor(model => model.bills_datetime, new { @class = "control-label" })
+                        <div class="field" style="padding: 5px 5px;">
+                            @(((DateTime)Model.bills_datetime).ToString("yyyy/MM/dd"))&nbsp;&nbsp;
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        @Html.LabelFor(model => model.invoice_datetime, new { @class = "control-label" })
+                        <div class="field" style="padding: 5px 5px;">
+                            @(((DateTime)Model.invoice_datetime).ToString("yyyy/MM/dd"))&nbsp;&nbsp;
+                        </div>
+                    </div>                
+
+                    <div class="control-group">
+                        @Html.LabelFor(model => model.invoice_no, new { @class = "control-label" })
+                        <div class="field" style="padding: 5px 5px;">
+                            @(Model.invoice_no)&nbsp;&nbsp;
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        @Html.LabelFor(model => model.info, new { @class = "control-label" })
+                        <div class="field" style="padding: 5px 5px;">
+                            @(Model.info)&nbsp;&nbsp;
+                        </div>
+                    </div>
+                }
+
+
+
+                <div class="control-group">
+                    <label for="" class="control-label">請款總額</label>
+                    <span class="field">
+                        <span class="label label-success" style="font-size: 150%;">@(sTotal.ToString("N0"))</span>
+                    </span>
+                </div>
+
+                @if (Model.flag != 2)
+                {
+                    
+                    @Html.EditorFor(model => model.flag)
+                    
+                    <div class="control-group">
+                        <div class="stdformbutton">
+                            <button class="btn btn-primary">確定</button>
+                        </div>
+                    </div>
+                }
+
+
+                <div class="row-fluid">
+                    <div class="span12 editprofileform">
+                        <h4 class="widgettitle">當月訂單</h4>
+                        <div class="">
+                            <div id="List_ajax">
+                                <table class="table table-striped">
+                                    <colgroup>
+                                        <col class="width12" />
+                                        <col class="width10" />
+                                        <col class="width10" />
+                                        <col class="width10" />
+                                        <col class="width10" />
+                                        <col class="width8" />
+                                        <col class="width8" />
+                                        <col class="width11" />
+                                        <col />
+
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>訂單單號</th>
+                                            <th>訂單日期</th>
+                                            <th>出貨日期</th>
+                                            <th>貨運公司</th>
+                                            <th>宅配單號</th>
+                                            <th>訂單金額</th>
+                                            <th>商品成本</th>
+                                            <th>運費成本</th>
+                                            <th>總成本</th>                                            
+                                            <th>明細</th>
+                                            <th>編輯出貨狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                                                          <tbody>
+                                        @foreach (var item in order_data)
+                                        {
+
+                                            if (string.IsNullOrEmpty(item.back_money_type) && string.IsNullOrEmpty(item.back_type))
+                                            {
+                                                //sTotal += item.cost_total;
+                                            <tr>
+                                                <td>@(item.order_sn)</td>
+                                                <td>@(item.order_datetime.Value.ToString("yyyy/MM/dd"))</td>
+                                               @if(item.goods_datetime !=null) {<td>@(((DateTime)item.goods_datetime).ToString("yyyy/MM/dd"))</td>}
+                                                else{
+                                               <td>尚未出貨</td>
+                                               }
+                                                <td>@(item.freight_name)</td>
+                                                <td>@(item.freight_no)</td>
+                                                <td>@(item.total)</td>                                   
+                                                
+                                                                                             
+                                                <td>@(item.cost_total)</td>
+                                                <td>@(item.freight_money)</td>                
+
+                                                <td>@((item.cost_total + item.freight_money).ToString("N2"))</td>
+                                                
+                                                <td><a onclick="getDetail('@(item.order_id)');" style="cursor:pointer;" data-toggle="modal" >[明細]</a></td>
+                                                 @if (item.freight_datetime == null)
+                                                {
+                                                <td><a href="@Url.Action("ClearEdit", "NwDrugBills", new { id = item.order_id,clear_money = 1})" style="cursor:pointer;" data-toggle="modal" >[編輯出貨狀態]</a></td>
+                                                }else
+                                                {
+                                                <td>此訂單已出貨，無法變更</td>
+                                                }
+                                            </tr>  
+                                            }
+                                            else
+                                            {
+                                                //sTotal += item.discount;
+                                            <tr>
+                                                <td>@(item.order_sn)</td>
+                                                <td>@(item.order_datetime.Value.ToString("yyyy/MM/dd"))</td>
+                                              @if(item.goods_datetime !=null) {<td>@(((DateTime)item.goods_datetime).ToString("yyyy/MM/dd"))</td>}
+                                                else{
+                                               <td>尚未出貨</td>
+                                               }
+                                                <td>@(item.freight_name)</td>
+                                                <td>@(item.freight_no)</td>
+                                                 <td>@(item.total-item.bonus)</td>
+                                                <td>@(item.bonus)</td>
+                                                <td>0</td>
+                                                <td>@(item.discount.ToString("N0"))</td> 
+                                                <td>@(item.total + item.freight_money).ToString("N2")</td>
+                                                <td>@(item.freight_money)</td>                                               
+                                                <td><a onclick="getDetail('@(item.order_id)');" style="cursor:pointer;" data-toggle="modal" >[明細]</a></td>
+                                                 @if(item.freight_datetime ==null)
+                                                {
+                                                <td><a href="@Url.Action("ClearEdit", "NwDrugBills", new { id = item.order_id,clear_money = 1})" style="cursor:pointer;" data-toggle="modal" >[編輯出貨狀態]</a></td>
+                                                }else
+                                                {
+                                                <td>此訂單已出貨，無法變更</td>
+                                                }
+                                            </tr>  
+                                            }
+
+
+                                        }
+
+                                        <tr>
+                                            <td colspan="4"></td>
+                                            <td style="color: red;">總額</td>
+                                            <td style="color: red;">@(sTotal.ToString("N0"))</td>
+                                            <td>&nbsp;</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">$(function () { $("#bills_datetime").datepicker(); })</script>
+<script type="text/javascript">$(function () { $("#invoice_datetime").datepicker(); })</script>
+
+@Html.Partial("template_order_detail")
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            ignore: "",
+            rules: {
+                invoice_no: "required",
+            },
+            messages: {
+                invoice_no: "發票號碼，必需填寫",
+
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>
+<script>
+    $(function () {
+
+        alert('此為最後可以編輯出貨狀態之列表，如請款後則無法變更訂單資料!')
+    })
+
+
+    </script>

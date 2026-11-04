@@ -1,0 +1,128 @@
+﻿@model String
+@{
+
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    //htmlAttributes2.Add("class", "span5");
+    //htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+
+    //撈出要求網址的資訊
+    var route = RouteTable.Routes.GetRouteData(new HttpContextWrapper(HttpContext.Current));
+    //將撈出的controller轉為字串並設給controller
+    string controller = route.Values["controller"] as string;
+    //將撈出的action轉為字串並設給action
+    string action = route.Values["action"] as string;
+
+    string id = ViewData.ModelMetadata.PropertyName;
+    string uploadify_id = "uploadify_" + id;
+    string img_src_id = "img_src_" + id;
+    string con = ViewContext.RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower();
+    if(controller == "NwHealth" && (action == "AuthorAdd" || action == "AuthorEdit"))
+    {
+        con = "author";   
+    } 
+    
+    string def_img = Url.Content("~/Areas/newweb/Content/uploadify/150x150.png");
+
+    var gData = ViewData[id] as IEnumerable<galaxy_web.Models.images_data>;
+}
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <div class="field">
+        <span id="@(uploadify_id)"></span>
+        <small>【圖片預覽(可一次上傳五張)，異動後請按儲存!!】@NW.GetParam(con).Img_Info</small><br />
+        <ul class="listfile" id="listfile-@(id)">
+            @if (gData.Count() > 0)
+            {
+                foreach (var item in gData.OrderBy(x => x.img_inx).Where(x => x.s_img != ""))
+                { 
+                <li class="span2">
+                    <div class="imgs_li" style="width: 150px; height: 150px; overflow: hidden;">
+                        <a href="@(Url.Content("~/Content/images/" + con + "/" + item.b_img))" target="_blank">
+                            <img id="@(img_src_id)" src="@(Url.Content("~/Content/images/" + con + "/" + item.s_img))" /></a>
+                    </div>
+                    <span class="imgs_infox">說明：<input type="text" name="img_info" value="@item.img_info" class="span2"  /></span>
+                    <span class="imgs_inxx">排序：<input type="number" name="img_inx" value="@item.img_inx" min="0" max="999999" class="span2" /></span>
+                    <span class="img_del" style="float: right; margin-top: 5px; cursor: pointer;" onclick="img2_del($(this));">
+                        <img src="@Url.Content("~/Areas/newweb/Content/uploadify/uploadify-cancel.png")" /></span>
+                    <input type="hidden" name="img_id" value="@item.imgs_id" />
+                    <input type="hidden" name="s_img" value="@item.s_img" />
+                    <input type="hidden" name="b_img" value="@item.b_img" />
+                </li>      
+                }
+            }
+            else
+            { 
+                <li class="def-img-li">
+                    <img id="@(img_src_id)" src="@(def_img)" />
+                </li>
+            }
+        </ul>
+        <br class="clearall" />
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#@(uploadify_id)').uploadify({
+            uploader: '@(Url.Action("UploadImage", "NwHome"))',
+            formData: { 'id': '0', 'name': "@con" },
+            swf: '@(Url.Content("~/Areas/newweb/Content/uploadify/uploadify.swf"))',
+            width: 60,
+            height: 23,
+            buttonText: "上傳",
+            buttonCursor: 'hand',
+            fileObjName: 'Filedata',
+            fileTypeExts: "*.jpg;*.png;*.gif",
+            fileTypeDesc: "請選擇 jpg png gif 文件",
+            auto: true,
+            multi: true,
+            queueSizeLimit: 5,
+            onUploadSuccess: function (file, data, response) {
+                if (response) {
+                    var json = JSON.parse(data);
+                    //移除
+                    $('.def-img-li').remove();
+
+                    var html = '';
+                    html += '<li class="span2">';
+                    html += '   <div class="imgs_li" style="width:150px; height:150px; overflow:hidden;">';
+                    html += '       <a href="@Url.Content("~/Content/images/" + con + "/")' + json.bimgName + '" target="_blank">';
+                    html += '       <img id="@(img_src_id)" src="' + json.imgSrc + '" /></a>';
+                    html += '   </div>';
+                    html += '   <span class="imgs_infox">說明：<input type="text" name="img_info" value="' + json.info + '" class="span2"  /></span>'
+                    html += '   <span class="img_ixx">排序：<input type="number" name="img_inx" value="0" min="0" max="999999" class="span2" /></span>'
+                    html += '   <span class="img_del" style="float: right; margin-top: 5px; cursor: pointer;" onclick="img2_del($(this));">';
+                    html += '       <img src="@Url.Content("~/Areas/newweb/Content/uploadify/uploadify-cancel.png")" /></span>';
+                    html += '   <input type="hidden" name="img_id" value="0" />';
+                    html += '   <input type="hidden" name="s_img" value="' + json.simgName + '" />';
+                    html += '   <input type="hidden" name="b_img" value="' + json.bimgName + '" />';
+                    html += '</li>';
+
+                    $('#listfile-@(id)').append(html);
+                }
+            }
+        });
+
+        //圖片刪除-src(預覽圖)、s_img/b_img(空值)
+    });
+
+    function img2_del(o) {
+        if (confirm('確定刪除該圖片？')) {
+            var oImg = o.siblings('.imgs_li');
+            var oS_img = oImg.siblings('input[name=s_img]');
+            var oB_img = oImg.siblings('input[name=b_img]');
+            var oInfo = oImg.siblings('.imgs_infox').find('input[name=img_info]');
+            var oInx = oImg.siblings('.imgs_inxx').find('input[name=img_inx]');
+            oImg.find('a').find('img').attr('src', '@(def_img)');
+            oS_img.val('');
+            oB_img.val('');
+            oInfo.val('');
+            oInx.val(0);
+            $(this).hide();
+        }
+    };
+</script>

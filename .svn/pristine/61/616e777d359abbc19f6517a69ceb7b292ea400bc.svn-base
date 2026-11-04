@@ -1,0 +1,225 @@
+﻿@model h365_web.Areas.newweb.Controllers.NwReportController.Order
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    string[] Tab = { "tab1", "tab2", "tab3" };
+    List<h365_web.Models.order_data>[] List_s = { Model.Clear, Model.Back, Model.Finish };
+
+    int num = 0;
+    
+    
+}
+
+<div class="widgetcontent">
+    <div class="abgne_tab">
+        <ul class="tabs">
+            <li><a href="#tab1">作廢</a></li>
+            <li><a href="#tab2">退貨</a></li>
+            <li><a href="#tab3">完成</a></li>
+        </ul>
+        <div>
+
+
+            @foreach (var List in List_s)
+            {
+                                            
+                <div id="@(Tab[num])" class="tab_content">
+
+                    <table class="table table-bordered mailinbox">
+                        <colgroup>
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                            </colgroup>
+                    <thead>
+                            <tr>
+                                <th class="center">訂單編號</th>
+                                <th class="center">總成本</th>
+                                <th class="center">毛利額</th>
+                                <th class="center">總計</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        </table>
+
+                    @foreach (var item in List)
+                    {
+                        int total = item.order_sub.Select(m => m.price * m.num).DefaultIfEmpty(0).Sum(); //售價總合
+                        double total_c = item.order_sub.Select(m => m.cost * m.num).DefaultIfEmpty(0).Sum(); //成本總合
+                                                    
+                        <table class="table table-bordered mailinbox">
+                            <colgroup>
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col class="width6" />
+                            </colgroup>
+                          
+                            <tbody>
+
+                                <tr class="@NW.echoBool(true, "unread", "visible")">
+                                    <td class="center">@Html.DisplayFor(modelItem => item.order_id)</td>
+                                    @*訂單編號*@
+                                    <td class="center">@("$ " + total_c.ToString("N0"))</td>
+                                    <td class="center">@(total - total_c)</td>
+                                    <td class="center">@("$ " + total.ToString("N0"))</td>
+                                    <td class="center" id="@(item.order_id)">訂單明細</td>
+                                </tr>                            
+                            </tbody>
+                        </table>
+                        
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table_all_@(item.order_id)" style="display: none">
+                            <colgroup>
+                                <col class="width10" />
+                                <col class="width6" />
+                                <col class="width6" />
+                                <col />
+                                <col class="width6" />
+                                <col class="width12" />
+                                <col class="width8" />
+                                <col class="width6" />
+                                <col class="width4" />
+                                <col class="width6" />
+                                <col class="width4" />
+                                <col class="width4" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="center">訂購時間</th>
+                                    <th class="center">訂單編號</th>
+                                    <th class="center">產品編號</th>
+                                    <th class="center">產品名稱</th>
+                                    <th class="center">收件人</th>
+                                    <th class="center">貨號</th>
+                                    <th class="center">廠商</th>
+                                    <th class="center">購買數量</th>
+                                    <th class="center">紅利</th>
+                                    <th class="center">健康紅利</th>
+                                    <th class="center">成本</th>
+                                    <th class="center">售價</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @*<tr id="loadPage"></tr>*@
+                                 <tr class="danger" id="loadPage_@(item.order_id)"></tr>
+
+                                <tr id="temlate" style="display: none">
+                                    <td class="right">{datetime}</td>
+                                    <td class="right">{order_id}</td>
+                                    <td class="right">{product_id}</td>
+                                    <td>{item_name}</td>
+                                    <td>{send_name}</td>
+                                    <td class="center">{item_no}</td>
+                                    <td>{name_company}</td>
+                                    <td class="right">{num}</td>
+                                    <td class="right">{bonus}</td>
+                                    <td class="right">{h_bonus}</td>
+                                    <td class="right">{cost}</td>
+                                    <td class="right">{price}</td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                        
+                        <script>
+
+                            String.prototype.toCustomDateString = function () {
+                                var r;
+                                var d = eval("new " + this.replace(/\//g, ""));
+
+                                //自定義格式
+                                if (d.getFullYear() > 1000) {
+                                    month = d.getMonth() + 1;
+                                    r = d.getFullYear() + "-" + month + "-" + d.getDate();
+                                }
+
+                                return r;
+                            }
+
+                            $('#@(item.order_id)').click(function () {
+
+
+                                $('#table_all_@(item.order_id)').toggle();
+
+                                $.post('@Url.Action("MonthlyEditSave", controller)', { id: '@(item.order_id)' }, function (result) {
+
+
+
+                                            $('#loadPage').html('');
+                                            $('#loadPage_@(item.order_id)').html('');
+
+                                            //alert(result.msg);
+
+                                            var data = JSON.parse(JSON.stringify(result.data)); //轉換
+                              
+                                            var temp = $('#temlate').html();
+                                            for (var item in data) {
+
+                                                var html = temp;
+                                              //轉換日期格式
+                                                //var date = eval(data[item].order_datetime.replace(/\/Date\((.*?)\)\//gi, "new Date($1)"));
+                                                var date1 = data[item].order_datetime.toCustomDateString();
+
+                                                html = html.replace(/{order_id}/g, data[item].order_id);
+                                                html = html.replace(/{product_id}/g, data[item].product_id);
+                                                html = html.replace(/{item_name}/g, data[item].item_name);
+                                                html = html.replace(/{item_no}/g, data[item].item_no);
+                                                html = html.replace(/{name_company}/g, data[item].name_company);
+                                                html = html.replace(/{num}/g, data[item].num);
+                                                html = html.replace(/{price}/g, data[item].price);
+                                                html = html.replace(/{cost}/g, data[item].cost);
+                                                html = html.replace(/{datetime}/g, date1);
+                                                html = html.replace(/{bonus}/g, data[item].bonus);
+                                                html = html.replace(/{send_name}/g, data[item].send_name);
+                                                html = html.replace(/{h_bonus}/g, data[item].h_bonus);
+                                                //毛利
+                                                //gross = data[item].price - data[item].cost;
+                                                //html = html.replace(/{gross}/g, gross);
+
+                                                $('#loadPage').append(html);
+                                                $('#loadPage_@(item.order_id)').append(html);
+
+                                            }
+
+                                            //window.location.reload(true); //強制重整
+
+                                        }, 'json');
+                                    })
+                                </script>
+                    }
+
+                </div>
+
+                    num++;
+            }
+
+            <script type="text/javascript">
+                $(function () {
+                    var _showTab = 0;
+                    var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+                    $($defaultLi.find('a').attr('href')).siblings().hide();
+
+                    $('ul.tabs li').click(function () {
+                        var $this = $(this),
+                            _clickTab = $this.find('a').attr('href');
+
+                        $this.addClass('active').siblings('.active').removeClass('active');
+
+                        $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+                        return false;
+                    }).find('a').focus(function () {
+                        this.blur();
+                    });
+
+                });
+            </script>
+
+        </div>
+    </div>
+</div>

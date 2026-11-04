@@ -1,0 +1,101 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.order_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var note = (List<galaxy_web.Models.order_note>)ViewData["note"];
+    var com = (List<galaxy_web.Models.sys_admin_data>)ViewData["com"];
+    var status = (IQueryable<galaxy_web.Models.order_status>)ViewData["status"];
+    var sub = (IQueryable<galaxy_web.Models.order_sub>)ViewData["sub"];
+
+    var keyword = ViewBag.kw;
+}
+
+
+
+<table class="table table-bordered mailinbox">
+    <colgroup>
+        <col />
+        <col />
+        <col class="width8" />
+        <col class="width12" />
+        <col class="width8" />
+        <col class="width8" />
+        <col class="width8" />
+        <col />
+        <col class="width8" />
+        <col class="width6" />
+    </colgroup>
+
+    <thead>
+        <tr>
+            <th class="center">供應商</th>
+            <th class="center">購買商品</th>
+            <th class="center">訂單單號</th>
+            <th class="center">訂單狀態</th>
+            <th class="center">寄送(預約)方</th>
+            <th class="center">寄送(預約)電話</th>
+            <th class="center">下單時間</th>
+            <th class="center">預約時間</th>
+            <th class="center">完成時間</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            
+
+            var item_note = note.Where(m => m.order_id == item.order_id).FirstOrDefault() ?? new galaxy_web.Models.order_note { };
+            var item_company = com.Where(m => m.admin_id == item.company_id).FirstOrDefault() ?? new galaxy_web.Models.sys_admin_data { };
+            var item_status = status.Where(m => m.order_id == item.order_id);
+            var item_sub = sub.Where(m => m.order_id == item.order_id);
+            
+            <tr class="@NW.echoBool((item.status != 999 ? true : false), "unread", "visible")">
+                @*                <td class="center">
+                    <input type="checkbox" name="block_id" class="block_check" value="@(item.order_data.order_id)" /></td>*@
+                <td class="center">@(item_company.name)</td>
+                <td class="center">@(item_sub.Select(m => m.item_name).FirstOrDefault())</td>
+                <td class="center">@(item.order_sn)</td>
+                <td class="center">@(NW.Flag_ArrS.Where(m => m.Key == item.status).Select(m => m.Value).FirstOrDefault())</td>
+                <td class="center">@(item.send_name)</td>
+                <td class="center">@(item.send_tel)</td>
+                <td class="center">@(NW.getDate(item_status.Where(m => m.status == 1).Select(m => m.create_datetime).FirstOrDefault()))</td>
+                <td class="center">@(item_note.note_time)</td>
+                <td class="center">@(NW.getDate(item_status.Where(m => m.status == 3).Select(m => m.create_datetime).FirstOrDefault()))</td>
+                <td class="center">
+                    @Html.ActionLink("編輯", "NoteEdit", new { id = item.order_id }, new { @class = "title", target = "_blank" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+<div class="pagination pagination-centered">
+
+    @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("sD", ViewBag.sD)
+            .AddRouteValue("eD", ViewBag.eD)
+            .AddRouteValue("cid", ViewBag.cid)
+            )
+
+</div>
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.Partial("template_list_fix")
+
+@*<script>
+    function Data(o) {
+        $('#S_' + o).toggle();
+    }
+</script>*@

@@ -1,0 +1,33 @@
+﻿@{
+    //ViewBag.Title = "ReportList";
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+        <ul class="nav nav-pills">
+        </ul>
+        <!--widgetsource-->
+        <div id="mail">
+            <div class="msghead">
+                @using (Html.BeginForm("ServiceReportAddSave", "NwProduct", FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+                {
+                  <div>
+                    日期：
+                    <input type="text" value="@(DateTime.Now.ToString("yyyy/MM/01"))" name="start_date" id="start_date" class="span2">
+                    ～
+                    <input type="text" value="@(DateTime.Now.ToString("yyyy/MM/dd"))" name="end_date" id="end_date" class="span2">
+                    
+                    <input type="submit" value="查詢" class="btn btn-primary" />
+                  </div>
+                }
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+            <br />
+        </div>
+        <!--#chat-->
+    </div>
+    <!--contentinner-->
+</div>
+<script type="text/javascript">$(function () { $('#start_date').datepicker(); $('#end_date').datepicker(); })</script>

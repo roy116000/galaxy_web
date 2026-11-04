@@ -1,0 +1,118 @@
+﻿@{    
+    Layout = null;         
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(NW.ssTitle)</title>
+
+    <link href="~/Areas/newweb/Content/css/style.default.css" rel="stylesheet" />
+    <link href="~/Areas/newweb/Content/Index/style.css" rel="stylesheet" />
+    @*<link href="~/Areas/newweb/Content/css/style.default.css" rel="stylesheet" />*@
+    <script src="~/Areas/newweb/Content/js/jquery-1.9.1.min.js"></script>
+    <link rel="icon" href="~/Areas/newweb/images/icon.png">
+
+
+    @*    <script src="~/Areas/newweb/Content/js/jquery-migrate-1.1.1.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/jquery.validate.min.js"></script>*@
+    <style>
+        .bounceIn {
+            animation-name: rotateInDownLeft;
+        }
+
+        .p1 {
+            width: 75%;
+        }
+
+            .p1 .m3 {
+                padding: 4% 2% 2%;
+            }
+
+                .p1 .m3 .b4 {
+                    width: 91%;
+                }
+
+                    .p1 .m3 .b4 .bx1 {
+                        width: 90%;
+                    }
+    </style>
+</head>
+
+<body class="bg1" cz-shortcut-listen="true">
+
+
+
+    <div class="m1">
+        <div class="a1">
+            <div class="lg">
+                <a href="@(NW.WEB_URL)">
+                    <img src="~/Areas/newweb/images/lg.png" /></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="m0"></div>
+
+    <div class="p1 animate4  fadeInDown">
+        <div class="m3 ">
+            <div class="b4  ">
+
+                <form id="form1" class="loginwrap zindex100" action="@(Url.Action("Login", "NwHome"))" method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input class="bx1 " type="text" id="username" name="uid" placeholder="請輸入帳號" autocomplete="off" autofocus="autofocus" required="required" />
+                    <input class="bx1" type="password" id="password" name="pwd" placeholder="請輸入密碼" required="required" />
+
+                    <div style="position: relative;">
+                        <input class="bx2" type="text" placeholder="請輸入驗證碼" maxlength="5" name="code" id="code" autocomplete="off" required="required">
+                        <div style="position: absolute; top: 10px; right: 10px;">
+                            <img id="code_img" style="width:100%" src="@(Url.Action("code", "NwHome"))">
+                        </div>
+                    </div>
+
+                    <div class="btn2">
+                        <input class="go" type="submit" value="登入" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.msg))
+                    {
+                        <div class="t2">@(ViewBag.msg)</div>
+                    }
+
+                </form>
+            </div>
+
+            @*<div class="b4 b4-2">
+                <div class="t3">這裡可放文案規則這裡可放文案規則這裡可放文案規則這裡可放文案規則這裡可放文案規則</div>
+            </div>*@
+
+        </div>
+    </div>
+
+</body>
+</html>
+
+<style>
+    .p1 .m3 .b4 .btn2 input {
+        width: 300px;
+        height: 36px;
+        font: bold 15px/34px "微軟正黑體";
+        color: #555;
+        display: inline-block;
+        text-align: center;
+        background: #ffdd99;
+        border-radius: 2px;
+        margin: 0 0 10px;
+        border-style: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+        .p1 .m3 .b4 .btn2 input:hover {
+            background: #002a56;
+            color: #fff;
+        }
+</style>

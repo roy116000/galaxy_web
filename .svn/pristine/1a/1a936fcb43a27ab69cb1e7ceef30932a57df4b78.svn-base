@@ -1,0 +1,533 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwNormController : _BaseController
+    {
+        //
+        // GET: /newweb/Nwnorm/
+
+        #region "招商規範列表"
+
+        public ActionResult List(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.norm_data
+                           join m2 in _DB.norm_group on m.group_id equals m2.group_id into mm
+                           orderby m.inx, m.start_date descending
+                           select new data_list()
+                           {
+                               data_id = m.norm_id,
+                               group_id = m.group_id,
+                               title = m.title,
+                               cont = m.cont,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               s_img = m.norm_image.OrderBy(x => x.img_inx).FirstOrDefault().s_img,
+                               g_name = mm.FirstOrDefault().name
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.title.Contains(kw) || m.cont.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            var data2 = this._DB.norm_group.OrderBy(m => m.inx).Select(m => new data_group()
+            {
+                group_id = m.group_id,
+                name = m.name,
+                counts = m.norm_data.Count()
+            });
+            ViewData["norm_group"] = data2;
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult List_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.norm_data
+                           join m2 in _DB.norm_group on m.group_id equals m2.group_id into mm
+                           orderby m.inx, m.start_date descending
+                           select new data_list()
+                           {
+                               data_id = m.norm_id,
+                               group_id = m.group_id,
+                               title = m.title,
+                               cont = m.cont,
+                               hits = m.hits,
+                               start_date = m.start_date,
+                               end_date = m.end_date,
+                               visible = m.visible,
+                               inx = m.inx,
+                               s_img = m.norm_image.OrderBy(x => x.img_inx).FirstOrDefault().s_img,
+                               g_name = mm.FirstOrDefault().name
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.title.Contains(kw) || m.cont.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult Edit(int id)
+        {
+
+            var data = this._DB.norm_data.Find(id);
+
+            //圖片
+            var image = _DB.norm_image.Where(m => m.norm_id.Equals(id)).ToList();
+            List<images_data> imgData = new List<images_data>();
+            foreach (var item in image)
+            {
+                images_data imgs_data = new images_data();
+                imgs_data.imgs_id = item.imgs_id;
+                imgs_data.s_img = item.s_img;
+                imgs_data.b_img = item.b_img;
+                imgs_data.img_info = item.img_info;
+                imgs_data.img_inx = item.img_inx;
+                imgData.Add(imgs_data);
+            }
+            ViewData["uploadimage2"] = imgData;
+
+            //下拉選單
+            var gData = (from m in _DB.norm_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in gData)
+            {
+                ListItems.Add(new ListItem(item.group_id.ToString(), item.name, item.group_id == data.group_id));
+            }
+            ViewData["group_id"] = ListItems;
+
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(norm_data norm_data, VmImage imgs)
+        {
+            var data = this._DB.norm_data.Find(norm_data.norm_id);
+            //var data1 = this._DB.norm_data.Where(m => m.norm_id.Equals(norm_data.norm_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.norm_id = norm_data.norm_id;
+                data.group_id = norm_data.group_id;
+                data.title = norm_data.title;
+                data.cont = norm_data.cont;
+                data.inx = norm_data.inx;
+                data.hits = norm_data.hits;
+                data.start_date = norm_data.start_date;
+                data.end_date = norm_data.end_date;
+                data.visible = norm_data.visible;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+                //data.create_user = norm_data.create_user;
+                //data.create_datetime = norm_data.create_datetime;
+
+                this._DB.SaveChanges();
+
+                #region "圖片處理"
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new norm_image();
+                        imgData.norm_id = data.norm_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = imgs.img_inx[i];
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.norm_image.Add(imgData);
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var imgData = _DB.norm_image.Find(imgs.img_id[i]);
+                        if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                        {
+                            _DB.norm_image.Remove(imgData);
+                        }
+                        else
+                        {
+                            imgData.norm_id = norm_data.norm_id;
+                            imgData.s_img = imgs.s_img[i].ToString();
+                            imgData.b_img = imgs.b_img[i].ToString();
+                            imgData.img_info = imgs.img_info[i].ToString();
+                            imgData.img_inx = imgs.img_inx[i];
+                        }
+                        _DB.SaveChanges();
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = norm_data.norm_id });
+        }
+
+        public ActionResult Add(int id)
+        {
+            norm_data data = new norm_data();
+            data.inx = 0;
+            data.start_date = DateTime.Now;
+            data.end_date = DateTime.Now.AddYears(10);
+
+            //圖片           
+            ViewData["UploadImage2"] = new List<images_data>();
+
+            //下拉選單
+            var gData = (from m in _DB.norm_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in gData)
+            {
+                ListItems.Add(new ListItem(item.group_id.ToString(), item.name, false));
+            }
+            ViewData["group_id"] = ListItems;
+
+
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult AddSave(norm_data norm_data, VmImage imgs)
+        {
+            //var data = this._DB.norm_data.Find(norm_data.norm_id);
+            //var data1 = this._DB.norm_data.Where(m => m.norm_id.Equals(norm_data.norm_id)).Select(m => m).SingleOrDefault();
+            var data = new norm_data { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.norm_id = norm_data.norm_id;
+                data.group_id = norm_data.group_id;
+                data.title = norm_data.title;
+                data.cont = norm_data.cont;
+                data.inx = norm_data.inx;
+                data.hits = norm_data.hits;
+                data.start_date = norm_data.start_date;
+                data.end_date = norm_data.end_date;
+                data.visible = norm_data.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.norm_data.Add(data);
+                this._DB.SaveChanges();
+
+                norm_data.norm_id = data.norm_id;
+
+                #region "圖片處理"
+
+                for (int i = 0; i < imgs.img_id.Count; i++)
+                {
+                    if (imgs.img_id[i] == 0)
+                    {
+                        var imgData = new norm_image();
+                        imgData.norm_id = data.norm_id;
+                        imgData.s_img = imgs.s_img[i].ToString();
+                        imgData.b_img = imgs.b_img[i].ToString();
+                        imgData.img_info = imgs.img_info[i].ToString();
+                        imgData.img_inx = imgs.img_inx[i];
+                        imgData.img_visible = true;
+
+                        if (imgs.s_img[i].ToString() != "" && imgs.s_img[i].ToString() != null)
+                        {
+                            //新增
+                            _DB.norm_image.Add(imgData);
+                        }
+                    }
+                    else
+                    {
+                        //編輯
+                        var imgData = _DB.norm_image.Find(imgs.img_id[i]);
+                        if (imgs.s_img[i].ToString() == "" || imgs.s_img[i].ToString() == null)
+                        {
+                            _DB.norm_image.Remove(imgData);
+                        }
+                        else
+                        {
+                            imgData.norm_id = norm_data.norm_id;
+                            imgData.s_img = imgs.s_img[i].ToString();
+                            imgData.b_img = imgs.b_img[i].ToString();
+                            imgData.img_info = imgs.img_info[i].ToString();
+                            imgData.img_inx = imgs.img_inx[i];
+                        }
+                        _DB.SaveChanges();
+                    }
+                }
+
+
+                _DB.SaveChanges();
+
+                #endregion
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = norm_data.norm_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update norm_data set visible = 1 Where norm_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update norm_data set visible = 0 Where norm_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From norm_image Where norm_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+
+                    sql = " Delete From norm_data Where norm_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "分類列表"
+
+        public ActionResult GroupList(string kw)
+        {
+
+            int currentPageIndex = 0;
+            var tmpData = this._DB.norm_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.norm_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupList_ajax(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            var tmpData = this._DB.norm_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.norm_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult GroupEdit(int id)
+        {
+
+            var data = this._DB.norm_group.Find(id);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupEditSave(norm_group norm_group)
+        {
+            var data = this._DB.norm_group.Find(norm_group.group_id);
+            //var data1 = this._DB.norm_group.Where(m => m.zz_id.Equals(norm_group.zz_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = norm_group.group_id;
+                data.name = norm_group.name;
+                data.inx = norm_group.inx;
+                data.visible = norm_group.visible;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+                //data.create_user = norm_group.create_user;
+                //data.create_datetime = norm_group.create_datetime;
+
+                this._DB.SaveChanges();
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = norm_group.group_id });
+        }
+
+        public ActionResult GroupAdd(int id)
+        {
+            norm_group data = new norm_group();
+            data.inx = 0;
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupAddSave(norm_group norm_group, VmImage imgs)
+        {
+            //var data = this._DB.norm_group.Find(norm_group.zz_id);
+            //var data1 = this._DB.norm_group.Where(m => m.zz_id.Equals(norm_group.zz_id)).Select(m => m).SingleOrDefault();
+            var data = new norm_group { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = norm_group.group_id;
+                data.name = norm_group.name;
+                data.inx = norm_group.inx;
+                data.visible = norm_group.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.norm_group.Add(data);
+                this._DB.SaveChanges();
+
+                norm_group.group_id = data.group_id;
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = norm_group.group_id });
+        }
+
+        [HttpPost]
+        public ActionResult GroupListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update norm_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update norm_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From norm_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+    }
+}

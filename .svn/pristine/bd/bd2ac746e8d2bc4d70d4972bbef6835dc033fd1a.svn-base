@@ -1,0 +1,285 @@
+﻿using h365_web.Models;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+public class Gs
+{
+    private static _dbContext _db_;
+
+    protected static _dbContext _DB
+    {
+        get
+        {
+            if (_db_ == null)
+            {
+                _db_ = new _dbContext();
+            }
+            return _db_;
+        }
+    }
+
+    
+
+
+    public static List<ListItem> sList(string[] str, string str_data = null, string addAll = null)
+    {
+        int num = 0;
+
+        List<ListItem> ListItems = new List<ListItem>();
+
+        if (!string.IsNullOrEmpty(addAll))
+        {
+            //沒東西 就第一個等於啟用
+            ListItems.Add(new ListItem("", addAll, string.IsNullOrEmpty(str_data) ? true : false));
+        }
+
+
+        if (str_data == null)
+        {
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], (num == 0 && string.IsNullOrEmpty(addAll)) ? true : false));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], (num == 0 && string.IsNullOrEmpty(addAll)) ? true : false));
+                }
+
+                num++;
+            }
+        }
+        else
+        {
+
+            string[] str_num = str_data.Trim(',').Split(',').ToArray();
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], ("," + str_data + ",").Contains("," + bb[0] + ",")));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], ("," + str_data + ",").Contains("," + num.ToString() + ",")));
+                }
+
+                num++;
+            }
+        }
+
+
+        return ListItems;
+    }
+
+
+    public static List<ListItem> sList_chained1(string[] str, string str_data = null)
+    {
+        List<ListItem> ListItems = new List<ListItem>();
+        int num = 0;
+
+        if (str_data == null)
+        {
+            //ListItems.Add(new ListItem("-1", "未分類", true));
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], false));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], false));
+                }
+
+                num++;
+            }
+        }
+        else
+        {
+            string[] str_num = str_data.Trim(',').Split(',').ToArray();
+            if (str_num.Count() == 1)
+            {
+                str_data = "," + str_data + ",";
+            }
+
+
+            //ListItems.Add(new ListItem("-1", "未分類", str_data == "-1"));
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], str_data.Contains("," + bb[0] + ",")));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], str_data.Contains("," + num.ToString() + ",")));
+                }
+
+                num++;
+            }
+        }
+
+
+        return ListItems;
+    }
+
+    public static List<ListItem> sList_chained2(string[] str, string str_data = null)
+    {
+        List<ListItem> ListItems = new List<ListItem>();
+        int num = 0;
+
+        if (str_data == null)
+        {
+            //ListItems.Add(new ListItem("-1", "未分類", true));
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], false, bb[2]));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], false));
+                }
+
+                num++;
+            }
+        }
+        else
+        {
+            string[] str_num = str_data.Trim(',').Split(',').ToArray();
+            if (str_num.Count() == 1)
+            {
+                str_data = "," + str_data + ",";
+            }
+
+
+            //ListItems.Add(new ListItem("-1", "未分類", str_data == "-1"));
+            foreach (var item in str)
+            {
+                string[] bb = item.Split(',');
+                if (bb.Count() > 1)
+                {
+                    ListItems.Add(new ListItem(bb[0], bb[1], str_data.Contains("," + bb[0] + ","), bb[2]));
+                }
+                else
+                {
+                    ListItems.Add(new ListItem(num.ToString(), bb[0], str_data.Contains("," + num.ToString() + ",")));
+                }
+
+                num++;
+            }
+        }
+
+
+        return ListItems;
+    }
+
+    #region"圖片路徑"
+
+    //圖片、放在哪裡、前置網址
+    public static string Path_Img(string img, string con = null, string url = null)
+    {
+
+        string path = (con == null ? "Content/images/product/" : "/Content/images/" + con + "/"); //圖片路徑
+
+        string img_s = "";
+
+        if (!string.IsNullOrEmpty(img))
+        {
+
+            if (img.IndexOf("http://") != -1)
+            {
+                img_s = img;
+            }
+            else
+            {
+                img_s = img.IndexOf("images") != -1 ? img : path + img;
+
+                //有無前置網址
+                img_s = (!string.IsNullOrEmpty(url)) ? url + img_s : img_s;
+            }
+        }
+        else
+        {
+            img_s = NW.WEB_URL + "images/no_photo.jpg";
+        }
+
+        return img_s;
+    }
+
+    #endregion
+
+    #region"驗證專區"
+
+    public static bool isPhone(string phone)
+    {
+        bool isphone = false;
+
+        string pattern = @"^09[\d]{8}$";
+        Regex r = new Regex(pattern);
+        Match m = r.Match(phone);
+
+        isphone = m.Success;
+
+
+        return isphone;
+
+    }
+
+    #endregion
+
+
+    #region"寄送簡訊"
+
+    public static string SendSms(string[] phone, string body) 
+    {
+        string msg = "";
+
+        string url = "", param = "", json = "", param_str = "";
+        url = "http://case.netsourcer.com.tw/sms.html";
+        param = "phone={0}&body={1}";
+
+        if (string.IsNullOrEmpty(body) || body.Length > 65)
+        {
+            msg = "訊息內容有問題，或者字數超過65個字";
+        }
+        else
+        {
+            foreach (var item in phone)
+            {
+                string p = item.Replace("-", "").Replace("－", "");
+
+                if (isPhone(p))
+                {
+                    param_str = string.Format(param, item, body);
+                    json = NW.getUrl(url, param_str, "POST");
+
+                }
+                else
+                {
+                    //紀錄失敗的
+                    msg = string.Join(",", item);
+                }
+            }
+        }
+
+
+
+        return msg;
+    }
+
+    #endregion
+}
+
+

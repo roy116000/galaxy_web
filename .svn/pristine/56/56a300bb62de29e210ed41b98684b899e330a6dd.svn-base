@@ -1,0 +1,104 @@
+﻿@model h365_web.Models.order_invoice2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.invoice_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">發票資訊</h4>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.invoice_id)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.invoice_id)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.name)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.clearing_date)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.clearing_date)&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.order_datetime)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.order_datetime.Value.ToString("yyyy/MM/dd"))&nbsp;
+                   
+                    </div>
+                </div>
+
+                @Html.EditorFor(model => model.invoice)
+
+                @Html.EditorFor(model => model.invoice_info)
+
+                @Html.EditorFor(model => model.invoice_datetime)
+
+                @if (Model.invoice_datetime != null)
+                {
+                    @Html.EditorFor(model => model.return_datetime)
+                }
+
+
+
+
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.total)</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        NT @(Model.total.ToString("N0"))&nbsp;
+                   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button onclick="history.back()" type="button" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                invoice: "required",
+                invoice_info: "required",
+                invoice_datetime: "required"
+            },
+            messages: {
+                invoice: "發票，必須填寫！",
+                invoice_info: "給誰，必需填寫",
+                invoice_datetime: "寄送發票時間，必須填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

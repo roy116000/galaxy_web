@@ -1,0 +1,93 @@
+﻿@model h365_web.Models.product_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Maori = (h365_web.Models.partner_maori)ViewData["Maori"];  
+  
+}
+
+@Html.EditorFor(m => m.inx)
+
+@Html.EditorFor(m => m.once_num)
+
+@Html.EditorFor(m => m.inventory_num) @*庫存量*@
+
+@Html.EditorFor(model => model.sold)
+
+@Html.EditorFor(m => m.order_style) @*產品狀況*@
+
+@Html.EditorFor(m => m.tax_flag) @*稅別*@
+
+
+
+@if (Model.product_id != 0)
+{
+                                
+    @Html.EditorFor(m => m.visible)
+
+    @Html.EditorFor(model => model.sms_visible) @*簡訊寄送?*@
+
+    @Html.EditorFor(model => model.status_flag)
+
+    @Html.EditorFor(model => model.back_info)
+
+}
+
+<h4 class="widgettitle">分潤分配</h4>
+
+@(Html.EditorFor(m => Maori.visible, null, "Maori_visible"))
+
+<div class="allnum">
+
+    @*@(Html.EditorFor(m => Maori.netsourcer_num, null, "netsourcer_num"))*@
+
+    @(Html.EditorFor(m => Maori.drugstore_num, null, "drugstore_num"))
+
+    @(Html.EditorFor(m => Maori.salesman_num, null, "salesman_num"))
+
+    @(Html.EditorFor(m => Maori.partner_member_num, null, "partner_member_num"))
+
+    @(Html.EditorFor(m => Maori.partner_sales_num, null, "partner_sales_num"))
+
+
+</div>
+
+
+
+<script>
+
+    $('.allnum').find('input').blur(function () {
+
+        var n = parseInt(0);
+        $('.allnum').find('input').each(function (o) {
+            var s = $('.allnum').find('input').eq(o).val();
+
+            n = n + parseInt(s);
+
+        });
+
+        if (n > 100) {
+            sweetAlert('分配比例最大100%', '目前 ' + n + ' 已超過', 'error');
+
+            $(this).val('0');
+        }
+
+    })
+
+    function Maori() {
+        var n = parseInt(0);
+        $('.allnum').find('input').each(function (o) {
+            var s = $('.allnum').find('input').eq(o).val();
+
+            n = n + parseInt(s);
+
+        });
+
+        if (n > 100) {
+            sweetAlert('分配比例最大100%', '目前 ' + n + ' 已超過', 'error');
+        }
+    }
+
+
+</script>

@@ -1,0 +1,144 @@
+﻿@model h365_web.Models.product_price2
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.price_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+              @Html.HiddenFor(model => model.group_name) 
+              <div class="control-group">
+                  <label class="control-label" for="price">活動名稱</label>
+                  <span class="field">
+                    @Model.group_name
+                  </span>
+              </div>
+
+
+              @Html.EditorFor(model => model.subject) 
+
+              @Html.EditorFor(model => model.price) 
+
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定活動的預設折數，無條件去掉小數點，0則帶入產品原價。</span>
+                  </span>
+              </div>
+
+              <div class="control-group">
+                <label for="price" class="control-label">(促銷固定價)</label>
+                <span class="field">
+                    <input type="text" value="@(Model.fix_price)" name="fix_price" maxlength="10" id="fix_price" data-val-required="促銷價 欄位是必要項。" data-val-number="欄位 促銷價 必須是數字。" data-val="true" class="span2 input-spinner" style="width: 140px; margin-right: 16px; text-align: right;"><span class="ui-spinner ui-widget"><div class="ui-spinner-buttons" style="height: 36px; left: -16px; top: -10.1px; width: 16px;"><div class="ui-spinner-up ui-spinner-button ui-state-default ui-corner-tr" style="width: 15px; height: 17px;"><span class="ui-icon ui-icon-triangle-1-n" style="margin-left: 6px; margin-top: 1px;">&nbsp;</span></div><div class="ui-spinner-down ui-spinner-button ui-state-default ui-corner-br" style="width: 15px; height: 17px;"><span class="ui-icon ui-icon-triangle-1-s" style="margin-left: 6px; margin-top: 1px;">&nbsp;</span></div></div></span>
+                </span>
+              </div>
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定活動固定價格。</span>
+                  </span>
+              </div>
+
+              @Html.EditorFor(model => model.stock) 
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定產品活動時間內可訂購數量，0表無限制。</span>
+                  </span>
+              </div>
+
+              @Html.EditorFor(model => model.limit) 
+              <div class="control-group">
+                  <label class="control-label" for="price"> </label>
+                  <span class="field">
+                    <span class="label label-info">設定每個帳號可訂購數量，0表示無限制。</span>
+                  </span>
+              </div>
+
+              @Html.EditorFor(model => model.start_date) 
+
+              @Html.EditorFor(model => model.end_date) 
+
+              @Html.EditorFor(model => model.countback_visible) 
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+      <div class="contentinner">
+        <div class="row-fluid">
+         <h4 class="widgettitle">匯入商品活動資料</h4>
+            <div class="span6">
+              <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">匯入商品活動資料</h4>
+              @using (Html.BeginForm("ActExecl", controller, FormMethod.Post, new { @class = "stdform", @id = "form9", enctype = "multipart/form-data" }))
+              {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.price_id)
+                <div class="widgetcontent bordered">
+                  <div>
+                    <div class="controls">
+                      <div class="fileupload fileupload-new" data-provides="fileupload">
+                        <div class="input-append">
+                          <div class="uneditable-input span3">
+                            <i class="icon-file fileupload-exists"></i>
+                            <span class="fileupload-preview"></span>
+                          </div>
+                          <span class="btn btn-file">
+                            <span class="fileupload-new">選擇Execl檔</span>
+                            <span class="fileupload-exists">更改</span>
+                            <input type="file" id="file_name" name="file_name" />
+                          </span>
+                          <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">移除</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="stdformbutton">
+                      <button class="btn btn-primary">匯入商品活動資料</button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+      </div>
+    </div>
+</div>
+<script type="text/javascript">
+  $(function () {
+    // With Form Validation
+    $("#form1").validate({
+      rules: {
+        group_name: "required",
+        subject: "required",
+        start_date: "required",
+        end_date: "required"
+      },
+      messages: {
+        group_name: "活動標題，必需填寫！",
+        subject: "前台促銷用語，必需填寫！",
+        start_date: "啟用日期，必需填寫！",
+        end_date: "結束日期，必需填寫！"
+      },
+      highlight: function (label) {
+        jQuery(label).closest('.control-group').addClass('error');
+      }
+    });
+
+  })
+</script>

@@ -1,0 +1,47 @@
+﻿@model h365_web.Models.member_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString(); 
+}
+
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.member_id)
+
+            <div class="widgetcontent">
+                <h4 class="widgettitle">會員資料</h4>
+
+                @Html.EditorFor(m => m.name)
+
+                @Html.EditorFor(m => m.phone)
+
+                @Html.EditorFor(m => m.password)
+
+                @Html.EditorFor(m => m.sex)
+
+                @Html.EditorFor(m => m.birthday)
+
+                @Html.EditorFor(m => m.zip)
+
+                @Html.EditorFor(m => m.address)
+
+                @Html.EditorFor(m => m.visible)
+
+                
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="button" class="btn" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'">回上一頁</button>
+                    </div>
+                </div>
+              
+            </div>
+        }
+    </div>
+</div>

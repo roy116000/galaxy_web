@@ -1,0 +1,105 @@
+﻿@model List<galaxy_web.Models.sys_power_list>
+@{
+    string controller = ViewBag.controller;     //ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewBag.action;  // ViewContext.RouteData.Values["action"].ToString();
+
+    int function_id = 0;
+    string active = "";
+
+
+    //訂單列表數量
+    List<int> order = (List<int>)ViewData["order"];
+}
+
+
+
+<div class="leftmenu">
+    <ul class="nav nav-tabs nav-stacked">
+
+
+        @foreach (var item in Model)
+        {
+@*if (!String.IsNullOrEmpty(item.init_action))
+            { 
+            <li><a href="@Url.Action(item.action, item.controll)"><span class="@item.icon"></span>@item.label</a></li>
+            }
+            else
+
+            {*@
+
+            if (function_id != item.function_id && function_id != 0)
+            {
+            @Html.Raw("</ul>")
+            @Html.Raw("</li>")
+            }
+
+
+            if (function_id != item.function_id)
+            {
+                if (item.controll == controller) { active = "active "; } else { active = ""; }
+                    
+            @Html.Raw("<li class=\"" + @active + "dropdown\"><a href=\"#\"><span class=\"" + @item.icon + "\"></span>" + @item.label + "</a>")
+
+                if (String.IsNullOrEmpty(active))
+                {
+            @Html.Raw("<ul>") 
+                }
+                else
+                { 
+            @Html.Raw("<ul  style=\"display:block\">")
+                }
+            }
+
+
+
+            if (item.controll == "NwOrder" && item.action == "ExportList")
+            {
+            <li><a href="@Url.Action(item.action, item.controll)">@item.sub_label (@(Session["export"]))</a></li>
+@*<li><a href="@Url.Action(item.action, item.controll)">@item.sub_label (@order[1])</a></li>*@
+            }
+            else if (item.controll == "NwOrder" && item.action == "GoodsList")
+            {
+            <li><a href="@Url.Action(item.action, item.controll)">@item.sub_label (@order[2])</a></li>
+            }
+
+            else
+            {
+            <li><a href="@Url.Action(item.action, item.controll)">@item.sub_label</a></li>
+            }
+
+
+
+
+            function_id = item.function_id;
+
+        }
+        @*}*@
+
+        @Html.Raw("</ul>")
+        @Html.Raw("</li>")
+
+        @*       
+        <li class="active dropdown"><a href=""><span class="icon-book"></span>Other Pages</a>
+            <ul style="display:block">
+                <li><a href="404.html">404 Error Page</a></li>
+                <li><a href="invoice.html">Invoice Page</a></li>
+                <li><a href="editprofile.html">Edit Profile</a></li>
+                <li><a href="grid.html">Grid Styles</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="stickyheader.html">Sticky Header Page</a></li>
+            </ul>
+        </li>*@
+    </ul>
+</div>
+
+<div style="background-color: white">
+    <a href="~/Content/files/galaxy.apk" target="_blank">
+        <h3 style="font-weight: bold; text-align: center;">Galaxy-供應商APP
+            <br />
+            Android</h3>
+        <img style="width: 100%" src="~/Areas/newweb/images/QRCode.png" />
+    </a>
+</div>
+
+
+

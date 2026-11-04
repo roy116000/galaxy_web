@@ -1,0 +1,153 @@
+﻿@{
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent animate4 fadeInUp">
+    <div class="contentinner content-elements">
+
+        <form id="form1" method="post" enctype="multipart/form-data">
+
+            <input hidden="hidden" name="name" />
+
+            @*匯入*@
+            <input hidden="hidden" type="file" name="Im" value="" />
+        </form>
+
+        @if (1 != 1)
+        {
+            <div class="row-fluid">
+                <div class="widgetcontent">
+                    <div class="span12">
+                        <h4 class="widgettitle">匯出</h4>
+                        <ul class="widgeticons row-fluid">
+
+                            <li class="one_fifth">
+                                <a href="@(Url.Action("List", "NwOrder"))">
+                                    <img src="~/Areas/newweb/images/ICON/04.png" /><span>訂單</span></a>
+                                @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單</span></a>*@
+                            </li>
+
+                            <li class="one_fifth">
+                                <a href="@(Url.Action("List", "NwOrder"))">
+                                    <img src="~/Areas/newweb/images/ICON/04.png" /><span>商品</span></a>
+                                @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單</span></a>*@
+                            </li>
+
+                            <li class="one_fifth">
+                                <a href="@(Url.Action("List", "NwOrder"))">
+                                    <img src="~/Areas/newweb/images/ICON/04.png" /><span>報表</span></a>
+                                @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單</span></a>*@
+                            </li>
+
+                        </ul>
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+
+        <div class="row-fluid">
+            <div class="widgetcontent">
+                <div class="span12">
+                    @*<h4 class="widgettitle">匯入</h4>*@
+                    <ul class="widgeticons row-fluid">
+
+                        <li class="one_fifth">
+                            <a class="Import" style="cursor: pointer" onclick="$('input[name=Im]').click();">
+                                <img src="~/Areas/newweb/images/ICON/01.png" /><span style="font-family: XXX;">匯入訂單</span></a>
+                            @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單</span></a>*@
+                        </li>
+
+
+                        @if (ViewBag.power < 3)
+                        {
+ 
+                            <li class="one_fifth">
+                                <a class="Import" style="cursor: pointer" onclick="$('input[name=Im]').click();">
+                                    <img src="~/Areas/newweb/images/ICON/05.png" /><span style="font-family: XXX;">匯入消費者發票</span></a>
+                                @*<img src="~/Areas/newweb/images/gemicon/location.png" /><span>訂單</span></a>*@
+                            </li>
+
+                        }
+                    </ul>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="List_ajax">
+            @Html.Partial(action + "_ajax")
+        </div>
+
+
+
+    </div>
+</div>
+
+<script>
+    $('.Import').click(function () {
+        var str = $(this).find('span').html();
+
+        $('input[name="name"]').val(str);
+
+    })
+</script>
+
+
+<script>
+
+    //匯入東西
+    $('input[name="Im"]').change(function () {
+
+        //格式
+        var re = /(\.xlsx)$/i;
+
+        var ext = $(this).val();
+
+        //判斷格式
+        if (!re.test(ext)) {
+
+            swal('請上傳.xlsx格式');
+
+            $('input[name="Im"]').val('');
+            return false;
+
+        } else {
+
+            swal({
+                title: "確定上傳 " + ext + " 嗎?",
+                text: "",
+                //type: "success",
+                showCancelButton: true,
+                //confirmButtonColor: "#DD6B55",
+                confirmButtonText: "是的，確定",
+                cancelButtonText: "再考慮看看",
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                //imageUrl: "/images/in6/未命名.png"
+            }, function (isConfirm) {
+                if (isConfirm) {
+
+
+
+                    $('#form1').attr('action', '@(Url.Action("Edit"))');
+                    $('#form1').submit();
+                } else {
+
+                    $('input[name="Im"]').val('');
+                    return false;
+                }
+            })
+        }
+    })
+
+</script>
+
+
+
+

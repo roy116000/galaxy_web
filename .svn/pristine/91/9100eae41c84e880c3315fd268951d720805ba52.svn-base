@@ -1,0 +1,72 @@
+﻿@model h365_web.Models.norm_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.norm_id)
+            <div class="widgetcontent">
+                <div class="tabbable">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#title">基本資料</a></li>
+                        <li><a data-toggle="tab" href="#images">圖片管理</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="title" class="tab-pane active">
+                            @Html.EditorFor(model => model.group_id)
+
+                            @Html.EditorFor(model => model.title)
+
+                            @Html.EditorFor(model => model.cont)
+
+                            @Html.EditorFor(model => model.inx)
+
+                            @Html.EditorFor(model => model.start_date)
+
+                            @Html.EditorFor(model => model.end_date)
+
+                            @Html.EditorFor(model => model.visible)
+                        </div>
+                        <div id="images" class="tab-pane">
+
+                            @Html.EditorFor(model => model.uploadimage2)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin-top: 20px;">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                group_id: "required",
+                title: "required"
+            },
+            messages: {
+                group_id: "分類標題，必需選擇！",
+                title: "標題，必需填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

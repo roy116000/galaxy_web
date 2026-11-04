@@ -1,0 +1,86 @@
+﻿@model h365_web.Areas.newweb.Controllers.NwReportController.search_data
+
+@{    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm("MemberBuyEdit", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", target = "_blank" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)  
+            
+            <div class="widgetcontent">
+                <h4 class="widgettitle">查詢條件</h4>
+
+                @*@Html.EditorFor(model => model.member_group)*@
+
+                @Html.EditorFor(model => model.start_date)
+
+                @Html.EditorFor(model => model.end_date)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button type="button" class="btn" onclick="gotosubmit()">檢視</button>
+                        <button type="button" class="btn" onclick="exp()">匯出</button> 
+                    </div>
+                </div>
+            </div>
+        }
+        @using (Html.BeginForm("MemberBuyEditSave", controller, FormMethod.Post, new { @class = "stdform", @id = "form2", target = "_blank" }))
+        {           
+             <input type="hidden" id="start" name="start" value="0" />
+             <input type="hidden" id="end" name="end" value="0" />     
+               
+        }
+    </div>
+</div>
+<script type="text/javascript">
+
+    function gotosubmit() {
+
+        $('#form1').submit();
+
+    }
+
+
+</script>
+<script type="text/javascript">
+
+    function exp() {
+        $('#start').val($('input[name = start_date]').val());
+        $('#end').val($('input[name = end_date]').val());
+        $('#form2').submit();
+    }
+
+
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                start_date: "required",
+                end_date: "required",
+            },
+            messages: {
+                start_date: "請選擇日期！",
+                end_date: "請選擇日期！",
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+
+    })
+</script>
+<script>
+
+    $("label[for='start_date']").text('起始日');
+    $("label[for='end_date']").text('結束日');
+</script>

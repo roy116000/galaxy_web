@@ -1,0 +1,639 @@
+﻿using ClosedXML.Excel;
+using h365_web.Models;
+using MvcPaging;
+using NPOI.SS.UserModel;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwPharmacistController : _BaseController
+    {
+        public static string[] Type = { "圖片", "影片" };
+        public static string[] Gift = { "商品", "獎勵金" };
+
+        public ActionResult List(int? page, string kw, DateTime? sD, DateTime? eD)
+        {
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            int cuxxpageindex = page.HasValue ? ((int)page.Value > 0 ? (int)page - 1 : 0) : 0;
+
+            var linq = this._DB.pharmacist_activity.Where(m => m.activity_id > 0);
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                linq = linq.Where(m => m.title.Contains(kw));
+            }
+
+            DateTime tD = DateTime.Today;
+            sD = sD.HasValue ? sD : new DateTime(tD.Year, tD.Month, 1);
+            eD = eD.HasValue ? eD : tD;
+            ViewBag.sD = sD.Value.ToShortDateString();
+            ViewBag.eD = eD.Value.ToShortDateString();
+            eD = eD.Value.AddDays(1);
+
+            //linq = linq.Where(m => sD <= m.start_datetime && eD > m.end_datetime);
+
+            var data = linq.OrderByDescending(m => m.change_datetime).ThenByDescending(m => m.create_datetime).ToPagedList(cuxxpageindex, 30);
+
+            if (cuxxpageindex > 0)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        public ActionResult Add(int id)
+        {
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            string Controller = RouteData.Values["controller"].ToString();
+            string Action = RouteData.Values["action"].ToString();
+
+            //var T = (from a in this._DB.sys_function_data.Where(m => m.controll == Controller)
+            //        join b in this._DB.sys_function_sub on a.function_id equals b.function_id into mm
+            //        select new
+            //        {
+            //            mm.Where(m => m.action == Action).FirstOrDefault().label
+            //        }).ToList();
+
+            //ViewBag.T = T.FirstOrDefault().label;
+
+
+            var data = this._DB.pharmacist_activity.Where(m => m.activity_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { TempData["jgrowl"] = "查無資料"; return RedirectToAction(""); }
+
+            data = data != null ? data : new pharmacist_activity() { };
+            if (data.activity_id == 0)
+            {
+                data.start_datetime = H365.Today;
+                data.end_datetime = H365.Today.AddMonths(5).AddDays(-1);
+                data.visible = true;
+
+            }
+            else
+            {
+                data.type_img = NW.Path_Img(data.type_img, RouteData.Values["controller"].ToString().Replace("Nw", ""));
+                data.type_url_img = NW.Path_Img(data.type_url_img, RouteData.Values["controller"].ToString().Replace("Nw", ""));
+
+                #region"問題"
+
+                var Q = this._DB.pharmacist_activity_data.Where(m => m.activity_id == data.activity_id).ToList();
+
+                ViewData["Q"] = Q;
+
+                #endregion
+            }
+
+            #region"選單"
+
+            ViewData["type"] = NW.sList(Type, data.type.ToString());
+
+            ViewData["gift"] = NW.sList(Gift, data.gift.ToString());
+
+            #endregion
+
+            ViewBag.id = data.activity_id;
+
+            return View(data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            //var data = Add(id);
+
+            return Add(id);
+        }
+
+        [ValidateInput(false), HttpPost]
+        public ActionResult EditSave(pharmacist_activity pharmacist_activity, HttpPostedFileBase type_img, HttpPostedFileBase type_url_img)
+        {
+            var data = this._DB.pharmacist_activity.Where(m => m.activity_id == pharmacist_activity.activity_id).FirstOrDefault();
+            if (data == null && pharmacist_activity.activity_id != 0) { TempData["jgrowl"] = "查無資料"; return RedirectToAction(RouteData.Values["action"].ToString().Replace("EditSave", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new pharmacist_activity() { };
+                data.title = pharmacist_activity.title;
+                data.type = pharmacist_activity.type;
+                data.gift = pharmacist_activity.gift;
+                data.gift_num = pharmacist_activity.gift_num;
+                data.info = pharmacist_activity.info;
+                data.cont = pharmacist_activity.cont;
+                data.start_datetime = pharmacist_activity.start_datetime;
+                data.end_datetime = pharmacist_activity.end_datetime;
+                data.visible = pharmacist_activity.visible;
+                data.type_url = pharmacist_activity.type_url;
+
+                #region"圖片專區"
+
+                if (type_img != null && type_img.ContentLength > 0 && NW.getFileType(type_img, 1)) //有無上傳
+                {
+
+                    string tmpPath = Server.MapPath("~/Content/images/" + RouteData.Values["controller"].ToString().Replace("Nw", "")); //存放路徑
+                    if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); } //建資料夾
+
+                    //var Group = this._DB.adv_group.Where(m => m.group_id == adv_data.group_id).FirstOrDefault();
+
+                    data.type_img = Images.Helps.ImageHelper.Rebmp(type_img, tmpPath, 720, 0);
+                }
+
+                if (type_url_img != null && type_url_img.ContentLength > 0 && NW.getFileType(type_url_img, 1)) //有無上傳
+                {
+
+                    string tmpPath = Server.MapPath("~/Content/images/" + RouteData.Values["controller"].ToString().Replace("Nw", "")); //存放路徑
+                    if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); } //建資料夾
+
+                    //var Group = this._DB.adv_group.Where(m => m.group_id == adv_data.group_id).FirstOrDefault();
+
+                    data.type_url_img = Images.Helps.ImageHelper.Rebmp(type_url_img, tmpPath, 720, 0);
+                }
+
+                #endregion
+
+                if (data.activity_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+                    this._DB.pharmacist_activity.Add(data);
+
+                    TempData["jgrowl"] = "新增成功";
+                }
+                else
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "修改成功";
+                }
+
+                this._DB.SaveChanges();
+
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = data.activity_id });
+            }
+        }
+
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            string DB = "pharmacist_activity";
+            string Id = "activity_id";
+            //this._DB.pharmacist_activity.Where(m => m.activity_id)
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update " + DB + " set visible = 1 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update " + DB + " set visible = 0 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    sql = " Delete From  " + DB + " Where " + Id + " in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+
+        [ValidateInput(false), HttpPost]
+        public ActionResult QuestionEditSave(pharmacist_activity_data activity_data)
+        {
+            var data = this._DB.pharmacist_activity_data.Where(m => m.question_id == activity_data.question_id).FirstOrDefault();
+            if (activity_data.question_id != 0 && data == null) { TempData["jgrowl"] = "查無資料"; }
+            else
+            {
+                data = data != null ? data : new pharmacist_activity_data() { };
+
+                data.activity_id = activity_data.activity_id;
+                data.title = activity_data.title;
+                data.answer1 = activity_data.answer1;
+                data.fraction1 = activity_data.fraction1;
+                data.answer2 = activity_data.answer2;
+                data.fraction2 = activity_data.fraction2;
+                data.inx = activity_data.inx;
+                data.visible = activity_data.visible;
+
+                if (data.question_id == 0)
+                {
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+                    this._DB.pharmacist_activity_data.Add(data);
+
+                    TempData["jgrowl"] = "新增成功";
+                }
+                else
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "修改成功";
+                }
+
+                this._DB.SaveChanges();
+
+            }
+
+            return RedirectToAction("Edit", new { id = activity_data.activity_id });
+
+        }
+
+        [ValidateInput(false), HttpPost]
+        public ActionResult QuestionDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            string DB = "pharmacist_activity_data";
+            string Id = "question_id";
+            //this._DB.pharmacist_activity_data.Where(m => m.question_id)
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update " + DB + " set visible = 1 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update " + DB + " set visible = 0 Where " + Id + " in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                  
+                    sql = " Delete From  " + DB + " Where " + Id + " in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return View();
+        }
+
+
+        #region"訂單列表"
+
+        public class _Order
+        {
+            public order_data_n O { get; set; }
+            public List<order_sub_n> S { get; set; }
+        }
+
+        public IEnumerable<_Order> Select(DateTime? sD, DateTime? eD, string kw, int? flag)
+        {
+            var linq = this._DB.order_data_n.Where(m => m.order_id > 0);
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                kw = kw.ToLower();
+
+                linq = linq.Where(m => m.order_name.ToLower().Contains(kw) || m.send_name.ToLower().Contains(kw) ||
+                    m.order_phone.Contains(kw) || m.send_phone.Contains(kw) || m.send_address.Contains(kw) || m.order_id.ToString() == kw);
+            }
+
+            if (flag.HasValue)
+            {
+                ViewBag.flag = flag;
+
+                linq = linq.Where(m => m.flag == flag);
+            }
+
+            if (sD.HasValue)
+            {
+                ViewBag.sD = NW.getDate(sD);
+
+                linq = linq.Where(m => m.order_datetime >= sD || m.pay_datetime >= sD || m.freight_datetime >= sD || m.finish_datetime >= sD);
+            }
+
+            if (eD.HasValue)
+            {
+                ViewBag.eD = NW.getDate(eD);
+
+                eD = eD.Value.AddDays(1);
+                linq = linq.Where(m => m.order_datetime < eD || m.pay_datetime < eD || m.freight_datetime < eD || m.finish_datetime < eD);
+            }
+
+            var data = (from a in linq
+                        join b in this._DB.order_sub_n on a.order_id equals b.order_id into mm
+                        select new _Order()
+                        {
+                            O = a,
+                            S = mm.OrderByDescending(m => m.price * m.num).ToList()
+                        });
+
+            return data;
+        }
+
+
+        public ActionResult OrderList(int? page, DateTime? sD, DateTime? eD, string kw, int? flag)
+        {
+
+
+            var linq = Select(sD, eD, kw, flag);
+
+            int IndexPage = page > 0 ? (int)page - 1 : 0;
+            IPagedList data = linq.OrderByDescending(m => m.O.flag).ThenByDescending(m => m.O.order_datetime).ToPagedList(IndexPage, 20);
+
+
+            #region"下拉選單"
+
+            List<ListItem> ListItems = new List<ListItem>() { };
+
+            ListItems = Gs.sList(NW.Name_flag, flag.ToString(), "全部");
+            ViewData["Flag"] = ListItems;
+
+            #endregion
+
+            if (page > 0)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        public ActionResult Export(DateTime? sD, DateTime? eD, string kw, int? flag)
+        {
+            string msg = "";
+            string value = "";
+
+            var data = Select(sD, eD, kw, flag).OrderBy(m => m.O.flag).ToList(); //匯出的資料
+            if (!data.Any()) { msg = "無相關內容，故無法匯出"; }
+            else
+            {
+                try
+                {
+                    string T = "'";
+                    int rowIdx = 1;
+                    int colIdx = 1;
+
+                    XLWorkbook workbook = new XLWorkbook();
+                    var sheet = workbook.Worksheets.Add("訂單明細");
+
+                    string[] Cols = { "項次", "訂購平台(請參照平台名稱)", "訂單單號", "訂單狀況(成立/作廢/退貨/取消訂單/已出貨)", "訂購時間", "訂購人", "收件人", "訂購人電話", "收件人電話", "配送地址", "貨號(飛象)", "商品名稱", "數量", "樣式/規格", "數量", "送達時間", "備註", "出貨時間", "出貨單號", "物流公司" };
+                    foreach (var item in Cols)
+                    {
+                        sheet.Cell(rowIdx, colIdx++).Value = T + item;
+                    }
+
+                    rowIdx = 2;
+                    int oid = 0;
+                    foreach (var item in data)
+                    {
+
+                        var O = item.O;
+
+                        foreach (var item2 in item.S)
+                        {
+                            var C = this._DB.company_data.Where(m => m.company_id == O.company_id).FirstOrDefault();
+
+
+                            string[] N = 
+                        {
+                            (Array.IndexOf(data.Select(m => m.O.order_id).ToArray(), O.order_id) + 1).ToString(),
+                            NW.Name_flag[O.flag],
+                            O.order_sn,
+                            C != null ? C.name : "查無廠商",
+                            item2.item_name,
+                            item2.num.ToString(),
+                            item2.price.ToString("N0"),
+                            O.order_datetime.HasValue ? O.order_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.pay_datetime.HasValue ? O.pay_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.export_datetime.HasValue ? O.export_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.freight_datetime.HasValue ? O.freight_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+
+                            O.freight_no,
+                            O.finish_datetime.HasValue ? O.finish_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : ""
+                        };
+
+                            int num = 1;
+                            foreach (var itemN in N)
+                            {
+                                sheet.Cell(rowIdx, num++).Value = T + itemN;
+                            }
+
+                            rowIdx++;
+                        }
+
+
+
+                        oid = O.order_id;
+                    }
+
+                    value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+                    workbook.SaveAs(value);
+                    workbook.Dispose();
+
+                    
+                }
+                catch
+                {
+                    msg = "匯出失敗，請與管理者聯繫";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx"));
+            }
+            else 
+            {
+                TempData["jgrowl"] = msg;
+                return RedirectToAction("OrderList");
+            }
+
+            
+        }
+
+        public ActionResult xxExport(DateTime? sD, DateTime? eD, string kw, int? flag)
+        {
+            string msg = "";
+            string value = "";
+
+            var data = Select(sD, eD, kw, flag).OrderBy(m => m.O.flag).ToList(); //匯出的資料
+            if (!data.Any()) { msg = "無相關內容，故無法匯出"; }
+            else
+            {
+                try
+                {
+                    string T = "'";
+                    int rowIdx = 1;
+                    int colIdx = 1;
+
+                    XLWorkbook workbook = new XLWorkbook();
+                    var sheet = workbook.Worksheets.Add("訂單明細");
+
+                    string[] Cols = { "項次", "訂單狀態", "訂單單號", "廠商名稱", "產品名稱", "訂購數量", "單價", "訂購時間", "付款時間", "匯出時間", "出貨時間", "出貨單號", "貨運公司", "完成時間" };
+                    foreach (var item in Cols)
+                    {
+                        sheet.Cell(rowIdx, colIdx++).Value = T + item;
+                    }
+
+                    rowIdx = 2;
+                    int oid = 0;
+                    foreach (var item in data)
+                    {
+
+                        var O = item.O;
+
+                        foreach (var item2 in item.S)
+                        {
+                            var C = this._DB.company_data.Where(m => m.company_id == O.company_id).FirstOrDefault();
+
+
+                            string[] N = 
+                        {
+                            (Array.IndexOf(data.Select(m => m.O.order_id).ToArray(), O.order_id) + 1).ToString(),
+                            NW.Name_flag[O.flag],
+                            O.order_sn,
+                            C != null ? C.name : "查無廠商",
+                            item2.item_name,
+                            item2.num.ToString(),
+                            item2.price.ToString("N0"),
+                            O.order_datetime.HasValue ? O.order_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.pay_datetime.HasValue ? O.pay_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.export_datetime.HasValue ? O.export_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+                            O.freight_datetime.HasValue ? O.freight_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : "",
+
+                            O.freight_no,
+                            O.finish_datetime.HasValue ? O.finish_datetime.Value.ToString("yyyy.MM.dd HH:mm:ss") : ""
+                        };
+
+                            int num = 1;
+                            foreach (var itemN in N)
+                            {
+                                sheet.Cell(rowIdx, num++).Value = T + itemN;
+                            }
+
+                            rowIdx++;
+                        }
+
+
+
+                        oid = O.order_id;
+                    }
+
+                    value = Server.MapPath("~/Content/files/export/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+                    workbook.SaveAs(value);
+                    workbook.Dispose();
+
+                    
+                }
+                catch
+                {
+                    msg = "匯出失敗，請與管理者聯繫";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx"));
+            }
+            else 
+            {
+                TempData["jgrowl"] = msg;
+                return RedirectToAction("OrderList");
+            }
+
+            //if(!string.IsNullOrEmpty(value))
+            //{
+            //    return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx"));
+            //}
+            //else
+            //{
+            //    return Json(new { msg = msg }, JsonRequestBehavior.AllowGet);
+            //}
+            
+        }
+
+        public ActionResult Import(HttpPostedFileBase file) 
+        {
+            string msg = "";
+            //匯入
+            if (file != null && file.ContentLength > 0 && NW.getFileType(file, 3))
+            {
+                try
+                {
+                    //判斷Excel版本
+                    IWorkbook excel = WorkbookFactory.Create(file.InputStream);
+
+                    //資料列
+                    NPOI.SS.UserModel.ISheet Sheet = excel.GetSheetAt(0);
+
+                    //所有的資料列
+                    for (int row = 1; row <= Sheet.LastRowNum; row++)
+                    {
+                        //不為空列
+                        if (Sheet.GetRow(row) != null)
+                        {
+                            string order_flag = Sheet.GetRow(row).GetCell(3).ToString();
+
+                            //已出貨
+                            if (order_flag == "已出貨")
+                            {
+                                string order_sn = Sheet.GetRow(row).GetCell(3).ToString();
+                                var data = this._DB.order_data_n.Where(m => m.order_sn == order_sn).FirstOrDefault();
+                                if (data != null)
+                                {
+                                    data.freight_datetime = DateTime.Parse(Sheet.GetRow(row).GetCell(17).ToString()); //出貨時間
+                                    data.freight_no = Sheet.GetRow(row).GetCell(18).ToString(); //出貨單號
+
+                                    //出貨公司
+                                    string freight_name = Sheet.GetRow(row).GetCell(19).ToString();
+                                    if (!string.IsNullOrEmpty(freight_name))
+                                    {
+                                        var Freight = this._DB.freight_data.Where(m => m.name.Contains(freight_name)).FirstOrDefault();
+                                        if (Freight != null)
+                                        {
+                                            data.freight_id = Freight.freight_id;
+                                        }
+                                    }
+
+                                    data.flag = 3; //出貨完成
+
+                                    this._DB.SaveChanges();
+                                }
+
+                            }
+                        }
+                    }
+
+                    msg = "匯入成功";
+                }
+                catch
+                {
+                    msg = "匯入過程有誤";
+                }
+            }
+            else 
+            {
+                msg = "請選擇Execl檔案";
+            }
+
+            return RedirectToAction("OrderList");
+        }
+
+        #endregion
+
+    }
+}

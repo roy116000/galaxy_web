@@ -1,0 +1,41 @@
+﻿@model MvcPaging.IPagedList<h365_web.Models.education_group>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                //var gData = (List<ListItem>)ViewData["gData"];
+}
+
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            @Html.Partial("template_select")
+
+            <form action="@(Url.Action(action, controller))" method="post">
+
+                <div>
+
+                    @*<span style="text-align: left">分類選單： @Html.SelectList("gid", gData)</span>*@
+                    <span style="float: right">
+                        <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax", Model)
+
+    </div>
+    <!--contentinner-->
+</div>

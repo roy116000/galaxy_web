@@ -1,0 +1,65 @@
+﻿@model List<h365_web.Models.order_data>
+
+<div class="row-fluid">
+                    <div class="span12 editprofileform">
+                        <h4 class="widgettitle">訂單資訊</h4>
+                        <div class="">
+                            <div id="">
+                                <table class="table table-striped">
+                                    <colgroup>
+                                        <col class="width8" />
+                                        <col class="width12" />
+                                        <col class="width12" />
+                                        <col />
+                                        <col class="width6" />
+                                        <col class="width12" />
+                                        <col class="width12" />
+                                        <col class="width12" />
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>當前狀態</th>
+                                            <th>訂單單號</th>
+                                            <th>出貨日期</th>
+                                            <th>品名</th>
+                                            <th>數量</th>
+
+                                            <th>貨運公司</th>
+                                            <th>宅配單號</th>
+                                            <th class="center">總成本</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in Model)
+                                        {
+                                            int num = Array.IndexOf(Model.ToArray(), item);
+
+                               
+                                            <tr>
+                                                <td>@(h365_web.Areas.newweb.Controllers.NwBillsController.Bill_flag[(int)item.bill_flag])</td>
+                                                <td>@Html.Raw(item.order_sn.Replace(",", "<br />"))</td>
+                                                <td>@(((DateTime)item.goods_datetime).ToString("yyyy/MM/dd"))</td>
+                                                <td title="@(item.order_sub.FirstOrDefault().product_data.web_name + " - " + item.order_sub.FirstOrDefault().item_name)">@(NW.word(item.order_sub.FirstOrDefault().product_data.item_name, 15, "..."))</td>
+                                                <td>@(item.order_sub.FirstOrDefault().num)</td>
+                                                <td>@(item.freight_name.Split(':')[1])</td>
+                                                <td>@(item.freight_no)</td>
+                                                <td class="right">@(item.cost_total.ToString("N0"))</td>
+
+                                            </tr>  
+
+                                        }
+
+                                        <tr>
+                                            <td colspan="5"></td>
+                                            <td><h2 style="color: red;">總額：</h2></td>
+                                            <td><h2 class="right" style="color: red;">@(Model.Select(m => m.cost_total).DefaultIfEmpty(0).Sum().ToString("N0"))</h2></td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>

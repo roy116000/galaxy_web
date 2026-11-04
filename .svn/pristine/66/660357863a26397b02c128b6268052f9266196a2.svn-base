@@ -1,0 +1,48 @@
+﻿@model h365_web.Models.product_specification
+
+
+@*啟用*@
+@Html.EditorFor(m => m.specification_visible)
+
+@Html.EditorFor(m => m.send_flag) @*寄送方式*@
+
+@Html.EditorFor(m => m.taking_x) @*服用說明*@
+
+@Html.EditorFor(m => m.preservation_x) @*保存方式*@
+
+@Html.EditorFor(m => m.vegetarian_x) @*素食*@
+
+@Html.EditorFor(m => m.dosage_form_x) @*劑型*@
+
+@*@Html.EditorFor(model => model.piece)*@ @*產品單位*@
+
+@Html.EditorFor(model => model.place_origin) @*產地*@
+
+@Html.EditorFor(model => model.barcode) @*國際條碼*@
+
+@*產品規格*@
+@Html.EditorFor(m => m.pcontent)
+
+@*保存期限*@
+@Html.EditorFor(m => m.deadline)
+
+@*廠商名稱*@
+@Html.EditorFor(m => m.company_name)
+
+@*廠商電話*@
+@Html.EditorFor(m => m.tel)
+
+@*廠商地址*@
+@Html.EditorFor(m => m.address)
+
+@*保險字號*@
+@Html.EditorFor(m => m.insurance_famous)
+
+@*登記字號*@
+@Html.EditorFor(m => m.log_famous)
+
+@*產品成分*@
+@Html.EditorFor(m => m.ingredients)
+
+@*注意事項*@
+@Html.EditorFor(m => m.precautions)

@@ -1,0 +1,64 @@
+﻿@model h365_web.Models.news_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.news_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                @Html.EditorFor(model => model.group_id)
+
+                @Html.EditorFor(model => model.title)
+
+                @Html.EditorFor(model => model.cont)
+
+                @Html.EditorFor(model => model.cont2)
+
+                @Html.EditorFor(model => model.inx)
+
+                @Html.EditorFor(model => model.start_date)
+
+                @Html.EditorFor(model => model.end_date)
+
+                @Html.EditorFor(model => model.visible)
+
+                 @Html.EditorFor(model => model.uploadimage)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                group_id: "required",
+                title: "required"
+            },
+            messages: {
+                group_id: "分類標題，必需選擇！",
+                title: "標題，必需填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+
+    })
+</script>

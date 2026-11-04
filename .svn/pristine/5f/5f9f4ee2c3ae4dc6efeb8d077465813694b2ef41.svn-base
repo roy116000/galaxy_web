@@ -1,0 +1,94 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.order_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+                    //List<h365_web.Models.news4_data> marData = (List<h365_web.Models.news4_data>)ViewData["marData"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width6" />
+            <col class="width6" />
+            @*<col class="width8" />*@
+            <col class="width10" />
+            <col class="width8" />
+            <col />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+            <col class="width8" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">單號 </th>
+                @*<th>店別 </th>*@
+                <th class="center">訂購人電話 </th>
+                <th class="center">收件藥局</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().order_datetime) </th>
+                <th class="center">付款方式 </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().flag) </th>
+                <th class="center">到貨時間</th>
+                <th class="center">備註</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().total) </th>
+                <th class="center">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                item.total = item.order_sub.Sum(m => m.price * m.num) + item.freight;
+                string sn = "";
+                sn = !string.IsNullOrEmpty(item.sn) ? item.sn : "";
+                //var market = marData.Where(m => m.sn == sn).FirstOrDefault();
+                           
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.order_id" /></td>
+                    <td class="center"><span class="label label-info" title="前台單號：@(item.order_sn)">@Html.DisplayFor(modelItem => item.order_id)</span></td>
+                    @*<td>@(market!=null ? market.title.Replace(" ","") : "生鮮購" )</td>*@
+                    <td>@Html.DisplayFor(modelItem => item.member_data.name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.send_name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.order_datetime)</td>
+                    <td class="center">@NW.payName(item.pay_id)</td>
+                    <td class="center"><span class="label label-@(item.flag > 0 ? "success" : "default")">@NW.flagName(item.flag)</span></td>
+                    <td class="center">@NW.getDate(item.goods_datetime)</td>
+                    <td class="center">
+                        @if (!string.IsNullOrEmpty(item.info))
+                        { 
+                            <div class="popoversample">
+                                <a href="#" data-rel="popover" data-placement="left" data-content="@(item.info)" rel="popover" data-original-title="" title="">
+                                    <i class="iconsweets-speech"></i>
+                                </a>
+                            </div>
+                        }
+                    </td>
+                    <td class="right">NT @Html.DisplayFor(modelItem => item.total)</td>
+                    <td>@Html.ActionLink("編輯", "Edit", new { id = item.order_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>@ViewBag.total</div>
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("start_date", ViewBag.start_date)
+            .AddRouteValue("end_date", ViewBag.end_date)
+            .AddRouteValue("flag", ViewBag.vflag)
+            .AddRouteValue("pay_visible", ViewBag.vpay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("pay_id", ViewBag.vpay_id)
+            )
+    </div>
+</div>
+<!--pagination-->

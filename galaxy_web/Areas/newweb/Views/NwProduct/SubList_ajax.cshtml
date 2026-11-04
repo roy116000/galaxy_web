@@ -1,0 +1,97 @@
+﻿@using MvcPaging;
+@model List<galaxy_web.Models.product_erp_group>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    int i = 1;
+                    //string s = "";
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width2" />
+            <col class="width4" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width4" />
+            <col class="width2" />
+            @*<col class="width8" />*@
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">#</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().pre))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().name))</th>
+                <th class="center">當前最大編號</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().Sub_sn))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().Sub_visible))</th>
+                @*<th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().count))</th>*@
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody style="vertical-align: middle">
+            @foreach (var item in Model)
+            {
+                              
+                <tr class="@NW.echoBool(item.Sub_visible, "unread", "visible")" >
+                    <td class="center">@(i++)</td>
+                    <td class="center">@Html.DisplayFor(m => item.pre)</td>
+                    <td>@Html.DisplayFor(m => item.name)</td>
+                    <td>@Html.DisplayFor(m => item.change_user)</td>
+
+                    <td>
+                        @Html.HiddenFor(m => item.group_id)
+
+                        @if (string.IsNullOrEmpty(item.Sub_sn))
+                        {
+                            <input style="min-width:100%" name="Sub_sn" class="ss" value="@(item.Sub_sn)" />
+                        }
+                        else
+                        {
+                            <div>@(item.Sub_sn)</div>
+                        }
+
+                    </td>
+                    <td class="center">@Html.CheckBoxFor(m => item.Sub_visible)</td>
+                    <td class="center">
+
+                        <button class="btn" type="button">儲存</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    $('.btn').click(function () {
+        var tr = $(this).parents('tr');
+
+        var sn = tr.find('input[name="Sub_sn"]').val();
+        var visible = tr.find('input[name="item.Sub_visible"]').prop("checked");
+
+        var group_id = tr.find('input[name="item.group_id"]').val();
+
+        $('#sn').val(sn);
+        $('#visible').val(visible);
+        $('#gid').val(group_id);
+
+        $('#form1').submit();
+    })
+</script>
+
+<form id="form1" action="@(Url.Action("SubEditSave", "NwProduct"))" method="post">
+
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <input name="nation" value="@(ViewBag.nation)" hidden="hidden" />
+    <input id="gid" name="gid" value="" hidden="hidden" />
+    <input id="sn" name="sn" value="" hidden="hidden" />
+    <input id="visible" name="visible" value="" hidden="hidden" />
+    <input name="cid" value="@(ViewBag.cid)" hidden="hidden" />
+</form>

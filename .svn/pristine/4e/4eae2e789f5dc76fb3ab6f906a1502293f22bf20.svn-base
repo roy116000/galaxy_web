@@ -1,0 +1,73 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.zzdrugstore_data>
+
+
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col  />
+            <col class="width10" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width16"/>
+            <col class="width5" />
+            <col class="width5" />
+            <col class="width5" />
+            <col class="width8" />
+            <col class="width5" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().drugstore_sn) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().name) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().tel) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().open_time) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().address) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().uid) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().pwd) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().start_date) </th>        
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {               
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.drugstore_id" />
+                    </td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.drugstore_sn)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.tel)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.open_time)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.address)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.uid)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.pwd)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.start_date)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax",""), new { id = item.drugstore_id }, new { @class = "name" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid))
+    </div>
+
+</div>
+<!--pagination-->

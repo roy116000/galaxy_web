@@ -1,0 +1,61 @@
+﻿@model h365_web.Models.drugstore_data
+<div class="maincontent">
+    <div class="contentinner">
+
+
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)  
+            
+            <div class="widgetcontent">
+                <h4 class="widgettitle">店中店監控列表</h4>
+
+                <form id="form1" name="form1"  target="_blank" action="@Url.Action("Edit","NwReport")">
+                請輸入查詢日期:
+                @*<input id="datetime" name="datetime" type="datetime"/>*@
+                    @Html.EditorFor(model => model.datetime)
+                </form>
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button type="button" class="btn" onclick="submit()"  >檢視</button>
+                    </div>
+                </div>
+            </div>
+        
+    </div>
+</div>
+
+
+
+
+@* <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">  *@
+<link href="~/Areas/newweb/Content/css/jquery-ui-v1.11.4.css" rel="stylesheet" />
+
+@*<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>*@
+<script src="~/Areas/newweb/Content/js/jquery-ui-1.11.4.min.js"></script>
+
+<script>
+    function submit() {
+    
+        $('#form1').submit();
+    }
+
+</script>
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                datetime: "required"
+            },
+            messages: {
+                datetime: "請輸入日期！"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>

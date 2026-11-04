@@ -1,0 +1,9 @@
+﻿@{
+    string h1 = ViewBag.h1;
+    string span = ViewBag.span;
+}
+
+<div class="pagetitle">
+    <h1>@h1</h1>
+    <span>@span</span>
+</div>

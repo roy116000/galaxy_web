@@ -1,0 +1,254 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwContactdrugstoreController : _BaseController
+    {
+        #region "聯絡列表"
+
+        public ActionResult List(int? gid, string kw)
+        {
+            int currentPageIndex = 0;
+
+            var tmpData = (from m in _DB.contact_drugstore
+                           orderby m.create_datetime descending
+                           select new data_list()
+                           {
+                               data_id=m.contact_id,
+                               name = m.name,
+                               drug_name = m.drug_name,
+                               drug_tel = m.drug_tel,
+                               mail = m.mail,
+                               address = m.address,
+                               visible = m.visible
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) || m.drug_tel.Contains(kw) || m.mail.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+            ViewBag.gid = gid;
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult List_ajax(int? gid, int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var tmpData = (from m in _DB.contact_drugstore
+                           orderby m.create_datetime descending
+                           select new data_list()
+                           {
+
+                               data_id = m.contact_id,
+                               name = m.name,
+                               drug_name = m.drug_name,
+                               drug_tel = m.drug_tel,
+                               mail = m.mail,
+                               address = m.address,
+                               visible = m.visible
+                           });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw) || m.tel.Contains(kw) || m.mail.Contains(kw));
+            }
+
+            if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+            ViewBag.gid = gid;
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult Edit(int id)
+        {
+
+            var data = this._DB.contact_drugstore.Find(id);
+
+            //下拉選單
+            //var gData = (from m in _DB.contact_drugstore orderby m.create_datetime descending select new { m.name, m.name }).ToList();
+            //List<ListItem> ListItems = new List<ListItem> { };
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            //foreach (var item in gData)
+            //{
+            //    ListItems.Add(new ListItem(item.group_id.ToString(), item.name));
+            //}
+            //ViewData["group_id"] = ListItems;
+
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(contact_drugstore contact_drugstore, VmImage imgs)
+        {
+            var data = this._DB.contact_drugstore.Find(contact_drugstore.contact_id);
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                data.contact_id = contact_drugstore.contact_id;
+                data.name = contact_drugstore.name;
+                data.sex = contact_drugstore.sex;
+                data.mail = contact_drugstore.mail;
+                data.inv_sn = contact_drugstore.inv_sn;
+                data.drug_name = contact_drugstore.drug_name;
+                data.drug_tel = contact_drugstore.drug_tel;
+                data.drug_phone = contact_drugstore.drug_phone;
+                data.zip = contact_drugstore.zip;
+                data.address = contact_drugstore.address;
+                data.snormal_hour = contact_drugstore.snormal_hour;
+                data.snormal_minute = contact_drugstore.snormal_minute;
+                data.enormal_hour = contact_drugstore.enormal_hour;
+                data.enormal_minute = contact_drugstore.enormal_minute;
+                data.sholiday_hour = contact_drugstore.sholiday_hour;
+                data.sholiday_minute = contact_drugstore.sholiday_minute;
+                data.eholiday_hour = contact_drugstore.eholiday_hour;
+                data.eholiday_minute = contact_drugstore.eholiday_minute;
+                data.drug_holiday = contact_drugstore.drug_holiday;
+                data.isholiday = contact_drugstore.isholiday;
+
+
+                data.visible = contact_drugstore.visible;
+                data.change_datetime = DateTime.Now;
+                data.change_user = User.Identity.Name;
+                data.reply = contact_drugstore.reply;
+
+
+
+       
+                this._DB.SaveChanges();
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = contact_drugstore.contact_id });
+        }
+
+        public ActionResult Add(int id)
+        {
+            contact_drugstore data = new contact_drugstore();
+
+            //下拉選單
+            //var gData = (from m in _DB.contact_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+            //List<ListItem> ListItems = new List<ListItem> { };
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            //foreach (var item in gData)
+            //{
+            //    ListItems.Add(new ListItem(item.group_id.ToString(), item.name, false));
+            //}
+            //ViewData["group_id"] = ListItems;
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult AddSave(contact_drugstore contact_drugstore, VmImage imgs)
+        {
+            var data = new contact_drugstore { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                data.contact_id = contact_drugstore.contact_id;
+                data.name = contact_drugstore.name;
+                data.sex = contact_drugstore.sex;
+                data.mail = contact_drugstore.mail;
+                data.inv_sn = contact_drugstore.inv_sn;
+                data.drug_name = contact_drugstore.drug_name;
+                data.drug_tel = contact_drugstore.drug_tel;
+                data.drug_phone = contact_drugstore.drug_phone;
+                data.zip = contact_drugstore.zip;
+                data.address = contact_drugstore.address;
+                data.snormal_hour = contact_drugstore.snormal_hour;
+                data.snormal_minute = contact_drugstore.snormal_minute;
+                data.enormal_hour = contact_drugstore.enormal_hour;
+                data.enormal_minute = contact_drugstore.enormal_minute;
+                data.sholiday_hour = contact_drugstore.sholiday_hour;
+                data.sholiday_minute = contact_drugstore.sholiday_minute;
+                data.eholiday_hour = contact_drugstore.eholiday_hour;
+                data.eholiday_minute = contact_drugstore.eholiday_minute;
+                data.drug_holiday = contact_drugstore.drug_holiday;
+                data.isholiday = contact_drugstore.isholiday;
+                data.visible = contact_drugstore.visible;
+                data.create_datetime = contact_drugstore.create_datetime;
+                data.create_user = User.Identity.Name;
+                data.reply = contact_drugstore.reply;
+
+
+
+                _DB.contact_drugstore.Add(data);
+                this._DB.SaveChanges();
+
+                contact_drugstore.contact_id = data.contact_id;
+
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = contact_drugstore.contact_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update contact_drugstore set visible = 1 Where contact_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update contact_drugstore set visible = 0 Where contact_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                   
+                    sql = " Delete From contact_drugstore Where contact_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+    }
+}

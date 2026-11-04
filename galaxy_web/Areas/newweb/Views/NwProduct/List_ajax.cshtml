@@ -1,0 +1,145 @@
+﻿@using MvcPaging;
+@model IPagedList<galaxy_web.Models.product_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    Dictionary<int, string> F = (Dictionary<int, string>)ViewData["F"]; //狀態
+    Dictionary<int, string> C = (Dictionary<int, string>)ViewData["C"]; //所屬廠商
+
+    int Pid = ViewBag.apower ?? 0;
+    
+}
+
+
+
+<table class="table table-bordered mailinbox">
+    <colgroup>
+
+        <col class="width4" />
+        <col class="width6" />
+        <col class="width14" />
+        <col class="width8" />
+        <col />
+        @if (Pid < 3)
+        {
+            <col class="width8" />
+        }
+        <col class="width6" />
+        <col class="width6" />
+        <col class="width6" />
+        <col class="width6" />
+
+        @if (Pid < 3)
+        {
+            <col class="width8" />
+        }
+
+        <col class="width6" />
+
+    </colgroup>
+    <thead>
+        <tr>
+            <th class="center">
+                <input type="checkbox" name="del_id" class="checkall" /></th>
+
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().status))</th>
+            <th class="center">所屬廠商</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().item_no))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().item_name))</th>
+            @if (Pid < 3)
+            {
+                <th class="center">上架平台</th>
+            }
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().price))</th>
+            <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().cost))</th>
+            <th class="center">數量</th>
+            <th class="center">@*@(Html.DisplayNameFor(m => m.FirstOrDefault().freight))*@毛利率</th>
+
+
+            @if (Pid < 3)
+            {                
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().erp_cost))</th>
+            }
+
+
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            string status = "", c_name = "";
+            if (F != null)
+            {
+                status = F.Where(m => m.Key == item.status).SingleOrDefault().Value;
+            }
+
+            if (C != null)
+            {
+                c_name = C.Where(m => m.Key == item.company_id).Select(m => m.Value).SingleOrDefault() ?? null;
+            }
+                                   
+            <tr class="@NW.echoBool((item.status != 999 ? true : false), "unread", "visible")">
+                <td class="center">
+                    <input type="checkbox" name="block_id" class="block_check" value="@(item.product_id)" /></td>
+
+                <td class="center">@(status)</td>
+                <td class="">@(c_name)</td>
+                <td class="left">@Html.DisplayFor(m => item.item_no)</td>
+                <td title="@(item.web_name)-@(item.item_name)" >@(NW.word(item.item_name, 18, "..."))</td>
+                @if (Pid < 3)
+                {
+                    <td class="left">@(NW.convert_platform(item.platform_ids))</td>
+                }
+                <td class="right">@(item.price.ToString(NW.point))</td>
+                <td class="right">@(item.cost.ToString(NW.point))</td>
+                @*<td class="right">@(item.freight.ToString(NW.point))</td>*@
+                <td class="center">@(item.Stock)</td>
+                @if (item.price > 0)
+                {
+                    <td class="right">@((((item.price - item.cost) / item.price) * 100).ToString("F2"))%</td>
+                }
+                else
+                {
+                    <td class="right">0%</td>
+                }
+
+
+                @if (Pid < 3)
+                {
+                    <td class="right">@(item.erp_cost.ToString(NW.point))</td>
+                }
+
+                <td class="center">
+                    @Html.ActionLink("編輯", "Edit", new { id = item.product_id }, new { @class = "title", target = "_blank" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+<div class="pagination pagination-centered">
+
+    @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(15)
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("kw", ViewBag.kw)
+            .AddRouteValue("sD", ViewBag.sD)
+            .AddRouteValue("eD", ViewBag.eD)
+            .AddRouteValue("cid", ViewBag.cid)
+            .AddRouteValue("status", ViewBag.status)
+            .AddRouteValue("sort", ViewBag.sort)
+            .AddRouteValue("p", ViewBag.p)
+            )
+
+</div>
+
+
+
+
+
+

@@ -1,0 +1,55 @@
+﻿@model h365_web.Models.product_data
+
+<div class="control-group">
+    <label for="" class="control-label"></label>
+    <span class="field">
+        <span class="label label-important">產品週期為：<span id="cycle">@Model.Cycle_Totle</span> 天</span>
+    </span>
+</div>
+
+@Html.EditorFor(model => model.Cycle_Visible)
+
+@Html.EditorFor(model => model.Unit)
+
+@Html.EditorFor(model => model.ProductTotle)
+
+@Html.EditorFor(model => model.Product_day)
+
+@Html.EditorFor(model => model.Product_once)
+
+
+
+<script>
+
+    
+    $('#ProductTotle').keyup(function (o) {
+        Cycle();
+    })
+
+    $('#Product_day').keyup(function (o) {
+        Cycle();
+    })
+
+    $('#Product_once').keyup(function (o) {
+        Cycle();
+    })
+
+    function Cycle() {
+        var total = $('#ProductTotle').val().replace(/[,]+/g, '');
+        var day = $('#Product_day').val().replace(/[,]+/g, '');
+        var once = $('#Product_once').val().replace(/[,]+/g, '');
+
+        
+
+        if (total != 0 && day != 0 && once != 0) {
+
+            var v = total / (day * once)
+
+        } else {
+            v = 0;
+        }
+
+        $('#cycle').html(v);
+    }
+
+</script>

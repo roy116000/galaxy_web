@@ -1,0 +1,260 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data.Entity;
+
+namespace h365_web.Models
+{
+    public class _dbContext : DbContext
+    {
+        public _dbContext() : base("netwebConnectionString") { }
+
+        public DbSet<sys_admin_data> sys_admin_data { get; set; }
+
+        public DbSet<sys_admin_data2> sys_admin_data1 { get; set; }
+
+        public DbSet<sys_admin_image> sys_admin_image { get; set; }
+
+        public DbSet<sys_power_data> sys_power_data { get; set; }
+
+
+        public DbSet<sys_power_sub> sys_power_sub { get; set; }
+
+        public DbSet<sys_power_list> sys_power_list { get; set; }
+
+        public DbSet<sys_function_data> sys_function_data { get; set; }
+
+        public DbSet<sys_function_sub> sys_function_sub { get; set; }
+
+        public DbSet<zz_data> zz_data { get; set; }
+
+        public DbSet<zz_imgs> zz_imgs { get; set; }
+
+        public DbSet<zz_group> zz_group { get; set; }
+
+        public DbSet<news_data> news_data { get; set; }
+        public DbSet<news_group> news_group { get; set; }
+        public DbSet<news_image> news_image { get; set; }
+
+        //首頁影片文字
+        public DbSet<index_data> index_data { get; set; }
+
+        //產業新聞
+        public DbSet<industry_data> industry_data { get; set; }
+        public DbSet<industry_group> industry_group { get; set; }
+        public DbSet<industry_image> industry_image { get; set; }
+
+        //新聞
+        public DbSet<news2_data> news2_data { get; set; }
+        public DbSet<news2_group> news2_group { get; set; }
+        public DbSet<news2_image> news2_image { get; set; }
+
+        //相簿管理
+        public DbSet<album_data> album_data { get; set; }
+        public DbSet<album_group> album_group { get; set; }
+        public DbSet<album_image> album_image { get; set; }
+
+        //網站設定
+        public DbSet<about_data> about_data { get; set; }
+        public DbSet<about2_data> about2_data { get; set; }
+        public DbSet<mail_group> mail_group { get; set; }
+
+        //廣告管理
+        public DbSet<adv_group> adv_group { get; set; }
+        public DbSet<adv_data> adv_data { get; set; }
+        public DbSet<adv_filter> adv_filter { get; set; }
+
+        //常見問題
+        public DbSet<question_group> question_group { get; set; }
+        public DbSet<question_data> question_data { get; set; }
+       
+        //聯絡地址
+        public DbSet<zip_data> zip_data { get; set; }
+
+        //訂單資訊
+        public DbSet<order_data> order_data { get; set; }
+        public DbSet<order_bills> order_bills { get; set; }
+
+        //藥局管理
+        public DbSet<drugstore_data> drugstore_data { get; set; }
+
+        //藥局登入
+        public DbSet<drugstore_loging> drugstore_loging { get; set; }
+
+        #region"產品"
+
+        public DbSet<product_data> product_data { get; set; }
+        public DbSet<product_group> product_group { get; set; }
+        public DbSet<product_image> product_image { get; set; }
+        public DbSet<product_freight> product_freight { get; set; }
+        public DbSet<product_price> product_price { get; set; }
+        public DbSet<product_index_group> product_index_group { get; set; }
+        public DbSet<product_group_act> product_group_act { get; set; }
+        public DbSet<product_gather> product_gather { get; set; }
+        public DbSet<product_specification> product_specification { get; set; }
+        public DbSet<product_ingredient> product_ingredient { get; set; }
+        public DbSet<product_sales> product_sales { get; set; }
+
+        #endregion
+
+        //訂單系統
+        public DbSet<order_data_n> order_data_n { get; set; }
+        public DbSet<order_sub_n> order_sub_n { get; set; }
+        public DbSet<freight_data> freight_data { get; set; }
+
+        #region"訂單系統"
+
+        public DbSet<order_sub> order_sub { get; set; }
+        public DbSet<order_pay> order_pay { get; set; }
+        public DbSet<order_goods> order_goods { get; set; }
+        public DbSet<order_charge> order_charge { get; set; }
+        public DbSet<order_invoice> order_invoice { get; set; }
+        public DbSet<order_invoice2> order_invoice2 { get; set; }
+        public DbSet<order_invoice_time> order_invoice_time { get; set; }
+        public DbSet<partner_order> partner_order { get; set; }
+
+        public DbSet<order_bill> order_bill { get; set; }
+
+        #endregion
+        
+        #region"會員管理"
+        public DbSet<member_group> member_group { get; set; }
+        public DbSet<member_data> member_data { get; set; }
+        public DbSet<member_bonus> member_bonus { get; set; }
+        public DbSet<member_login> member_login { get; set; }
+        public DbSet<member_real> member_real { get; set; }
+        #endregion
+
+        #region"健康寶典"
+
+        public DbSet<health_organ> health_organ { get; set; }
+        public DbSet<health_part> health_part { get; set; }
+        public DbSet<health_data> health_data { get; set; }
+        public DbSet<health_sub> health_sub { get; set; }
+        public DbSet<health_news> health_news { get; set; }
+        public DbSet<health_specialty> health_specialty { get; set; }
+
+        public DbSet<health_symptom_data> health_symptom_data { get; set; }
+        public DbSet<health_symptom_group> health_symptom_group { get; set; }
+        #endregion
+
+        #region"醫藥資訊"
+        public DbSet<medicines_approve> medicines_approve { get; set; }
+        public DbSet<medicines_atccode> medicines_atccode { get; set; }
+        public DbSet<medicines_data> medicines_data { get; set; }
+        public DbSet<medicines_price> medicines_price { get; set; }
+        public DbSet<medicines_group> medicines_group { get; set; }
+        public DbSet<medicines_main> medicines_main { get; set; }
+        public DbSet<medicines_image> medicines_image { get; set; }
+        public DbSet<medicines_check> medicines_check { get; set; }
+        #endregion
+
+        #region"作者"
+        public DbSet<author_data> author_data { get; set; }
+        public DbSet<author_group> author_group { get; set; }
+        public DbSet<author_image> author_image { get; set; }
+
+        #endregion
+
+        //廠商
+        public DbSet<company_data> company_data { get; set; }
+        public DbSet<company_image> company_image { get; set; }
+
+        //Tag
+        public DbSet<tag_data> tag_data { get; set; }
+
+        //qrc
+        public DbSet<qrcode_login> qrcode_login { get; set; }
+
+        public DbSet<contact_drugstore> contact_drugstore { get; set; }
+
+        //招商規範
+        public DbSet<norm_data> norm_data { get; set; }
+        public DbSet<norm_group> norm_group { get; set; }
+        public DbSet<norm_image> norm_image { get; set; }
+
+        //加盟系統
+        public DbSet<partner_maori> partner_maori { get; set; }
+        public DbSet<partner_money> partner_money { get; set; }
+
+
+        public DbSet<solt_data> solt_data { get; set; }
+
+
+
+        #region 得來組MODEL
+
+
+        public DbSet<news4_data> news4_data { get; set; }
+
+        #region"產品"
+
+        //產品
+        public DbSet<product_data2> product_data2 { get; set; }
+        public DbSet<product_group2> product_group2 { get; set; }
+        public DbSet<product_image2> product_image2 { get; set; }
+        public DbSet<product_freight2> product_freight2 { get; set; }
+        public DbSet<product_price2> product_price2 { get; set; }
+        public DbSet<product_index_group2> product_index_group2 { get; set; }
+        public DbSet<product_group_act2> product_group_act2 { get; set; }
+        public DbSet<product_service2> product_service2 { get; set; }
+        public DbSet<product_service_image2> product_service_image2 { get; set; }
+
+        #endregion
+
+        #region"訂單系統"
+        public DbSet<order_data2> order_data2 { get; set; }
+        public DbSet<order_sub2> order_sub2 { get; set; }
+        public DbSet<order_pay2> order_pay2 { get; set; }
+        public DbSet<order_goods2> order_goods2 { get; set; }
+        public DbSet<order_charge2> order_charge2 { get; set; }
+        public DbSet<order_druginvoice> order_druginvoice { get; set; }
+        public DbSet<order_bills2> order_bills2 { get; set; } 
+        //public DbSet<partner_order> partner_order2 { get; set; }
+        #endregion
+
+        #endregion
+
+        #region"藥師資訊"
+
+        public DbSet<pharmacist_data> pharmacist_data { get; set; } //藥師資訊
+
+        public DbSet<pharmacist_activity> pharmacist_activity { get; set; } //活動專區
+
+        public DbSet<pharmacist_activity_data> pharmacist_activity_data { get; set; } //活動專區
+
+        #endregion
+
+        #region"開機報表新增"
+        //藥局留言
+        public DbSet<msg_note> msg_note { get; set; }
+
+        public DbSet<drug_image> drug_image { get; set; }
+
+        public DbSet<durg_time> durg_time { get; set; }
+
+        public DbSet<partner_data> partner_data { get; set; }
+
+        public DbSet<drugstore_dealer> drugstore_dealer { get; set; }
+
+        public DbSet<drugstore_sales> drugstore_sales { get; set; }
+
+        public DbSet<partner_sales> partner_sales { get; set; }
+
+        public DbSet<partner_member> partner_member { get; set; }
+
+        public DbSet<drugstore_datao> drugstore_datao { get; set; }
+
+        public DbSet<drugstore_time> drugstore_time { get; set; }
+
+        #endregion
+
+        #region"衛教宣導"
+
+        public DbSet<education_data> education_data { get; set; }
+        public DbSet<education_group> education_group { get; set; }
+
+        #endregion
+    }
+}

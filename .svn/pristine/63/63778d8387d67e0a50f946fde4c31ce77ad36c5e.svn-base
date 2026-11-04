@@ -1,0 +1,20 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Mon_S = (List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>)ViewData["Order_Mon_S"];
+    var Day = (h365_web.Areas.newweb.Controllers.NwReportController.Order)ViewData["Order_Day"];
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+        @Html.Partial("template_mon", Mon_S)
+
+        <div style="padding-top:20px"></div>
+
+        @Html.Partial("template_day", Day)
+    </div>
+</div>
+
+

@@ -1,0 +1,48 @@
+﻿@model h365_web.Models.tag_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.tag_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">關聯設定</h4>
+
+                @Html.EditorFor(model => model.tag_name)
+
+                @Html.EditorFor(model => model.inx)
+
+                @Html.EditorFor(model => model.visible)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="button" onclick="location.href = '@Url.Action("List")'" class="btn">回列表</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                tag_name: "required"
+            },
+            messages: {
+                tag_name: "*"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>

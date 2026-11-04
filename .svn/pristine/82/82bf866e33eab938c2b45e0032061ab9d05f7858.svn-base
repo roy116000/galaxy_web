@@ -1,0 +1,120 @@
+﻿@model String
+@{
+    
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    //htmlAttributes2.Add("class", "span5");
+    //htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+
+
+    string id = ViewData.ModelMetadata.PropertyName;
+    string uploadify_id = "uploadify_"+id;
+    string img_src_id="img_src_"+id;
+    string path = ViewContext.RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower();
+    string con = path + "_" + ViewContext.RouteData.Values["action"].ToString().Replace("Nw", "").ToLower().Replace("add","").Replace("edit","") ;
+    
+    
+    string def_img = Url.Content("~/Areas/newweb/Content/uploadify/150x150.png");
+
+    var item = ViewData[id] as h365_web.Models.images_data;
+    var img_id = 0;
+    if (item != null){
+        img_id = item.imgs_id;
+    }
+    
+}
+
+<div class="control-group">
+    @Html.Label("",htmlAttributes) 
+    <div class="field">
+        <span id="@(uploadify_id)"></span>
+        <small>【圖片預覽，異動後請按儲存!!】@NW.GetParam(con).Img_Info</small><br />
+        <ul class="listfile">
+            @if (item.s_img != "" && item.s_img != null)
+            {
+                <li>
+                    <a href="@(Url.Content("~/Content/images/" + path + "/" + item.b_img))" target="_blank">
+                        <img id="@(img_src_id)" src="@(Url.Content("~/Content/images/" + path + "/" + item.s_img))" width="150" /></a>
+                    <span class="img_del" style="float: right; margin-top: 5px; cursor: pointer;" onclick="img_del($(this));">
+                        <img src="@Url.Content("~/Areas/newweb/Content/uploadify/uploadify-cancel.png")" /></span>
+                    <input type="hidden" name="img_id" value="@item.imgs_id" />
+                    <input type="hidden" name="s_img" value="@item.s_img" />
+                    <input type="hidden" name="b_img" value="@item.b_img" />
+                    <input type="hidden" name="img_info" value="" />
+                    <input type="hidden" name="img_inx" value="0" />
+                </li>      
+              
+            }
+            else
+            { 
+                <li>
+                    <a href="@(def_img)" target="_blank">
+                        <img id="@(img_src_id)" src="@(def_img)" /></a>
+                    <span class="img_del" style="float: right; margin-top: 5px; cursor: pointer; display: none;" onclick="img_del($(this));">
+                        <img src="@Url.Content("~/Areas/newweb/Content/uploadify/uploadify-cancel.png")" /></span>
+                    <input type="hidden" name="img_id" value="@img_id" />
+                    <input type="hidden" name="s_img" value="" />
+                    <input type="hidden" name="b_img" value="" />
+                    <input type="hidden" name="img_info" value="" />
+                    <input type="hidden" name="img_inx" value="0" />
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#@(uploadify_id)').uploadify({
+            uploader: '@(Url.Action("UploadImageCustom", "NwHome"))',
+            formData: { 'id': '0', 'name': "@con",'path':"@path" },
+            swf: '@(Url.Content("~/Areas/newweb/Content/uploadify/uploadify.swf"))',
+            width: 60,
+            height: 23,
+            buttonText: "上傳",
+            buttonCursor: 'hand',
+            fileObjName: 'Filedata',
+            fileTypeExts: "*.jpg;*.png;*.gif",
+            fileTypeDesc: "請選擇 jpg png gif 文件",
+            auto: true,
+            multi: false,
+            queueSizeLimit: 1,
+            onUploadSuccess: function (file, data, response) {
+                if (response) {
+                    var json = JSON.parse(data);
+                    var oImg = $('#@(img_src_id)').parents('a');
+                    var oS_img = oImg.siblings('input[name=s_img]');
+                    var oB_img = oImg.siblings('input[name=b_img]');
+                    var oImg_id = oImg.siblings('input[name=img_id]');
+                    var oImg_del = oImg.siblings('span.img_del');
+                    oImg.attr('href', json.imgSrc.replace(json.simgName, json.bimgName));
+                    $('#@(img_src_id)').attr('src', json.imgSrc);
+                    oS_img.val(json.simgName);
+                    oB_img.val(json.bimgName);
+                    oImg_del.show();
+
+                    //0:新增；> 0 編輯
+                    if (oImg_id.val() == 0) {
+                        oImg_id.val(0);
+                    }
+                }
+            }
+        });
+    });
+
+    function img_del(o) {
+        if (confirm('確定刪除該圖片？')) {
+            var oImg = o.siblings('a');;
+            var oS_img = oImg.siblings('input[name=s_img]');
+            var oB_img = oImg.siblings('input[name=b_img]');
+            oImg.find('img').attr('src', '@(def_img)');
+            oImg.attr('href','@(def_img)');
+            oS_img.val('');
+            oB_img.val('');
+            $(this).hide();
+        }
+    }
+
+</script>

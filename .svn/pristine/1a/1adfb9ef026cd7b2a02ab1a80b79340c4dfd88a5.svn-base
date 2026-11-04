@@ -1,0 +1,10 @@
+﻿@model h365_web.Models.product_data
+@{
+    var aData = (h365_web.Models.sys_admin_data)ViewData["aData"];
+}
+
+@Html.EditorFor(model => model.info)
+
+@Html.EditorFor(model => model.introduce)
+
+@Html.EditorFor(m => m.tag)

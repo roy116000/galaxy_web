@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+     public class contact_drugstore
+     {
+         [Key]
+         public int contact_id { get; set; }
+
+         [DisplayName("負責人姓名")]
+         public string name { get; set; }
+
+         [DisplayName("性別")]
+         public string sex { get; set; }
+
+         [DisplayName("信箱")]
+         public string mail { get; set; }
+
+         [DisplayName("統一編號")]
+         public string inv_sn { get; set; }
+
+         [DisplayName("藥局名稱")]
+         public string drug_name { get; set; }
+
+         [DisplayName("藥局市內電話")]
+         public string drug_tel { get; set; }
+
+         [DisplayName("藥局行動電話")]
+         public string drug_phone { get; set; }
+
+         [DisplayName("地區")]
+         public int zip { get; set; }
+
+         [DisplayName("藥局地址")]
+         public string address { get; set; }
+
+         [DisplayName("平日營業時間-時(起)")]
+         public string snormal_hour { get; set; }
+
+         [DisplayName("平日營業時間-分(起)")]
+         public string snormal_minute { get; set; }
+
+         [DisplayName("平日營業時間-時(迄)")]
+         public string enormal_hour { get; set; }
+
+         [DisplayName("平日營業時間-分(迄)")]
+         public string enormal_minute { get; set; }
+
+         [DisplayName("假日營業時間-時(起)")]
+         public string sholiday_hour { get; set; }
+
+         [DisplayName("假日營業時間-分(起)")]
+         public string sholiday_minute { get; set; }
+
+         [DisplayName("假日營業時間-時(迄)")]
+         public string eholiday_hour { get; set; }
+
+         [DisplayName("假日營業時間-分(迄)")]
+         public string eholiday_minute { get; set; }
+
+         [DisplayName("藥局公休日")]
+         public string drug_holiday { get; set; }
+
+         [DisplayName("國定假日公休")]
+         public Boolean isholiday { get; set; }
+
+         [DisplayName("啟用")]
+         public Boolean visible { get; set; }
+
+         [DisplayName("create_datetime")]
+         public DateTime? create_datetime { get; set; }
+
+         [DisplayName("create_user")]
+         public string create_user { get; set; }
+
+         [DisplayName("change_datetime")]
+         public DateTime? change_datetime { get; set; }
+
+         [DisplayName("change_user")]
+         public string change_user { get; set; }
+
+
+         [UIHint("Info")]
+         [DisplayName("留言")]
+         public string reply { get; set; }
+         
+
+     }
+
+
+}

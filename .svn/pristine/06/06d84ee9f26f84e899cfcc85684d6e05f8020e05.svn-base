@@ -1,0 +1,31 @@
+﻿@using h365_web.Models;
+@model MvcPaging.IPagedList<h365_web.Models.health_part>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+        <!--widgetsource-->
+        <div id="mail">
+
+            @Html.Partial("template_select")
+
+            <form action="@(Url.Action(action, controller))" method="post">
+                <div style="text-align: right">
+                    <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                    <input type="submit" value="查詢" class="btn btn-primary" />
+                </div>
+            </form>
+
+
+        </div>
+        <!--#chat-->
+
+        @Html.Partial(action + "_ajax", Model)
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>

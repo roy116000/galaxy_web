@@ -1,0 +1,63 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.data_group>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    string[] freight_name = { "常溫運費", "冷藏運費", "冷凍運費", "活動區-商品組合購", "活動區-任選幾件購" };
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width15" />
+            <col />
+            <col class="width10" />
+            <col class="width5" />
+            <col class="width5" />
+            <col class="width12" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">溫層運費 </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().name) </th>
+                <th class="center">分類數量</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().inx) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible)</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {               
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.group_id" /></td>
+                    <td class="center">@Html.DisplayFor(modelItem => freight_name[Convert.ToInt32(item.change_user)])</td>
+                    <td>@Html.DisplayFor(modelItem => item.name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.counts)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td>
+                      @if (item.group_id!=426 && item.group_id !=427){
+                      @Html.ActionLink("編輯", action.Replace("List", "Edit"), new { id = item.group_id }, new { @class = "title" })<span>｜</span>
+                      }
+                      @Html.ActionLink("分類管理", action.Replace("List", "SubList").Replace("_ajax",""), new { gid = item.group_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+
+</div>
+<!--pagination-->

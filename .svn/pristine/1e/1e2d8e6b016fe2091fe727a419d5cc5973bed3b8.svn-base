@@ -1,0 +1,383 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class partner_maori
+    {
+        [Key]
+        public int maori_id { get; set; }
+
+        [DisplayName("倍率")]
+        public double netsourcer_num { get; set; }
+
+        [DisplayName("藥師毛利額")]
+        public int drugstore_num { get; set; }
+
+        [DisplayName("加盟業務毛利額")]
+        public int partner_sales_num { get; set; }
+
+        [DisplayName("加盟主毛利額")]
+        public int partner_member_num { get; set; }
+
+        [DisplayName("推廣業務毛利額")]
+        public int salesman_num { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用獨立配置")]
+        public bool visible { get; set; }
+
+        [DisplayName("第一周期_起")]
+        public int cycle1_start { get; set; }
+
+        [DisplayName("第一周期_末")]
+        public int cycle1_end { get; set; }
+
+        [DisplayName("第二周期_起")]
+        public int cycle2_start { get; set; }
+
+        [DisplayName("第二周期_末")]
+        public int cycle2_end { get; set; }
+
+        [DisplayName("加盟簽約金")]
+        public int contract_price { get; set; }
+
+        [DisplayName("合約期間")]
+        public int contract_date { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("商品編號")]
+        public int product_id { get; set; }
+
+
+    }
+
+    public class partner_money
+    {
+        [Key]
+        public int money_id { get; set; }
+
+        [DisplayName("獎金種類")]
+        public int money_group_id { get; set; }
+
+        [DisplayName("領取人分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("登入者ID")]
+        public int id { get; set; }
+
+        [DisplayName("提供者ID")]
+        public int source_admin_id { get; set; }
+
+        [DisplayName("訂單ID")]
+        public int order_id { get; set; }
+
+        [DisplayName("flag")]
+        public int flag { get; set; }
+
+        [DisplayName("金額")]
+        public double money { get; set; }
+
+        [DisplayName("金額詳情")]
+        public string info { get; set; }
+
+        [DisplayName("金額時間")]
+        public DateTime? money_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        //public virtual partner_money_group partner_money_group { get; set; }
+        //public virtual ICollection<partner_price> partner_price { get; set; }
+        [NotMapped]
+        [DisplayName("藥局編號")]
+        public int drug_id { get; set; }
+
+        [NotMapped]
+        [DisplayName("角色名稱")]
+        public string power_name { get; set; }
+
+        [NotMapped]
+        [DisplayName("名稱")]
+        public string name { get; set; }
+    }
+
+    public class partner_data
+    {
+        [Key]
+        public int partner_id { get; set; }
+
+        [DisplayName("公司名稱")]
+        public string name { get; set; }
+
+        [DisplayName("帳號(電子信箱)")]
+        public string mail { get; set; }
+
+        [DisplayName("負責人聯絡電話")]
+        public string phone { get; set; }
+
+        [DisplayName("密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("密碼加密MD5")]
+        public string pwd_md5 { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("郵遞區號")]
+        public int zip { get; set; }
+
+        [DisplayName("聯絡地址")]
+        public string address { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public int admin_id { get; set; }
+
+        [DisplayName("聯絡窗口")]
+        public string contact_name { get; set; }
+
+        [DisplayName("窗口電話")]
+        public string contact_tel { get; set; }
+
+        [DisplayName("窗口信箱")]
+        public string contact_mail { get; set; }
+
+        [UIHint("File")]
+        [DisplayName("營業登記證影本")]
+        public string file_name { get; set; }
+
+        [DisplayName("公司負責人")]
+        public string boss { get; set; }
+
+        [DisplayName("統一編號")]
+        public string inv_sn { get; set; }
+
+        [DisplayName("發票抬頭")]
+        public string inv_title { get; set; }
+
+        public virtual ICollection<partner_sales> partner_sales { get; set; }
+    }
+
+    public class partner_sales
+    {
+        [Key]
+        public int sales_id { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("職稱")]
+        public int group_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("所屬加盟管理商")]
+        public int partner_id { get; set; }
+
+        [DisplayName("主管ID")]
+        public int parent_id { get; set; }
+
+        [DisplayName("姓名")]
+        public string name { get; set; }
+
+        [DisplayName("帳號(電子信箱)")]
+        public string mail { get; set; }
+
+        [DisplayName("聯絡電話")]
+        public string phone { get; set; }
+
+        [DisplayName("密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("密碼加密MD5")]
+        public string pwd_md5 { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("郵遞區號")]
+        public int zip { get; set; }
+
+        [DisplayName("聯絡地址")]
+        public string address { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("系統ID")]
+        public int admin_id { get; set; }
+
+
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("身分類型")]
+        public int status_type { get; set; }
+
+        [NotMapped]
+        [UIHint("CheckBoxList")]
+        [DisplayName("業務群")]
+        public string[] responsible_xx { get; set; }
+
+        public virtual partner_data partner_data { get; set; }
+    }
+
+    public class partner_member
+    {
+
+        [Key]
+        public int member_id { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("加盟業務")]
+        public int sales_id { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("類型")]
+        public int group_id { get; set; }
+
+        [DisplayName("加盟主名稱")]
+        public string name { get; set; }
+
+        [DisplayName("公司負責人")]
+        public string boss { get; set; }
+
+        [DisplayName("統一編號/身份證字號")]
+        public string sn { get; set; }
+
+        [DisplayName("帳號(電子信箱)")]
+        public string mail { get; set; }
+
+        [DisplayName("連絡電話")]
+        public string phone { get; set; }
+
+        [DisplayName("密碼")]
+        public string pwd { get; set; }
+
+        [DisplayName("密碼MD5加密")]
+        public string pwd_md5 { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("公司登記/戶籍地址")]
+        public int zip { get; set; }
+
+        [DisplayName("")]
+        public string address { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("單據寄送地址")]
+        public int send_zip { get; set; }
+
+        [DisplayName("")]
+        public string send_address { get; set; }
+
+        [DisplayName("同上")]
+        public Boolean send_change { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        public int admin_id { get; set; }
+
+        [DisplayName("聯絡人")]
+        public string contact_name { get; set; }
+
+        [DisplayName("聯絡人電話")]
+        public string contact_tel { get; set; }
+
+        [DisplayName("聯絡信箱")]
+        public string contact_mail { get; set; }
+
+
+        [UIHint("File")]
+        [DisplayName("身分證明影本/公司登記營業證")]
+        public string file_name { get; set; }
+
+        [DisplayName("出生日期")]
+        public string birthday { get; set; }
+
+        [DisplayName("匯款帳戶")]
+        public string bank_no { get; set; }
+
+
+        [UIHint("File")]
+        [DisplayName("匯款帳戶影本")]
+        public string bank_file { get; set; }
+
+        [NotMapped]
+        [DisplayName("已綁定藥局")]
+        public string drug_name { get; set; }
+
+        [NotMapped]
+        [DisplayName("地址")]
+        public string drug_address { get; set; }
+
+        [NotMapped]
+        [DisplayName("電話")]
+        public string drug_tel { get; set; }
+
+    }
+    
+}

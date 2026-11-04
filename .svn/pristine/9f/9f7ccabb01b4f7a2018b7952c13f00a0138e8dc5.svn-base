@@ -1,0 +1,1143 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+    public class product_group2
+    {
+        [Key]
+        public int group_id { get; set; }
+
+        [DisplayName("分類標題")]
+        public string name { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分區標題")]
+        public int parent_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("溫層")]
+        public int freight_id { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("前台列表大產品填入產品ID")]
+        public string arrProduct_id { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("分類標籤")]
+        public string s_img { get; set; }
+
+
+        //public virtual ICollection<product_data> product_data { get; set; }
+        public ICollection<product_data2> product_data2 { get; set; }
+    }
+
+    public class product_data2
+    {
+
+        [Key]
+        [DisplayName("product_id")]
+        public int product_id { get; set; }
+
+        [UIHint("SelectList_chained")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("健保碼")]
+        //[Display(Prompt = "貨號如不填寫，將自動產生")]
+        public string item_no { get; set; }
+
+        [DisplayName("英文名")]
+        [Display(Prompt = "品名，必需填寫")]
+        public string item_name { get; set; }
+
+        [DisplayName("中文名")]
+        public string web_name { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("健保單價")]
+        public Double price { get; set; }
+
+        [DisplayName("售價")]
+        public int sprice { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("成分含量")]
+        [Display(Prompt = "最多50字，若超過50字，前台會自動縮成50字")]
+        public string info { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("詳細介紹")]
+        public string introduce { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("得來速不販售")]
+        public Boolean isdrive { get; set; }
+
+        [DisplayName("點閱率")]
+        public int hits { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("樣式/規格")]
+        public string style_name { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("配送方式")]
+        public int freight_id { get; set; }
+
+        [DisplayName("是否需運費")]
+        public Boolean freight_visible { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("購物狀況")]
+        public int order_style { get; set; }
+
+        [DisplayName("啟用日")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("獲利%數")]
+        public int payment { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("稅別")]
+        public int tax_flag { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("主打商品")]
+        public Boolean visible_index { get; set; }
+
+        [DisplayName("商品單位")]
+        public string piece { get; set; }
+
+        [DisplayName("供貨成本")]
+        public Double cost { get; set; }
+
+        [DisplayName("產地")]
+        public string place_origin { get; set; }
+
+        [DisplayName("仿單")]
+        public string barcode { get; set; }
+
+        [DisplayName("前台顯示標籤")]
+        [UIHint("CheckBoxList")]
+        public string iconmark { get; set; }
+
+        [DisplayName("限購數量")]
+        public int limit { get; set; }
+
+        [DisplayName("庫存量")]
+        public int stock { get; set; }
+
+        [DisplayName("設定啟用庫存量")]
+        public Boolean stock_visible { get; set; }
+
+        [DisplayName("製藥廠")]
+        public string drug_company { get; set; }
+
+
+        [NotMapped]
+        [UIHint("UploadImage2")]
+        [DisplayName("多圖圖片管理")]
+        public string uploadimage2 { get; set; }
+
+        public virtual product_group2 product_group2 { get; set; }
+        public virtual product_freight2 product_freight2 { get; set; }
+
+        public ICollection<product_image2> product_image2 { get; set; }
+    }
+
+    public class product_image2
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("product_id")]
+        public int product_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+        public virtual product_data2 product_group2 { get; set; }
+
+    }
+
+    public class product_freight2
+    {
+
+        [Key]
+        public int freight_id { get; set; }
+
+        [DisplayName("標題")]
+        public string name { get; set; }
+
+        [DisplayName("滿金額免運")]
+        public int total { get; set; }
+
+        [DisplayName("運費")]
+        public int price { get; set; }
+
+        [NotMapped]
+        [DisplayName("前台運費")]
+        public int freight { get; set; }
+
+        public virtual IEnumerator<product_data> product_data2 { get; set; }
+
+    }
+
+    public class history_data2
+    {
+        public int product_id { get; set; }
+        public string item_name { get; set; }
+        public string item_no { get; set; }
+        public int sprice { get; set; }
+        public string piece { get; set; }
+        public string img { get; set; }
+        public int freight_id { get; set; }
+        public DateTime create_datetime { get; set; }
+    }
+
+    public class product_price2
+    {
+        [Key]
+        [DisplayName("price_id")]
+        public int price_id { get; set; }
+
+        [DisplayName("活動名稱")]
+        public string group_name { get; set; }
+
+        [DisplayName("前台促銷用語")]
+        public string subject { get; set; }
+
+        [DisplayName("product_id")]
+        public int product_id { get; set; }
+
+        [DisplayName("產品名稱")]
+        public string product_name { get; set; }
+
+        [DisplayName("促銷價")]
+        public int price { get; set; }
+
+        [DisplayName("促銷固定價")]
+        public int fix_price { get; set; }
+
+        [DisplayName("活動產品數量")]
+        public int stock { get; set; }
+
+        [DisplayName("限購量")]
+        public int limit { get; set; }
+
+        [DisplayName("啟用日期")]
+        [UIHint("Datetime24")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("結束日期")]
+        [UIHint("Datetime24")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("是否倒數")]
+        public Boolean countback_visible { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("建立人員")]
+        public string create_user { get; set; }
+
+        [DisplayName("建立日期")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("修改人員")]
+        public string change_user { get; set; }
+
+        [DisplayName("修改日期")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("成本")]
+        public Double cost { get; set; }
+
+        [DisplayName("原始價格")]
+        public int org_price { get; set; }
+
+        [DisplayName("原始成本")]
+        public Double org_cost { get; set; }
+
+        [NotMapped]
+        [DisplayName("啟用時間")]
+        public string start_time { get; set; }
+
+        [NotMapped]
+        [DisplayName("結束時間")]
+        public string end_time { get; set; }
+
+        [NotMapped]
+        [DisplayName("啟用")]
+        public bool visible { get; set; }
+
+        [NotMapped]
+        [DisplayName("產品數量")]
+        public int count { get; set; }
+
+        [DisplayName("前台顯示標籤")]
+        [UIHint("CheckBoxList")]
+        public string iconmark { get; set; }
+
+    }
+
+    public class product_index_group2
+    {
+        [Key]
+        [DisplayName("index_id")]
+        public int index_id { get; set; }
+
+        [DisplayName("首頁名稱")]
+        public string name { get; set; }
+
+        [DisplayName("選擇分類的ID")]
+        [UIHint("info_Tags")]
+        public string arrGroup_id { get; set; }
+
+        [DisplayName("排序")]
+        public int inx { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+    }
+
+    public class product_group_act2
+    {
+        [Key]
+        [DisplayName("act_id")]
+        public int act_id { get; set; }
+
+        [DisplayName("group_id")]
+        public int group_id { get; set; }
+
+        [DisplayName("行銷用語")]
+        public string name { get; set; }
+
+        [DisplayName("未滿金額")]
+        public int total { get; set; }
+
+        [DisplayName("運費")]
+        public int freight { get; set; }
+
+        [UIHint("File")]
+        [DisplayName("上橫幅")]
+        public string s_img { get; set; }
+
+        [DisplayName("上橫幅超連結")]
+        public string url { get; set; }
+
+        [DisplayName("任選件數")]
+        public int num { get; set; }
+
+        [DisplayName("任選件數的價格")]
+        public int money { get; set; }
+
+        [DisplayName("單一商品限購量")]
+        public int max_buy { get; set; }
+
+        [DisplayName("起始日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("結束日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+    }
+
+    public class product_service2
+    {
+        [Key]
+        public int news_id { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("分類")]
+        public int group_id { get; set; }
+
+        [DisplayName("貨號")]
+        public string title { get; set; }
+
+        [DisplayName("品名")]
+        public string cont { get; set; }
+
+        [UIHint("Number")]
+        [DisplayName("限領數量")]
+        public int inx { get; set; }
+
+        [DisplayName("已點擊數量")]
+        public int hits { get; set; }
+
+        [DisplayName("啟用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? start_date { get; set; }
+
+        [DisplayName("停用日期")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? end_date { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("Html")]
+        [DisplayName("詳細介紹")]
+        public string cont2 { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage_custom")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage { get; set; }
+
+        [NotMapped]
+        [UIHint("UploadImage2")]
+        [DisplayName("單圖圖片管理")]
+        public string uploadimage2 { get; set; }
+
+    }
+
+    public class product_service_image2
+    {
+
+        [Key]
+        public int imgs_id { get; set; }
+
+        [DisplayName("news_id")]
+        public int news_id { get; set; }
+
+        [DisplayName("s_img")]
+        public string s_img { get; set; }
+
+        [DisplayName("b_img")]
+        public string b_img { get; set; }
+
+        [DisplayName("img_info")]
+        public string img_info { get; set; }
+
+        [DisplayName("img_inx")]
+        public int img_inx { get; set; }
+
+        [DisplayName("img_visible")]
+        public Boolean img_visible { get; set; }
+
+    }
+
+
+    public class order_data2
+    {
+        [Key]
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("訂單單號")]
+        public string order_sn { get; set; }
+
+        [DisplayName("訂單日期")]
+        public DateTime? order_datetime { get; set; }
+
+        [DisplayName("admin_id")]
+        public int admin_id { get; set; }
+
+        [DisplayName("member_id")]
+        public int member_id { get; set; }
+
+        [DisplayName("訂購人")]
+        public string send_name { get; set; }
+
+        [DisplayName("訂購人性別")]
+        public string send_sex { get; set; }
+
+        [DisplayName("訂購人電話")]
+        public string send_tel { get; set; }
+
+        [DisplayName("訂購人郵遞區號")]
+        public int send_zip { get; set; }
+
+        [DisplayName("訂購人城市")]
+        public string send_city { get; set; }
+
+        [DisplayName("訂購人鄉鎮")]
+        public string send_canton { get; set; }
+
+        [DisplayName("訂購人地址")]
+        public string send_address { get; set; }
+
+        [DisplayName("訂購人信箱")]
+        public string send_mail { get; set; }
+
+        [DisplayName("send_note")]
+        public string send_note { get; set; }
+
+        [DisplayName("送貨日期")]
+        public string send_time { get; set; }
+
+        [DisplayName("送貨時段")]
+        public string send_time2 { get; set; }
+
+        [DisplayName("付款方式")]
+        public int pay_id { get; set; }
+
+        [DisplayName("付款完成")]
+        public Boolean pay_visible { get; set; }
+
+        [DisplayName("付款備註")]
+        public string pay_note { get; set; }
+
+        [DisplayName("付款時間")]
+        public DateTime? pay_datetime { get; set; }
+
+        [DisplayName("虛擬帳號與信用卡後五碼")]
+        public string pay_approvecode { get; set; }
+
+        [DisplayName("運費")]
+        public int freight { get; set; }
+
+        [DisplayName("發票聯式")]
+        public string invoice { get; set; }
+
+        [DisplayName("統一編號")]
+        public string inv_sn { get; set; }
+
+        [DisplayName("發票抬頭")]
+        public string inv_title { get; set; }
+
+        [DisplayName("狀態")]
+        public int flag { get; set; }
+
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        [DisplayName("出貨時間")]
+        public DateTime? freight_datetime { get; set; }
+
+        [UIHint("SelectList")]
+        [DisplayName("物流名稱")]
+        public string freight_name { get; set; }
+
+         
+        [DisplayName("物流編號")]
+        public string freight_no { get; set; }
+
+        [DisplayName("申請退貨時間")]
+        public DateTime? back_datetime { get; set; }
+
+        [DisplayName("申請退貨備註")]
+        public string back_info { get; set; }
+
+        [DisplayName("退貨時間")]
+        public DateTime? backed_datetime { get; set; }
+
+        [DisplayName("退貨備註")]
+        public string backed_info { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("取消說明")]
+        public string visible_info { get; set; }
+
+        [DisplayName("訂單ＩＰ")]
+        public string ip { get; set; }
+
+        [DisplayName("訂單裝置")]
+        public string device { get; set; }
+
+        [DisplayName("運費內容")]
+        public string freight_flag_name { get; set; }
+
+
+        [DisplayName("發票號碼")]
+        public string invoice_no { get; set; }
+
+        [DisplayName("發票日期")]
+        public DateTime? invoice_datetime { get; set; }
+
+        [DisplayName("發票備註")]
+        public string invoice_note { get; set; }
+
+        [DisplayName("匯出日期")]
+        public DateTime? export_datetime { get; set; }
+
+        [DisplayName("匯出備註")]
+        public string export_info { get; set; }
+
+        [DisplayName("出貨日期")]
+        public DateTime? goods_datetime { get; set; }
+
+        [DisplayName("出貨備註")]
+        public string goods_info { get; set; }
+
+        [DisplayName("備註")]
+        public string info { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人")]
+        public string order_name { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人電話")]
+        public string order_phone { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人地址")]
+        public string order_address { get; set; }
+
+        //[NotMapped]
+        [DisplayName("總金額")]
+        public int total { get; set; }
+
+        [DisplayName("訂購店別")]
+        public string sn { get; set; }
+
+        //
+        [DisplayName("運費金額")]
+        public int freight_money { get; set; }
+
+        public int bills_id { get; set; }
+
+        public int drugstor_id { get; set; }
+
+        public int buy_flag { get; set; }
+
+         [DisplayName("折讓金額")]
+        public int discount { get; set; }
+
+        public string back_money_type{ get;set;}
+
+        public string back_type { get; set; }
+
+        [DisplayName("總成本")]
+        public int cost_total { get; set; }
+
+        public string back_flag { get; set; }
+
+        [DisplayName("折扣")]
+        public int bonus { get; set; }
+        
+
+        public virtual ICollection<order_sub2> order_sub2 { get; set; }
+
+        //public virtual member_data member_data { get; set; }
+
+    }
+
+    public class order_list2
+    {
+        [Key]
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("訂單單號")]
+        public string order_sn { get; set; }
+
+        [DisplayName("訂單日期")]
+        public DateTime? order_datetime { get; set; }
+
+        [DisplayName("admin_id")]
+        public int admin_id { get; set; }
+
+        [DisplayName("member_id")]
+        public int member_id { get; set; }
+
+        [DisplayName("訂購人")]
+        public string send_name { get; set; }
+
+        [DisplayName("訂購人性別")]
+        public string send_sex { get; set; }
+
+        [DisplayName("訂購人電話")]
+        public string send_tel { get; set; }
+
+        [DisplayName("訂購人郵遞區號")]
+        public int send_zip { get; set; }
+
+        [DisplayName("訂購人城市")]
+        public string send_city { get; set; }
+
+        [DisplayName("訂購人鄉鎮")]
+        public string send_canton { get; set; }
+
+        [DisplayName("訂購人地址")]
+        public string send_address { get; set; }
+
+        [DisplayName("訂購人信箱")]
+        public string send_mail { get; set; }
+
+        [DisplayName("send_note")]
+        public string send_note { get; set; }
+
+        [DisplayName("送貨日期")]
+        public string send_time { get; set; }
+
+        [DisplayName("送貨時段")]
+        public string send_time2 { get; set; }
+
+        [DisplayName("付款方式")]
+        public int pay_id { get; set; }
+
+        [DisplayName("付款完成")]
+        public Boolean pay_visible { get; set; }
+
+        [DisplayName("付款備註")]
+        public string pay_note { get; set; }
+
+        [DisplayName("付款時間")]
+        public DateTime? pay_datetime { get; set; }
+
+        [DisplayName("虛擬帳號與信用卡後五碼")]
+        public string pay_approvecode { get; set; }
+
+        [DisplayName("運費")]
+        public int freight { get; set; }
+
+        [DisplayName("發票聯式")]
+        public string invoice { get; set; }
+
+        [DisplayName("統一編號")]
+        public string inv_sn { get; set; }
+
+        [DisplayName("發票抬頭")]
+        public string inv_title { get; set; }
+
+        [DisplayName("狀態")]
+        public int flag { get; set; }
+
+        [DisplayName("出貨時間")]
+        public DateTime? freight_datetime { get; set; }
+
+        [DisplayName("物流名稱")]
+        public string freight_name { get; set; }
+
+        [DisplayName("物流編號")]
+        public string freight_no { get; set; }
+
+        [DisplayName("申請退貨時間")]
+        public DateTime? back_datetime { get; set; }
+
+        [DisplayName("申請退貨備註")]
+        public string back_info { get; set; }
+
+        [DisplayName("退貨時間")]
+        public DateTime? backed_datetime { get; set; }
+
+        [DisplayName("退貨備註")]
+        public string backed_info { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean visible { get; set; }
+
+        [DisplayName("取消說明")]
+        public string visible_info { get; set; }
+
+        [DisplayName("訂單ＩＰ")]
+        public string ip { get; set; }
+
+        [DisplayName("訂單裝置")]
+        public string device { get; set; }
+
+        [DisplayName("運費內容")]
+        public string freight_flag_name { get; set; }
+
+
+        [DisplayName("發票號碼")]
+        public string invoice_no { get; set; }
+
+        [DisplayName("發票日期")]
+        public DateTime? invoice_datetime { get; set; }
+
+        [DisplayName("發票備註")]
+        public string invoice_note { get; set; }
+
+        [DisplayName("匯出日期")]
+        public DateTime? export_datetime { get; set; }
+
+        [DisplayName("匯出備註")]
+        public string export_info { get; set; }
+
+        [DisplayName("出貨日期")]
+        public DateTime? goods_datetime { get; set; }
+
+        [DisplayName("出貨備註")]
+        public string goods_info { get; set; }
+
+        [DisplayName("備註")]
+        public string info { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人")]
+        public string order_name { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人電話")]
+        public string order_phone { get; set; }
+
+        [NotMapped]
+        [DisplayName("訂購人地址")]
+        public string order_address { get; set; }
+
+        [NotMapped]
+        [DisplayName("總金額")]
+        public int total { get; set; }
+
+        [DisplayName("溫層")]
+        public int freight_id { get; set; }
+
+        [DisplayName("訂購店別")]
+        public string sn { get; set; }
+
+        //[DisplayName("訂購店別")]
+        //public string sn { get; set; }
+
+        public virtual ICollection<order_sub2> order_sub2 { get; set; }
+
+        public virtual member_data member_data2 { get; set; }
+
+    }
+
+    public class order_sub2
+    {
+        [Key]
+        [DisplayName("sub_id")]
+        public int sub_id { get; set; }
+
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("product_id")]
+        public int product_id { get; set; }
+
+        [DisplayName("產品名稱")]
+        public string item_name { get; set; }
+
+        [DisplayName("產品編號")]
+        public string item_no { get; set; }
+
+        [DisplayName("樣式規格")]
+        public string style_name { get; set; }
+
+        [DisplayName("金額")]
+        public int price { get; set; }
+
+        [DisplayName("數量")]
+        public int num { get; set; }
+
+        [DisplayName("成本")]
+        public int payment { get; set; }
+
+        [DisplayName("運送方式")]
+        public int freight_id { get; set; }
+
+        [DisplayName("成本")]
+        public double cost { get; set; }
+
+        [NotMapped]
+        [DisplayName("是否須運費")]
+        public bool freight_visible { get; set; }
+
+        [NotMapped]
+        [DisplayName("限量")]
+        public int limit { get; set; }
+
+        [NotMapped]
+        [DisplayName("小圖")]
+        public string s_img { get; set; }
+
+        public virtual order_data2 order_data2 { get; set; }
+
+        public virtual product_data2 product_data2 { get; set; }
+
+    }
+
+    public class order_pay2
+    {
+        [Key]
+        [DisplayName("pay_id")]
+        public int pay_id { get; set; }
+
+        [DisplayName("付款方式")]
+        public string pay_name { get; set; }
+
+        [DisplayName("啟用")]
+        public Boolean pay_visible { get; set; }
+
+        [DisplayName("說明")]
+        public string info { get; set; }
+    }
+
+    public class order_goods2
+    {
+        [Key]
+        [DisplayName("goods_id")]
+        public int goods_id { get; set; }
+
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("sub_id")]
+        public int sub_id { get; set; }
+
+        [DisplayName("name")]
+        public string name { get; set; }
+
+        [DisplayName("sn")]
+        public string sn { get; set; }
+
+        [DisplayName("num")]
+        public int num { get; set; }
+
+        [DisplayName("goods_datetime")]
+        public DateTime? goods_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+    }
+
+    public class order_charge2
+    {
+        [Key]
+        [DisplayName("charge_id")]
+        public int charge_id { get; set; }
+
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("freight_id")]
+        public int freight_id { get; set; }
+
+        [DisplayName("charge_name")]
+        public string charge_name { get; set; }
+
+        [DisplayName("item_sn")]
+        public string item_sn { get; set; }
+
+        [DisplayName("num")]
+        public int num { get; set; }
+
+        [DisplayName("total")]
+        public double total { get; set; }
+
+        [DisplayName("charge_datetime")]
+        public DateTime? charge_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+    }
+
+    public class order_druginvoice
+    {
+        [Key]
+        [DisplayName("invoice_id")]
+        public int invoice_id { get; set; }
+
+        [DisplayName("order_id")]
+        public int order_id { get; set; }
+
+        [DisplayName("sub_id")]
+        public int sub_id { get; set; }
+
+        [DisplayName("tax")]
+        public string tax { get; set; }
+
+        [DisplayName("invoice")]
+        public string invoice { get; set; }
+
+        [DisplayName("invoice_datetime")]
+        public DateTime? invoice_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+    }
+
+    public class order_report2
+    {
+        [Key]
+        [DisplayName("貨號")]
+        public string item_no { get; set; }
+
+        [DisplayName("品名")]
+        public string item_name { get; set; }
+
+        [DisplayName("數量")]
+        public int num { get; set; }
+
+        [DisplayName("營業額")]
+        public int price { get; set; }
+
+        [DisplayName("成本")]
+        public Double cost { get; set; }
+
+        [DisplayName("溫層")]
+        public int freight_id { get; set; }
+
+    }
+
+    public class order_bills2
+    {
+        [Key]
+        public int bills_id { get; set; }
+
+        [DisplayName("廠商")]
+        public int company_id { get; set; }
+
+        [UIHint("Info_Tags")]
+        [DisplayName("發票號碼")]
+        public string invoice_no { get; set; }
+
+        [DisplayName("發票日期")]
+        public DateTime? invoice_datetime { get; set; }
+
+        [DisplayName("create_user")]
+        public string create_user { get; set; }
+
+        [DisplayName("create_datetime")]
+        public DateTime? create_datetime { get; set; }
+
+        [DisplayName("change_user")]
+        public string change_user { get; set; }
+
+        [DisplayName("change_datetime")]
+        public DateTime? change_datetime { get; set; }
+
+        [UIHint("RadioBoxList")]
+        [DisplayName("請款狀態")]
+        public int flag { get; set; }
+
+        [DisplayName("審核人")]
+        public string check_user { get; set; }
+
+        [DisplayName("請款時間")]
+        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:yyyy/MM/dd}")]
+        public DateTime? bills_datetime { get; set; }
+
+        [UIHint("Info")]
+        [DisplayName("備註")]
+        [Display(Prompt = "此欄位僅能填入文字")]
+        public string info { get; set; }
+
+        [DisplayName("請款年月")]
+        public int yymm { get; set; }
+
+        //0月結 1半月結上 2半月結下
+        [DisplayName("請款方式")]
+        public int bills_flag { get; set; }
+
+        [DisplayName("出貨起始日")]
+        public DateTime? sdate { get; set; }
+
+        [DisplayName("出貨最後日")]
+        public DateTime? edate { get; set; }
+
+        [DisplayName("請款總額(cost_total)")]
+        public double total { get; set; }
+
+    }
+
+
+}

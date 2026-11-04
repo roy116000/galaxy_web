@@ -1,0 +1,8 @@
+﻿@font-face {
+    font-family: XXX;
+    src: url(/Areas/newweb/Content/fonts/w6.ttf);
+}
+
+span {
+    font-family: XXX;
+}

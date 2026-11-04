@@ -1,0 +1,5 @@
+﻿@model h365_web.Models.product_data
+
+@*@Html.EditorFor(model => model.uploadimage)*@
+
+@Html.EditorFor(m => m.img)

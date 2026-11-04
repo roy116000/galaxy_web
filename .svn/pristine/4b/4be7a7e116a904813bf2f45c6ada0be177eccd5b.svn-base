@@ -1,0 +1,164 @@
+﻿@using h365_web.Models;
+@model MvcPaging.IPagedList<h365_web.Models.data_list>
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    //List<h365_web.Models.data_group2> gData = (List<h365_web.Models.data_group2>)ViewData["product_group2"];
+
+    List<h365_web.Models.product_group2> gData2 = (List<h365_web.Models.product_group2>)ViewData["data3"];
+    List<h365_web.Models.product_group2> gData3 = (List<h365_web.Models.product_group2>)ViewData["data33"];
+
+    List<h365_web.Models.product_data2> pd = (List<h365_web.Models.product_data2>)ViewData["data4"];
+
+    string gid = Request["gid"];
+
+    List<h365_web.Models.product_price2> product_price = (List<h365_web.Models.product_price2>)ViewData["product_price"];
+    
+}
+<style>.cursour {cursor:pointer;}</style>
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        if ($("input[name='block_id']:checked").length == 0) { alert('請至少選擇一項'); return false; }
+        var name = '選擇商品加入活動';
+        switch (flag) { case 1: name = "啟用"; break; case 2: name = "停用"; break; case 3: name = "首頁顯示"; break; case 4: name = "首頁停用"; break; case 0: name = "刪除"; break; }
+        if (confirm('確定要' + name + '？')) {
+            var arrVal = new Array();
+            $("input[name='block_id']:checked").each(function (i) {
+                arrVal[i] = this.value;
+            });
+        }
+        $('#cb_flag').val(flag);
+        $('#cb_id').val(arrVal.toString());
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="cb_id" name="cb_id" value="" />
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+         <ul class="nav nav-pills">
+            <li @NW.echoBool(ViewBag.pstatus == null, "class=active", "")>@Html.ActionLink("全部", action, new {gid = ViewBag.gid })</li>
+            <li @(ViewBag.pstatus ==1 ? "class=active" : "")><a href="@Url.Action(action, new { @pstatus = 1 ,gid = ViewBag.gid })">上架<br /></a></li>
+            <li @(ViewBag.pstatus ==2 ? "class=active" : "")><a href="@Url.Action(action, new { @pstatus = 2 ,gid = ViewBag.gid})">下架<br /></a></li>            
+           
+        </ul>
+
+
+        <div class="row-fluid">
+            <div class="span2" style="padding-top: 10px;">
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="@NW.echoBool(String.IsNullOrEmpty(gid), "active", "")"><a href="@Url.Action("List", new {@pstatus = ViewBag.pstatus })">全部商品</a></li>
+
+                    @foreach (var item in gData2)
+                    {
+                        <li><a><span class="icon-chevron-right"></span>@(item.name)</a></li>
+                        foreach (var item2 in gData3.Where(m => m.parent_id == item.group_id).ToList())
+                        {
+                            <li  class="@NW.echoBool(item2.group_id.ToString() == gid, "active", "")">
+                            <a href="@Url.Action(action, new { @pstatus = ViewBag.pstatus ,gid = item2.group_id})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@(item2.name)(@pd.Where(m=>m.group_id==item2.group_id).Count())</a></li>
+                        }
+                        
+                    }
+
+
+                   @* @foreach (var item in gData)
+                    {
+                        <li><a><span class="icon-chevron-right"></span>@(item.name)</a></li>
+                        if (item.data_group != null)
+                        {
+                            foreach (var subitem in item.data_group)
+                            { 
+                        <li  class="@NW.echoBool(subitem.group_id.ToString() == gid, "active", "")">
+                            <a href="@Url.Action(action, new { @pstatus = ViewBag.pstatus ,gid = subitem.group_id})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@(subitem.name)(@subitem.counts)</a></li>
+                            }
+                        }
+                    }*@
+                </ul>
+            </div>
+            <div class="span10">
+                <!--widgetsource-->
+                <div id="mail">
+                    <div class="msghead">
+                        @using (Html.BeginRouteForm("", FormMethod.Get))
+                        {
+                            <ul class="msghead_menu">
+                                <li>
+                                    <a href="@Url.Action(action.Replace("List", "Add"), controller, new { id = 0 })" class="btn"><span class="icon-pencil"></span>新增</a>
+                                    <div class="btn-group">
+                                        <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                                        <ul class="dropdown-menu">
+                                            <li><a onclick="cbHandel(1);" href="#"><span class="icon-ok-sign"></span>啟用</a></li>
+                                            <li><a onclick="cbHandel(2);" href="#"><span class="icon-ban-circle"></span>停用</a></li>
+                                            <li class="divider"></li>
+                                            <li><a onclick="cbHandel(3);" href="#"><span class="icon-ok-sign"></span>首頁顯示</a></li>
+                                            <li><a onclick="cbHandel(4);" href="#"><span class="icon-ban-circle"></span>首頁停用</a></li>
+                                            @if (product_price.Count > 0) {
+                                            <li class="divider"></li>
+                                              foreach (var item in product_price) {
+                                            <li><a onclick="cbHandel(@(999+item.price_id));" href="#"><span class="icon-ok-sign"></span>@(item.group_name)</a></li>
+                                              }
+                                            }
+                                            <li class="divider"></li>
+                                            <li><a onclick="cbHandel(0);" href="#"><span class="iconsweets-trashcan"></span>刪除</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="marginleft15 filesearch">
+                                    <input type="text" id="kw" name="kw" class="filekeyword" placeholder="請輸入品名或貨號" value="@ViewBag.kw" />
+                                    <input type="hidden" id="gid" name="gid" value="@ViewBag.gid" />
+                                </li>
+                                <li class="right newfilebtn">
+                                    <input type="submit" value="查詢" class="btn btn-primary" /></li>
+                            </ul>
+                        }
+                        <span class="clearall"></span>
+                    </div>
+                    <!--msghead-->
+
+                    <br />
+
+
+                </div>
+                <!--#chat-->
+
+                @Html.Partial(action + "_ajax", Model)
+                <!--list-->
+
+
+            </div>
+
+        </div>
+
+    </div>
+    <!--contentinner-->
+</div>
+<script type="text/javascript">
+  function combo(id) {
+    var name = $('#pp'+id).html();
+    var value = prompt('請輸入【' + name + '】單品組合入數，此功能會產出全新組合商品', '3');
+    if (value != null && value != "") {
+      $('#combo_id').val(id); $('#combo_num').val(value); $('#frmCombo').submit();
+    }
+  }
+  function copy(id) {
+    var name = $('#pp'+id).html();
+    if (confirm('確定要複製【'+name+'】商品嗎？')) {
+      $('#combo_id').val(id); $('#combo_num').val("0"); $('#frmCombo').submit();
+    }
+  }
+</script>
+@using (Html.BeginForm("ComboSave", controller, FormMethod.Post, new { @id = "frmCombo" }))
+{
+    <input type="hidden" id="combo_id" name="combo_id" value="0" />
+    <input type="hidden" id="combo_num" name="combo_num" value="0" />
+}

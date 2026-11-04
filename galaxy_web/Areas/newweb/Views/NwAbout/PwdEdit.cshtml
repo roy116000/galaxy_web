@@ -1,0 +1,56 @@
+﻿@model galaxy_web.Models.sys_admin_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        @*        <div class="pagetitle animate3 fadeInUp">
+            <h1 style="font-weight: bold">修改密碼</h1>
+            <span></span>
+        </div>*@
+
+        <h4 class="widgettitle">修改密碼</h4>
+
+        <form id="form1" action="@(Url.Action(action + "Save", controller))" method="post" class="stdform">
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => m.admin_id)
+
+            <div class="control-group">
+                <label for="create_user" class="control-label">當前密碼</label>
+                <div style="padding: 5px 5px;" class="field">
+                    @(Model.pwd) &nbsp;&nbsp;
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="pwd">密碼</label>
+                <div class="controls">
+                    <input class="span2" id="pwdx" maxlength="50" name="pwdx" type="password" placeholder="" required="required" value="">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="pwd">確認密碼</label>
+                <div class="controls">
+                    <input class="span2" id="pwdy" maxlength="50" name="pwdy" type="password" placeholder="" required="required" value="">
+                    <span class="help-inline"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    @*<button type="button" onclick="location.href = '@(Request.RawUrl)'" class="btn">回列表</button>*@
+                    @*<button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>*@
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>

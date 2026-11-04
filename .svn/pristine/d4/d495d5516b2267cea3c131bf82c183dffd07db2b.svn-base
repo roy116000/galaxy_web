@@ -1,0 +1,397 @@
+﻿@using MvcPaging;
+
+@model h365_web.Models.medicines_main
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+
+    List<string> pharmacist = (List<string>)ViewData["pharmacist"];
+    List<string> datetime = (List<string>)ViewData["datetime"];
+    List<int> num = (List<int>)ViewData["num"];
+
+            //foreach (string item in pharmacist)
+            //{
+            //    string pharmacist_s = item;
+            //}
+    
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.main_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">審核資料 <span class="pull-right"></span></h4>
+
+                @*中文名稱*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.name)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.name
+                    </div>
+                </div>
+
+                @*英文名稱*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.name_en)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.name_en
+                    </div>
+                </div>
+
+                @*許可證字號*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.atc_code)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.atc_code
+                    </div>
+                </div>
+
+                @*sn*@
+                <div class="control-group">
+                    <label class="control-label">@Html.DisplayNameFor(model => model.sn)</label>
+                    <div class="field" style="padding: 5px 5px;">
+                        @Model.sn
+                    </div>
+                </div>
+
+                <div class="abgne_tab">
+                    <ul class="tabs">
+                        <li id="num0" onclick="onlic('0')" style="display: none"><a href="#tab1">形狀</a></li>
+                        <li id="num1" onclick="onlic('1')" style="display: none"><a href="#tab2">顏色</a></li>
+                        @*<li><a href="#tab3">圖片</a></li>*@
+                        <li id="num2" onclick="onlic('2')" style="display: none"><a href="#tab4">適應症(藥師)</a></li>
+                        <li id="num3" onclick="onlic('3')" style="display: none"><a href="#tab5">適應症(民眾)</a></li>
+                        <li id="num4" onclick="onlic('4')" style="display: none"><a href="#tab6">主要副作用</a></li>
+                        <li id="num5" onclick="onlic('5')" style="display: none"><a href="#tab7">應注意事項</a></li>
+                        <li id="num6" onclick="onlic('6')" style="display: none"><a href="#tab8">參考文獻</a></li>
+                    </ul>
+
+                    <div>
+
+                        @*形狀*@
+                        <div id="tab0" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前形狀</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.shape)
+                                </div>
+
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[0])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[0])
+                                </div>
+                            </div>
+
+
+                            @Html.EditorFor(model => model.shape_id)
+
+
+                        </div>
+
+                        @*顏色*@
+                        <div id="tab1" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前顏色</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.color)
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[1])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[1])
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.color_id)
+                        </div>
+
+                        @*藥師適應症*@
+                        <div id="tab2" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前適應症(藥師)</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.pharmacists)
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[2])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[2])
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.pharmacist_id)
+
+                        </div>
+
+                        @*民眾適應症*@
+                        <div id="tab3" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前適應症(民眾)</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.people)
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[3])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[3])
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.people_id)
+
+                        </div>
+
+                        @*副作用*@
+                        <div id="tab4" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前副作用</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.side_effect)
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[4])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[4])
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.effect_id)
+
+                        </div>
+
+                        @*注意事項*@
+                        <div id="tab5" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">目前注意事項</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.notes)
+                                    @*@(ViewBag.notes)*@
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">目前責任藥師</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(pharmacist[5])
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">審核通過時間</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(datetime[5])
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(model => model.notes_id)
+
+                        </div>
+
+                        @*參考文獻*@
+                        <div id="tab6" class="tab_content" style="display: none;">
+                            <div class="control-group">
+                                <label class="control-label">形狀</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.shape)
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.shape_liter)
+                                </div>
+                                <img src="/images/----.png" style="width: 100%" />
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">顏色</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.color)
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.color_liter)
+                                </div>
+                                <img src="/images/----.png" style="width: 100%" />
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">適應症(藥師)</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.pharmacists)
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.pharmacist_liter)
+                                </div>
+                                <img src="/images/----.png" style="width: 100%" />
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">適應症(民眾)</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.people)
+
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.people_liter)
+                                </div>
+                                <img src="/images/----.png" style="width: 100%" />
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">副作用</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.side_effect)
+
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.effect_liter)
+                                </div>
+                                <img src="/images/----.png" style="width: 100%" />
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">注意事項</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.notes)
+                                </div>
+                                <label class="control-label">參考文獻</label>
+                                <div class="field" style="padding: 5px 5px;">
+                                    @(ViewBag.notes_liter)
+                                </div>                              
+                            </div>
+
+
+                        </div>
+
+                        @for (int a = 0; a < num.Count(); a++)
+                        {
+                            <input class="num-@a" value="@num[a]" style="display: none;"/>
+                        }
+
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">審核完成</button>
+                        <button type="reset" class="btn">重新審核</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@*書籤-顯示消失用*@
+<script>
+    $(function () {
+
+        var first_num = '';
+        for (a = 0; a < 7; a++) {
+            var num = $('.num-' + a).val();
+            if (num != 1) {
+                $('#num' + a).show();
+                if (first_num == '') {
+                    first_num = a.toString();
+                    $('#tab' + first_num).show();
+                }
+            }
+        }
+    })
+
+</script>
+
+@*書籤-點哪個亮哪個*@
+<script>
+    function onlic(o) {
+
+        var a = "";
+
+        if (a = o) {
+            for (b = 0; b <= 6; b++) {
+
+                $('#tab' + b).hide();
+            }
+            //$('#active' + o).attr('class', 'active click_ig');
+            $('#tab' + o).show();
+        }
+    }
+</script>
+
+
+@*分隔書籤用*@
+@*<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>*@

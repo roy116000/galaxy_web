@@ -1,0 +1,15 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    int sD = DateTime.Today.AddYears(-5).Year;
+    int[] Year = Enumerable.Range(sD, 6).OrderByDescending(m => m).ToArray(); //年分 抓五年
+}
+
+
+@Html.Partial("template_total_all", Model)
+
+
+
+

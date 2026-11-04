@@ -1,0 +1,57 @@
+﻿@model galaxy_web.Models.news_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+
+        <form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => m.news_id)
+
+            <h4 class="widgettitle">公告</h4>
+
+            @Html.EditorFor(m => m.group_id)
+
+            @Html.EditorFor(m => m.title)
+
+            @Html.EditorFor(m => m.info)
+
+            @Html.EditorFor(m => m.cont)
+
+            @Html.EditorFor(m => m.start_date)
+
+            @Html.EditorFor(m => m.end_date)
+
+            @Html.EditorFor(m => m.hits)
+
+            @Html.EditorFor(m => m.inx)
+
+            @Html.EditorFor(m => m.visible)
+
+
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    @*<button type="button" onclick="location.href = '@(Request.RawUrl)'" class="btn">回列表</button>*@
+                    @*<button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>*@
+                </div>
+            </div>
+
+        </form>
+
+
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#group_id, #title').attr('required', true);
+    })
+</script>

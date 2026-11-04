@@ -1,0 +1,116 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.product_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var aData = NW.admin(User.Identity.Name);
+
+    var gD = (List<h365_web.Models.product_group>)ViewData["gD"];
+    var cData = (List<h365_web.Models.company_data>)ViewData["cData"];
+    
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width8" />
+            <col class="width12" />
+
+            <col class="width6" />
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width8" />
+            @*<col class="width8" />*@
+            <col class="width10" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().post_datetime))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().group_id))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().item_no))</th>
+                <th>@(Html.DisplayNameFor(m => m.FirstOrDefault().item_name))</th>
+
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().sprice))</th>
+                <th class="center">成本</th>
+                <th class="center">毛利額</th>
+                @*<th class="center">廠商</th>*@
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+
+                var g = gD.Where(m => ("," + m.group_id + ",").Contains("," + item.group_ids + ",")).Select(m => m.name).ToArray();
+                string g_name = string.Join(",", g);
+
+                var c = cData.Where(m => m.company_id == item.company_id).FirstOrDefault();
+                string c_name = c != null ? c.name : "查無廠商";
+                    
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.product_id)" /></td>
+                    <td class="center" title="@(item.post_datetime)">@(NW.getDate(item.post_datetime))</td>
+                    <td>@(g_name)</td>
+                    <td class="center" title="@(c_name)">@Html.DisplayFor(m => item.item_no)</td>
+                    <td title="@(item.web_name)" >@Html.DisplayFor(m => item.item_name)</td>
+
+                    <td class="center">@Html.DisplayFor(m => item.sprice)</td>
+                    <td class="center">@Html.DisplayFor(m => item.cost)</td>
+                    <td class="center">@(((item.sprice - item.cost) * 100 / item.sprice).ToString("N2")) %</td>
+                    @*<td class="center">@(c_name)</td>*@
+
+                    <td class="center">
+                        @Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.product_id }, new { @class = "title", target = "_blank" })
+
+                        @if (item.status_flag == 3 && aData.power_id <= 2 && aData.power_id != 6)
+                        {
+                            @:&nbsp;
+                            <span class="btn-group cursour">
+                                <span class="label label-info dropdown-toggle" data-toggle="dropdown">設定 <span class="iconfa-caret-down"></span></span>
+                                <ul class="dropdown-menu" style="left: auto; right: 0;">
+                                    <li><a onclick="copy(@(item.product_id));" class="cursour">複製商品</a></li>
+                                    @*<li class="divider"></li>
+                                  <li><a onclick="combo(@(item.data_id));" class="cursour">新增單品組合</a></li>*@
+                                </ul>
+                            </span>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+            .AlwaysAddFirstPageNumber().AddRouteValue("flag", ViewBag.flag)
+            )      
+
+    </div>
+
+</div>
+
+<script>
+    function copy(o)
+    {
+        $.post('@Url.Action("Copy", controller)', { pid: o }, function (result)
+        {
+            window.location.reload(true); //強制重整
+
+        });
+
+
+        //alert(o);
+    }
+</script>

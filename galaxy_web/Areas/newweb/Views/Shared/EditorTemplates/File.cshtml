@@ -1,0 +1,59 @@
+﻿@using System.Text.RegularExpressions;
+@model string
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("type", "hidden");
+}
+
+<div class="control-group">
+    @Html.Label("", htmlAttributes)
+    <div class="controls">
+        <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="input-append">
+                <div class="uneditable-input span3">
+                    <i class="icon-file fileupload-exists"></i>
+                    <span class="fileupload-preview"></span>
+                </div>
+                <span class="btn btn-file">
+                    <span class="fileupload-new">Select file</span>
+                    <span class="fileupload-exists">Change</span>
+                    <input type="file" id="@ViewData.TemplateInfo.HtmlFieldPrefix" name="@ViewData.TemplateInfo.HtmlFieldPrefix" />
+                </span>
+                <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@if (Model != "" && Model != null)
+{
+    string path = Path.GetExtension(Model);
+
+    if (Regex.IsMatch(path, "^[.](jpg|png|jpeg|gif|bmp)$", RegexOptions.IgnoreCase))
+    { 
+    <div class="control-group">
+        <label class="control-label">預覽圖</label>
+        <div class="editor-field">
+            <a href="@Url.Content("~/Content/images/" + ViewContext.RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower() + "/" + Model)" target="_blank">
+                <img src="@Url.Content("~/Content/images/" + ViewContext.RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower() + "/" + Model)" width="300" />
+            </a>
+        </div>
+    </div>
+    }
+    else
+    {
+    <div class="control-group">
+        <label class="control-label">檔案</label>
+        <div class="editor-field" style="padding:5px 5px;">
+            <a href="@Url.Content("~/Content/images/" + ViewContext.RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower() + "/" + Model)" target="_blank">
+                @Model
+            </a>
+        </div>
+    </div>
+    }
+}

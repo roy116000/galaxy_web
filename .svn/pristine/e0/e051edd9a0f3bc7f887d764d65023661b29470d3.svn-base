@@ -1,0 +1,60 @@
+﻿@model h365_web.Models.tag_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            
+        
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                <input id="med_id" name="med_id" value="@id" style="display:none" />
+
+                @Html.EditorFor(model => model.tag_name)
+
+
+                @Html.EditorFor(model => model.inx)
+
+
+                @Html.EditorFor(model => model.visible)
+
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+
+                tag_name: "required"
+               
+            },
+            messages: {
+
+                tag_name: "關聯名稱，必需填寫！"
+               
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+
+    })
+</script>

@@ -1,0 +1,107 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.order_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+
+
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width5" />
+            <col class="width10" />
+            <col class="width10" />
+            <col />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">單號 </th>
+                <th class="center">訂購方</th>
+                <th class="center">收件方</th>
+                <th class="center">品名</th>
+                <th class="center">訂購時間</th>
+                <th class="center">出貨時間</th>
+                <th class="center">交貨時間</th>
+                <th class="center">狀態</th>
+                <th class="center">金額</th>
+                <th class="center">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+
+                item.total = item.total - item.bonus - item.solt_price;
+                            
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.order_id" /></td>
+                    <td class="center"><span class="label label-info" title="前台單號：@(item.order_sn), 所屬廠商：@(item.Company_name)">@Html.DisplayFor(modelItem => item.order_id)</span></td>
+                    <td title="@(item.device)" class="center">@Html.DisplayFor(modelItem => item.order_name)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.send_name)</td>
+                    <td title="@( "～" + item.pro_item_name)">@NW.word(item.pro_item_name, 18, "...")</td>
+                    <td class="center">@NW.getDate(item.order_datetime)</td>
+                    <td class="center">@NW.getDate(item.goods_datetime)</td>
+                    <td class="center">@NW.getDate(item.finish_datetime)</td>
+                    <td class="center"><span class="label label-@(item.flag > 0 ? "success" + item.flag : "default")" title="@(item.order_flag == 0 ? "店取" : "寄送")">@((item.finish_datetime != null && item.goods_datetime == null) ? NW.Name_flag[1] : NW.Name_flag[item.flag])</span></td>
+                    <td class="right" title="@("紅利：" + item.bonus + ", 健康紅利：" + item.solt_price)" style="@((item.solt_price != 0 || item.bonus != 0) ? "color:#4169E1" : "")" >$ @(item.total.ToString("N0"))</td>
+                    <td class="center">
+                        @if (item.finish_datetime != null && ((item.goods_datetime != null ? item.goods_datetime : DateTime.Now) >= DateTime.Today) && NW.admin(User.Identity.Name).power_id <= 2)
+                        { 
+                            @Html.ActionLink("退貨 | ", "BackEdit", new { id = item.order_id }, new { @class = "title" })
+                        }
+                        @Html.ActionLink("編輯", "Edit", new { id = item.order_id }, new { @class = "title" })
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "")).DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            
+            .AlwaysAddFirstPageNumber()
+            .AddRouteValue("sD", ViewBag.sD)
+            .AddRouteValue("eD", ViewBag.eD)
+            .AddRouteValue("flag", ViewBag.flag)
+            .AddRouteValue("pay_visible", ViewBag.pay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+            
+            )
+    </div>
+</div>
+<!--pagination-->
+
+
+<style>
+    .label-default {
+        background-color: red;
+    }
+
+    .label-success1 {
+        background-color: #DB8F00;
+    }
+
+    .label-success2 {
+        background-color: green;
+    }
+
+    .label-success5 {
+        background-color: #0033FF;
+    }
+</style>

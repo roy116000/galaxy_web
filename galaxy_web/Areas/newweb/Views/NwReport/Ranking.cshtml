@@ -1,0 +1,86 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Company = (List<ListItem>)ViewData["Company"];
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+
+        <form id="form1" method="post">
+
+
+            <div class="row-fluid">
+
+                <div class="span2">
+                    <select name="cid" class="span12">
+                        @foreach (var item in Company)
+                        {
+                            <option value="@(item.Value)" @(item.IsChecked ? "selected=selected" : "") >@(item.DisplayText)</option>
+                        }
+                    </select>
+                </div>
+
+                @*<div class="span2">
+                    <select name="year" class="span12" style="text-align: center">
+                        <option value="">請選擇：年</option>
+                        @for (int i = NW.Now.Year; i >= NW.Now.Year - 5; i--)
+                        {
+                            <option value="@(i)" selected="@(i == ViewBag.year)">@(i)</option>
+                        }
+                    </select>
+                </div>*@
+
+                <div class="span2">
+                    <input name="sD" class="span12" placeholder="起始時間" value="@(ViewBag.sD)" type="datetime" />
+
+                    @*<input placeholder="起始時間" />*@
+                    @*<select name="month" class="span12" style="text-align: center">
+                        <option value="">請選擇：月</option>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@(i)" selected="@(i == ViewBag.month)">@(i)</option>
+                        }
+                    </select>*@
+                </div>
+
+                <div class="span2">
+                    <input name="eD" class="span12" placeholder="結束時間" value="@(ViewBag.eD)" type="datetime" />
+                </div>
+
+                <div class="span6 pull-right">
+                    <input class="span8" type="text"  name="kw" autocomplete="off" placeholder="請輸入搜尋相關" value="@(ViewBag.kw)"/>
+                    <input class="btn btn-primary span2" type="submit" value="查詢" />
+                    <input type="button" onclick="Type('1')" class="btn span2" value="匯出" />
+                    <input name="type" type="hidden" />
+
+                </div>
+
+            </div>
+
+            <br />
+
+        </form>
+
+        <div id="List_ajax">
+            @Html.Partial(action + "_ajax")
+        </div>
+
+        <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+        @Html.Partial("template_list_fix")
+
+    </div>
+</div>
+
+<script>
+    function Type(o) {
+
+        $('input[name="type"]').val(o);
+        $('#form1').submit();
+
+        $('input[name="type"]').val('0');
+    }
+</script>

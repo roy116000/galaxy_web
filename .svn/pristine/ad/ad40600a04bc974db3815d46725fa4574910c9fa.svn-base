@@ -1,0 +1,62 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.product_price2>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col />
+            <col class="width25" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width12" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th>@Html.DisplayNameFor(model => model.First().group_name) </th>
+                <th class="center">產品名稱</th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().price) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().start_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().end_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().limit) </th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+              if (item.start_date <= DateTime.Today && item.end_date >= DateTime.Today) { item.visible = true; }
+                            
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@item.price_id" /></td>
+                    <td>@Html.DisplayFor(modelItem => item.group_name)</td>
+                    <td class="left"><a href="@(Url.Action("Edit", "NwProduct", new {@id=item.product_id },null))" target="_blank">@Html.DisplayFor(modelItem => item.product_name)</a></td>
+                    <td class="right">@Html.DisplayFor(modelItem => item.price)</td>
+                    <td class="center">@item.start_date.Value.ToString("yyyy/MM/dd")</td>
+                    <td class="center">@item.end_date.Value.ToString("yyyy/MM/dd")</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.limit)</td>
+                    <td>@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax",""), new { id = item.price_id }, new { @class = "title" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw).AddRouteValue("group_name", ViewBag.group_name))
+    </div>
+
+</div>
+<!--pagination-->

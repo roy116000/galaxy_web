@@ -1,0 +1,436 @@
+﻿@model h365_web.Models.product_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var ingredient = (h365_web.Models.product_ingredient)ViewData["ingredient"];
+    var specification = (h365_web.Models.product_specification)ViewData["specification"];
+    var aData = (h365_web.Models.sys_admin_data)ViewData["aData"];
+    
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        <div class="stdform">
+
+
+
+            <div class="widgetcontent">
+
+                <h4 class="widgettitle">商品資料 
+                    @*@if (Model.product_id != 0)
+                    {
+                        <span class="pull-right"><a href="~/Shop_PreView.html?id=@(Model.product_id)" target="_blank">前台預覽</a> </span>
+                    }*@
+                </h4>
+
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬廠商</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(ViewBag.company_name)</span>
+                    </span>
+                </div>
+
+                @*分類*@
+                @*@if (Model.product_id != 0)
+                {
+                    @Html.EditorFor(m => m.group_ids) 
+                }*@
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">貨號</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_no)&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">品牌</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.web_name)&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">品名</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.item_name)&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">庫存量</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(Model.inventory_num)&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">產品狀況</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(NW.Flag_Order_Stype[Model.order_style])&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="create_user" class="control-label">稅別</label>
+                    <div style="padding: 5px 5px;" class="field">
+                        @(NW.Flag_Tax[Model.tax_flag])&nbsp;&nbsp;
+   
+                    </div>
+                </div>
+
+                <div class="abgne_tab">
+                    <ul class="tabs">
+
+                        <li><a href="#tab1">產品價格</a></li>
+                        <li><a href="#tab2">產品資訊</a></li>
+                        @*<li><a href="#tab3">產品設定</a></li>*@
+                        <li><a href="#tab4">產品圖檔</a></li>
+                        <li><a href="#tab5">產品週期</a></li>
+                        <li><a href="#tab6">營養標示</a></li>
+                        <li><a href="#tab7">產品規格</a></li>
+
+                        @if (Model.product_id != 0)
+                        {
+                            <li><a href="#tab8">變更記錄</a></li>
+                        }
+
+                    </ul>
+
+                    <div>
+
+                        <div id="tab1" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">建議售價</label>
+                                <div id="price" style="padding: 5px 5px;" class="field">
+                                    @(Model.price)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">售價</label>
+                                <div id="sprice" style="padding: 5px 5px;" class="field">
+                                    @(Model.sprice)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">成本</label>
+                                <div id="cost" style="padding: 5px 5px;" class="field">
+                                    @(Model.cost)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            @*<div class="control-group">
+                                <label for="" class="control-label">毛利額 / 毛利率</label>
+                                <span class="field">
+                                    <span class="label label-important" style="font-size: 150%;" id="profit">0 元 / 0.00 %</span>
+                                </span>
+                            </div>*@
+
+                            @*<div class="control-group">
+                                <label for="create_user" class="control-label">回饋紅利</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.back_bonus)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>*@
+
+                            @*<div class="control-group">
+                                <label for="" class="control-label">毛利額 / 毛利率(紅利回饋)</label>
+                                <span class="field">
+                                    <span class="label label-important" style="font-size: 150%;" id="profit2">0 元 / 0.00 %</span>
+                                </span>
+                            </div>*@
+
+
+
+
+                        </div>
+
+                        <div id="tab2" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">販售數量</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.sold)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品簡介</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Html.Raw(Model.info))&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品內容</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Html.Raw(Model.introduce))&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="tab4" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">圖檔</label>
+
+                                <img style="padding: 5px 5px;" class="field" src="@(NW.Path_Img(Model.img, "product"))" />&nbsp;&nbsp;
+
+                                @*<div style="padding: 5px 5px;" class="field">
+                                    @(Model.sold)&nbsp;&nbsp;
+   
+                                </div>*@
+                            </div>
+
+                        </div>
+
+                        <div id="tab5" class="tab_content">
+
+                            <div class="control-group">
+                                <label class="control-label" for=""></label>
+                                <span class="field">
+                                    <span class="label label-important">產品週期為：<span id="cycle">@(Model.Cycle_Totle)</span> 天</span>
+                                </span>
+                            </div>
+
+                            @*<div class="control-group">
+                                <label for="create_user" class="control-label">週期啟用</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.Cycle_Visible)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>*@
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品單位</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.Unit)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品總量</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.ProductTotle)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品耗量(次/天)</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.Product_day)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">產品耗量(單位/一次)</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.Product_once)&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="tab6" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">營養標示</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Html.Raw(ingredient.summary_table))&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="tab7" class="tab_content">
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">寄送方式</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(NW.Flag_Send[specification.send_flag])&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">成分表</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Html.Raw(specification.ingredients))&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">注意事項</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Html.Raw(specification.precautions))&nbsp;&nbsp;
+   
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="tab8" class="tab_content">
+
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.create_user, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @NW.admin(Model.create_user).name&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.create_datetime, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @Model.create_datetime&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.check_user, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @NW.admin(Model.check_user).name&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.check_datetime, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @Model.check_datetime&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.change_user, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @NW.admin(Model.change_user).name&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                @Html.LabelFor(model => model.change_datetime, new { @class = "control-label" })
+                                <div class="field" style="padding: 5px 5px;">
+                                    @Model.change_datetime&nbsp;&nbsp;
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        var _showTab = 0;
+        var $defaultLi = $('ul.tabs li').eq(_showTab).addClass('active');
+
+        $($defaultLi.find('a').attr('href')).siblings().hide();
+
+        $('ul.tabs li').click(function () {
+            var $this = $(this),
+                _clickTab = $this.find('a').attr('href');
+
+            $this.addClass('active').siblings('.active').removeClass('active');
+
+            $(_clickTab).stop(false, true).fadeIn().siblings().hide();
+            return false;
+        }).find('a').focus(function () {
+            this.blur();
+        });
+
+    });
+</script>
+
+<script>
+
+    $(function () {
+
+
+
+        profit();
+        $('#sprice').change(profit);
+        $('#cost').change(profit);
+
+
+        profit2();
+        $('#sprice').change(profit2);
+        $('#cost').change(profit2);
+        $('#back_bonus').change(profit2);
+
+        profit3();
+        $('#sales_money').change(profit3);
+        $('#sales_cost').change(profit3);
+
+
+    });
+
+    function profit() {
+        var sprice = $('#sprice').val().replace(/[,]+/g, '');
+        var cost = $('#cost').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost, 2);
+        if (sprice != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit').html('0 元 / 0.00 %');
+        }
+    }
+
+    function profit2() {
+        var sprice = $('#sprice').val().replace(/[,]+/g, '');
+        var cost = $('#cost').val().replace(/[,]+/g, '');
+        var backBonus = $('#back_bonus').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost - backBonus, 2);
+        if (sprice != 0 && backBonus != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit2').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit2').html('0 元 / 0.00 %');
+        }
+    }
+
+    function profit3() {
+        var sprice = $('#sales_money').val().replace(/[,]+/g, '');
+        var cost = $('#sales_cost').val().replace(/[,]+/g, '');
+        var above = formatFloat(sprice - cost, 2);
+        if (sprice != 0) {
+            var value = (above / sprice) * 100;
+            value = formatFloat(value, 2);
+            $('#profit3').html(above + ' 元 / ' + value + ' %');
+        } else {
+            $('#profit3').html('0 元 / 0.00 %');
+        }
+    }
+
+    function formatFloat(num, pos) {
+        var size = Math.pow(10, pos);
+        return Math.round(num * size) / size;
+    }
+
+</script>

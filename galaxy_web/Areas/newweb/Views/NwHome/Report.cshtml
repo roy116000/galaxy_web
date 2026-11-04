@@ -1,0 +1,22 @@
+﻿@model List<h365_web.Models.product_data>
+@{
+    ViewBag.Title = "Report";
+}
+
+@foreach (var item in Model)
+{ 
+    <div>
+
+        <img src="@(NW.Path_Img(item.uploadimage))" />
+        @*<img src="~/Content/images/product/201509071647097350831.jpg" />*@
+        @(item.item_no)
+        
+        <span>@(item.web_name)</span>
+        
+        <span>@(item.item_name)</span>
+
+
+        
+    </div>
+    
+}

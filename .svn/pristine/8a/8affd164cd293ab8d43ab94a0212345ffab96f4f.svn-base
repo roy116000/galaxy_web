@@ -1,0 +1,56 @@
+﻿@model h365_web.Models.drugstore_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.drugstore_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                @Html.EditorFor(model => model.drugstore_sn)
+
+                @Html.EditorFor(model => model.name)
+
+                @Html.EditorFor(model => model.full_name)
+
+                @Html.EditorFor(model => model.tel)
+
+                @Html.EditorFor(model => model.fax)
+
+                @Html.EditorFor(model => model.open_time)
+
+                @Html.EditorFor(model => model.zip)
+
+                @Html.EditorFor(model => model.address)
+
+                @Html.EditorFor(model => model.uid)
+
+                @Html.EditorFor(model => model.pwd)
+
+                @Html.EditorFor(model => model.visible)
+
+                @Html.EditorFor(model => model.inx)
+
+                @Html.EditorFor(model => model.start_date)
+
+                @Html.EditorFor(model => model.end_date)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

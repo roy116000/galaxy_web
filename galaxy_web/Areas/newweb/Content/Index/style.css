@@ -1,0 +1,92 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+/* 重設
+--------------------------------------------------- */
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain) */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;background: transparent;/*vertical-align: baseline;*/}
+ol, ul, li{list-style: none;}
+
+/*以下為針對HTML5,暫時不開放----------------*/  
+/* HTML5 display-role reset for older browsers */
+/*
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {display: block;}
+body {line-height: 1;}
+ol, ul {list-style: none;}
+blockquote, q {quotes: none;}
+blockquote:before, blockquote:after,
+q:before, q:after {content: '';content: none;}
+table {border-collapse: collapse;border-spacing: 0;}
+*/
+fieldset,img { border: none; }
+
+/*-------------------基本-----------------------------*/
+a{ font-size:15px; text-decoration:none;outline:none; /* for Firefox */
+ hlbr:expression(this.onFocus=this.blur()); color:#000 /* for IE */;transition:all 0.3s}
+a:hover{ font-size:15px; text-decoration:none;color:#000;outline:none; /* for Firefox */hlbr:expression(this.onFocus=this.blur());transition:all 0.3s}
+a:focus{outline: none;hlbr:expression(this.onFocus=this.blur());text-decoration:none;transition:all 0.3s}
+
+body{outline:none; /* for Firefox */hlbr:expression(this.onFocus=this.blur()); /* for IE */ line-height:0px; min-width:500px}
+
+/*背景控制*/
+.bg1{ width:100%; background:url(../../images/bg1.jpg) center top no-repeat; 
+background-attachment:fixed;}
+
+
+/*中間區域*/
+
+/*TOP*/
+.m0{ width:100%; height:300px;}
+.m1{ height:auto; overflow:hidden; width:100%; /*background:rgba(30, 37, 65, 0.9);*/  box-shadow:0 0px 0px #000;position:fixed;top:0px;left:0px;}
+.m1 .a1{width:1200px;height:auto; overflow:hidden; margin:0 auto; padding:0px 0 0}
+.m1 .a1 .lg{width:220px; height:70px; float:left}
+.m1 .a1 .lg img{width:220px; height:70px; }
+.m1 .a1 .lk{width:700px; height:70px; float:right;}
+.m1 .a1 .lk .w1{width:100px; height:70px; margin:0 5px; float:right;}
+.m1 .a1 .lk .w1 a{width:100px; height:70px; float:right; font:bold 16px/70px Verdana, "微軟正黑體"; color:#f3e0ae; text-align:center}
+.m1 .a1 .lk .w1:hover a{ color:#a28038}
+/*擁擠順暢提示*/
+.m2{width:100%;height:auto; overflow:hidden; margin:0 auto 0px; text-align:center}
+.m2 .b1{ width:250px;height:36px; overflow:hidden; background:rgba(255,0,90,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #ff005a }
+.m2 .b2{ width:250px;height:36px; overflow:hidden; background:rgba(255,170,0,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #ffaa00 }
+.m2 .b3{ width:250px;height:36px; overflow:hidden; background:rgba(60,210,0,0.5); margin:0 auto 30px;font:bold 16px/36px verdana,"微軟正黑體"; color:#fff; text-align:center ; border-radius:50px; border:2px solid #33d700 }
+
+
+/*mb-login*/
+.p1{ width:1200px; height:auto; overflow:auto; margin:0 auto;}
+.p1 .m3{ width:340px; min-height:200px; height:auto; overflow:hidden; padding:30px 20px 30px 19px; background:rgba(255,255,255,0.6); float:right; border-radius:5px;box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4{ width:300px;min-height:200px; height:auto; overflow:hidden;float:left; padding:0 20px 0 20px;}
+.p1 .m3 .b4-2{ min-height:40px; height:auto;margin-top:15px; padding-top:10px;border-top:1px dotted #888}
+.p1 .m3 .b4 .bta1{ width:290px; height:34px;  border-bottom:1px solid #002a56; padding:0 5px; margin:0 0 10px 0}
+.p1 .m3 .b4 .bta1 .btn1 a{width:100px;height:34px; float:left; display:inline-block; background:#a17f36; border-radius:3px 3px 0 0; text-align:center;font:15px/36px Georgia,"微軟正黑體"; color:#fff; margin-right:4px}
+.p1 .m3 .b4 .bta1 .btn1 a:hover{background:#f3e0ae; color:#a17f36}
+.p1 .m3 .b4 .bta1 .btn1 a.active{height:34px;margin-bottom:0px;background:#002a56; color:#fff; font-weight:bold; }
+
+.p1 .m3 .b4 .t1{ width:250px; height:24px; font:15px/24px verdana,"微軟正黑體"; margin:0; color:#555;margin:0 5px 5px 0;}
+.p1 .m3 .b4 .bx1{ width:280px; height:36px; border:0px solid #ccc; padding:0 10px;font:16px/34px verdana,"微軟正黑體"; background:rgba(255,255,255,0.9);margin:0 10px 10px 0; border-radius:3px;box-shadow:0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .bx2{ width:140px; height:36px; border:0px solid #ccc; padding:0 10px;font:16px/36px verdana,"微軟正黑體"; background:rgba(255,255,255,0.9);margin:0 10px 10px 0; border-radius:3px; float:left;box-shadow:0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .im1{ width:auto; height:auto; overflow:hidden; float:left; margin:2px 0}
+.p1 .m3 .b4 .im1 img{ width:auto; height:30px;overflow:hidden; }
+.p1 .m3 .b4 .btn2 a{width:300px; height:36px;font:bold 15px/34px "微軟正黑體";color:#555; display:inline-block; text-align:center; background:#ffdd99; border-radius:2px; margin:0 0 10px;box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25)}
+.p1 .m3 .b4 .btn2 a:hover{ background:#002a56;color:#fff}
+.p1 .m3 .b4 .t2 {width:280px; min-height:20px; height:auto; overflow:hidden; font:13px/18px verdana,"微軟正黑體"; margin:0; color:#fff;margin:0 5px 0px 0; clear:both; background:#060063; padding:3px 10px;border-radius:0px; text-align:center}
+.p1 .m3 .b4 .t3 { width:100%; min-height:24px; height:auto; overflow:hidden; font:13px/20px verdana,"新細明體"; margin:0; color:#555; clear:both;text-align:justify;text-justify: inter-ideograph;}
+
+
+/*手機網頁選單*/
+.m1 .a1 .mn{ display:none}

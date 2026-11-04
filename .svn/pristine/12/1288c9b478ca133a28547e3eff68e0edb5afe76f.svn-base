@@ -1,0 +1,229 @@
+﻿@model h365_web.Models.health_news
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    List<ListItem> gData = (List<ListItem>)ViewData["parent_id"];
+
+    var parent = (Dictionary<int, string>)ViewData["parent"];
+    string Strs = "";
+
+    var tag = (List<h365_web.Models.tag_data>)ViewData["tag"];
+}
+<div class="maincontent">
+    <div class="contentinner">
+        @*<ul class="nav nav-pills">
+            <li>@Html.ActionLink("回列表", ("OrganList" + "_ajax"), controller, new { page = 2 }, null)</li>
+        </ul>*@
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            
+            @Html.HiddenFor(model => model.news_id)
+
+            <div class="widgetcontent">
+
+                <h4 class="widgettitle">基本資料</h4>
+
+                @Html.EditorFor(m => m.title)
+
+                @*選擇部位*@
+                <div class="control-group">
+                    <label for="parent_id" class="control-label">@Html.DisplayNameFor(m => m.parent_id)</label>
+                    <div class="field">
+                        <select name="parent_id" id="parent_id" class="span2">
+                            @foreach (var item in gData)
+                            { 
+                                <option value="@(item.Value)">@(item.DisplayText)</option>                
+                            }
+                        </select>
+                        <span class="help-inline"></span>
+
+                        @*選擇選項時*@
+                        <script>
+                            $('#parent_id').change(function () {
+                                var o = $(this).val(); //當下選取的
+                                if (o != "") {
+                                    $('#parent_id :selected').text(); //選擇的字眼
+
+                                    function sortNumber(a, b) //排序函数
+                                    {
+                                        return a - b
+                                    }
+
+                                    var q = $('#parent_ids').val(); //目前有的
+
+                                    if (!($.contains(q, ',' + o))) //沒有才新增
+                                    {
+                                        //框框內新增選擇的顯示值
+                                        $('#parent_tags').append('<span onclick="tags_(' + $(this).val() + ')" class="tag" id="tags_' + $(this).val() + '"> ' + $('#parent_id :selected').text() + ' </span>')
+
+                                        //新增選擇的值
+                                        $('#parent_ids').val(function (n, c) {
+                                            var str = c + ',' + o
+                                            str = str.split(',').sort(sortNumber);
+                                            return str;
+                                        });
+                                    }
+                                }
+
+                                $("#parent_id").find(":selected").remove(); //刪除選擇的選項
+
+                                if ($('#parent_id option').val() != "") //新增一個請選擇置頂
+                                {
+                                    $('#parent_id option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+                                }
+
+                            });
+                        </script>
+
+                    </div>
+                </div>
+
+                @*部位*@
+                <div class="control-group">
+
+                    <label for="parent_tags" class="control-label">@Html.DisplayNameFor(m => m.parent_id)</label>
+
+                    <div class="tagsinput" id="parent_tags" style="width: 456px; height: 100px;">
+
+                        @if (parent != null)
+                        {
+                            foreach (var item in parent)
+                            {                        
+                            <span onclick="tags_('@(item.Key)')" class="tag" id="tags_@(item.Key)">@(item.Value)</span>
+                            
+                                Strs = Strs + "," + item.Key;
+                            }
+                        }
+
+                        <input id="parent_ids" name="parent_ids" value="@(Strs)" style="display:none;" />
+
+                        <script>   //選項點擊時
+                            function tags_(o) {
+                                //tags = 選項的顯示值
+                                var tags = $('#tags_' + o).html();
+                                //將刪除的選項,加回選單中
+                                $("#parent_id").append($("<option></option>").attr("value", o).text(tags)); //將刪除的選項,加回選單中
+
+                                if ($('#parent_id option').val() != "") //新增一個請選擇置頂
+                                {
+                                    $('#parent_id option:first').before($('<option value="">請選擇</option>').attr('selected', true)); //新增置頂                      
+                                }
+
+                                $('#tags_' + o).remove(); //刪除選項
+
+                                $('#parent_ids').val(function (n, c) //刪除選項的值
+                                {
+
+                                    var str = c;
+
+                                    return str.replace(',' + o, '');
+
+                                });
+                            }
+                        </script>
+
+                    </div>
+                </div>
+
+                @*內容*@
+                @Html.EditorFor(model => model.cont)
+
+                @*文章分區*@
+                @Html.EditorFor(model => model.flag)
+
+                @*作者*@
+                @Html.EditorFor(m => m.author_id)
+
+                @*起始時間*@
+                @Html.EditorFor(model => model.start_date)
+
+                @*到期時間*@
+                @Html.EditorFor(model => model.end_date)
+
+                @Html.EditorFor(model => model.uploadimage)
+
+                @Html.EditorFor(m => m.inx)
+
+                @Html.EditorFor(m => m.visible)
+
+                @*新增Tag*@
+                <div class="control-group">
+                    <div class="field">
+                        <a class="btn" href="@Url.Action("TagAdd", "NwProduct", new { id = id, type = 1 })">新增Tag</a>
+                    </div>
+                </div>
+
+                @Html.EditorFor(model => model.tag)
+
+                <div style="width: 900px; text-align: left; margin: 0 auto 30px;">
+
+                    <button id="button_tag" type="button" class="btn btn-primary" style="margin-bottom: 20px">Tag選單</button>
+
+                    <div id="div_tag" style="display: none; text-align: justify; width: 900px">
+
+                        <a class="btn" onclick="id_tag('通用');">通用</a>
+
+                        @foreach (var item in tag)
+                        {           
+                            <a class="btn" onclick="id_tag('@(item.tag_name)');">@(item.tag_name)</a>                                  
+                        }
+                    </div>
+
+                    @*Tag選單-淡出淡入*@
+                    <script>
+                        $(document).ready(function () {
+                            $('#button_tag').click(function () {
+                                $('#div_tag').fadeToggle();
+                            });
+                        });
+                    </script>
+                    @*點擊下方Tag輸入用*@
+                    <script>
+                        function id_tag(o) {
+                            //alert(o);           
+                            var tag = $('#tag_tag').html();
+
+                            $('#tag_tag').val(tag + o);
+
+                            $('#tag_tagsinput').click();
+
+                        }
+                    </script>
+
+                </div>
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        @*<button type="reset" class="btn">取消</button>*@
+                    </div>
+                </div>
+            </div>          
+        }
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+
+                title: "required"
+            },
+            messages: {
+
+                title: "標題，必需填寫"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>

@@ -1,0 +1,106 @@
+﻿@model List<h365_web.Areas.newweb.Controllers.NwReportController.Order_All>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    int sD = DateTime.Today.AddYears(-5).Year;
+    int[] Year = Enumerable.Range(sD, 6).OrderByDescending(m => m).ToArray(); //年分 抓五年
+}
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        //if (confirm('確定要全部匯出？')) {
+        //    var arrVal = new Array();
+        //    $("input[name='block_id']:checked").each(function (i) {
+        //        arrVal[i] = this.value;
+        //    });
+        //}
+        //flag=1 銷售報表用
+        if (flag == 0 && (($('#start_date').val() == "") || ($('#end_date').val() == ""))) {
+            alert("請選擇日期!");
+        } else {
+            if (flag == 0) {
+                $('#start').val($('#start_date').val());
+                $('#end').val($('#end_date').val());
+            }
+
+            //$('#cb_id').val(arrVal.toString());
+            $('#cb_flag').val(flag);
+            $('#year1').val($('#year').val());
+            $('#frmCheckbox').submit();
+        }
+    }
+</script>
+@using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox", @target = "_blank" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+@*<input type="hidden" id="cb_id" name="cb_id" value="" />*@
+    <input type="hidden" id="year1" name="year1" value="" />
+    <input type="hidden" id="start" name="start" value="" />  //起始日
+    <input type="hidden" id="end" name="end" value="" />      //結束日
+}
+<div class="maincontent">
+    <div class="contentinner">
+        <!--widgetsource-->
+        <div id="mail">
+            <div class="msghead">
+                @using (Html.BeginRouteForm("", FormMethod.Get))
+                {
+                    <ul class="msghead_menu">
+                        <li>
+                            <div class="btn-group">
+
+                                <select id="year" name="year">
+                                    @foreach (var item in Year)
+                                    { 
+                                        <option @(item == ViewBag.year ? "selected=selected" : "") value="@(item)">@(item)</option>                                  
+                                    }
+
+                                </select>
+
+                            </div>
+                        </li>
+                        <li class="marginleft15 filesearch">
+
+                            @*<input type="text" id="kw" name="kw" class="filekeyword" placeholder="請輸入標題" value="@ViewBag.kw" />*@
+                            <input type="submit" value="查詢" class="btn btn-primary" />&nbsp;
+                        </li>
+
+                        <li>
+                            <a onclick="cbHandel(1);" href="#" class="btn">匯出年報表</a>&nbsp;
+                        </li>
+                    </ul>   
+                    <ul>
+                        <li>
+                            <input type="text" value="" name="start_date" id="start_date" class="span2">
+                            ～
+                             <input type="text" value="" name="end_date" id="end_date" class="span2">
+                            <a onclick="cbHandel(0);" href="#" class="btn">匯出</a>
+                        </li>
+                    </ul>
+                }
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+
+            <br />
+
+
+        </div>
+        <!--#chat-->
+
+        @Html.Partial("template_year", Model)
+
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('#start_date').datepicker();
+        $('#end_date').datepicker();     
+    })
+
+
+</script>

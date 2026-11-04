@@ -1,0 +1,64 @@
+﻿@{
+    var R = (List<galaxy_web.Models.product_status>)ViewData["R"]; //修改紀錄
+    Dictionary<int, string> Status_F = (Dictionary<int, string>)ViewData["Status_F"];
+}
+
+@if (R != null)
+{
+                            
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width10" />
+            <col class="width12" />
+            <col class="width10" />
+            <col class="width10" />
+            <col />
+
+
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">#</th>
+                <th class="center">修改人員</th>
+                <th class="center">@(Html.DisplayNameFor(m => R.FirstOrDefault().create_datetime))</th>
+                <th class="center">@(Html.DisplayNameFor(m => R.FirstOrDefault().status))</th>
+                <th class="center">@(Html.DisplayNameFor(m => R.FirstOrDefault().status_old))</th>
+                <th class="center">@(Html.DisplayNameFor(m => R.FirstOrDefault().info))</th>
+
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in R)
+            {
+                string status = string.Empty, status_old = string.Empty;
+
+                if (Status_F != null)
+                {
+                    try
+                    {
+                        status = Status_F.Where(m => m.Key == item.status).SingleOrDefault().Value;
+                        status_old = Status_F.Where(m => m.Key == item.status_old).SingleOrDefault().Value;
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                int num = Array.IndexOf(R.ToArray(), item) + 1;
+                    
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="right">@(num)</td>
+                    <td>@(Html.DisplayFor(m => item.create_user))</td>
+                    <td class="center" title="@(item.create_datetime)">@(NW.getDate(item.create_datetime))</td>
+                    <td class="center">@Html.DisplayFor(m => status)</td>
+                    <td class="center">@Html.DisplayFor(m => status_old)</td>
+                    <td class="left">@Html.DisplayFor(m => item.info)</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}

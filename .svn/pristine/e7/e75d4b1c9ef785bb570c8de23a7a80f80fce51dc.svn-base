@@ -1,0 +1,5 @@
+﻿@{
+    ViewBag.Title = "MonthlyList";
+}
+
+<h2>MonthlyList</h2>

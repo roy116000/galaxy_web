@@ -1,0 +1,111 @@
+﻿@using galaxy_web.Models;
+@model MvcPaging.IPagedList<galaxy_web.Models.order_bills>
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();    
+
+
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        if ($("input[name='block_id']:checked").length == 0) { alert('請至少選擇一項'); return false; }
+        var name = '作廢';
+        switch (flag) { case 1: name = "作廢"; break; }
+        if (confirm('確定要' + name + '？')) {
+            var arrVal = new Array();
+            $("input[name='block_id']:checked").each(function (i) {
+                arrVal[i] = this.value;
+            });
+        }
+        $('#cb_flag').val(flag);
+        $('#cb_id').val(arrVal.toString());
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm("StayAdd", controller, FormMethod.Post, new { @id = "frmCheckbox" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="cb_id" name="cb_id" value="" />
+}
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <ul class="nav nav-pills">
+            @foreach (var item in NW.nation_list)
+            { 
+                <li @( ViewBag.nation == item ? "class=active" : "")><a href="@Url.Action(action, new { nation = item, flag = ViewBag.flag })">@(item) </a></li>
+            }
+        </ul>
+
+        @if (action == "List")
+        {
+            var pills = (Dictionary<string, KeyValuePair<int, int>>)ViewData["pills"];
+            
+            <ul class="nav nav-pills">
+                @foreach (var item in pills)
+                { 
+                    <li @( ViewBag.flag == item.Value.Key ? "class=active" : "")><a href="@Url.Action(action, new { nation = ViewBag.nation, flag = item.Value.Key })">@(item.Key) ( @(item.Value.Value) ) </a></li>
+                }
+            </ul>
+        }
+        <!--widgetsource-->
+        <div id="mail">
+            <div class="msghead">
+
+                @using (Html.BeginRouteForm("", FormMethod.Get))
+                {
+                    <div>
+                        請款月份：
+                    <select name="yymm">
+
+                        @foreach (var item in ViewBag.yymm_list as string[])
+                        { 
+                            <option value="@(item)" @(ViewBag.yymm == item ? "selected" : "")>@(item)</option>
+                        }
+
+                    </select>
+                        <input type="hidden" name="flag" value="@(ViewBag.flag)">
+                        <input type="hidden" name="nation" value="@(ViewBag.nation)">
+                        @if (action == "List")
+                        {
+                            <input type="text" name="kw" placeholder="搜尋廠商名稱" value="@(ViewBag.kw)">
+                        }
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+
+                    </div>
+                    
+                    <div>
+                        <ul class="msghead_menu">
+                            <li>
+
+                                <div class="btn-group">
+
+                                    <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                                    <ul class="dropdown-menu">
+                                        <li><a onclick="cbHandel(1);" href="#"><span class="icon-remove-sign"></span>作廢</a></li>
+                                    </ul>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                    </div>
+                }
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+            <br />
+        </div>
+        <!--#chat-->
+
+        @Html.Partial(action + "_ajax", Model)
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>
+

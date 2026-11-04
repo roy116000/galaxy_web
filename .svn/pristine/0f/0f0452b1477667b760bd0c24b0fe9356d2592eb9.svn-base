@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>健康資訊讚-銷售後台</title>
+    
+    <link rel="stylesheet" href="~/Areas/newweb/Content/css/style.default.css" type="text/css" />
+   <link rel="stylesheet" href="~/Areas/newweb/Content/prettify/prettify.css" type="text/css" />
+    <link rel="stylesheet" href="~/Areas/newweb/Content/css/bootstrap-fileupload.min.css" type="text/css" />
+    <link rel="stylesheet" href="~/Areas/newweb/Content/css/bootstrap-timepicker.min.css" type="text/css" />
+
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery-1.9.1.min.js"></script>
+
+    <script type="text/javascript" src="~/Areas/newweb/Content/prettify/prettify.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery-migrate-1.1.1.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery-ui-1.9.2.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/bootstrap-fileupload.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/bootstrap-timepicker.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.uniform.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.tagsinput.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.autogrow-textarea.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/charCount.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/ui.spinner.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/chosen.jquery.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/custom.js"></script>
+@*    <script type="text/javascript" src="~/Areas/newweb/Content/js/forms.js"></script>*@
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.ui.datepicker-zh-TW.min.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.maskedinput.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/jquery.chained.min.js"></script>
+    <script src="~/Areas/newweb/Content/js/jquery.jgrowl.js"></script>
+
+    <link href="~/Areas/newweb/Content/uploadify/uploadify.css" rel="stylesheet" />
+    <script src="~/Areas/newweb/Content/uploadify/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript" src="~/Areas/newweb/Content/ck/ckeditor/ckeditor.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/ck/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/ck/ckfinder/ckfinder.js"></script>
+
+    <link href="~/Areas/newweb/Content/css/bootstrap-tagsinput.css" rel="stylesheet" />
+    <script src="~/Areas/newweb/Content/js/bootstrap-tagsinput.min.js"></script>
+
+    <link href="~/Content/css/sweetalert.css" rel="stylesheet" />
+    <script src="~/Content/js/sweetalert.min.js"></script>
+
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+
+@*     <script type="text/javascript" src="~/Areas/newweb/Content/Scripts/swfupload/swfupload.js"></script>
+    <script type="text/javascript" src="~/Areas/newweb/Content/Scripts/swfupload/jquery.swfupload.js"></script>*@
+
+</head>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    string admin_name = NW.admin(User.Identity.Name).name;
+    var power_id = NW.admin(User.Identity.Name).power_id;
+    }
+<body>
+    <div class="mainwrapper fullwrapper">
+        <!-- START OF LEFT PANEL -->
+        <div class="leftpanel">
+            <div class="logopanel">
+                <h1><a href="#">後台管理系統</a></h1>
+            </div>
+            <!--logopanel-->
+            <div class="datewidget">@DateTime.Now</div>
+
+            <div class="searchwidget" style="height: 26px; border-bottom: 0px;">                
+               @(admin_name),您好!
+            </div>
+            <!--searchwidget-->
+            @Html.Action("Template_left", "NwHome", new { controller = controller, action= action})
+            <!--leftmenu-->
+        </div>
+        <!--mainleft-->
+        <!-- END OF LEFT PANEL -->
+
+        <!-- START OF RIGHT PANEL -->
+        <div class="rightpanel">
+            <div class="headerpanel">
+                <a href="#" class="showmenu"></a>
+                <div class="headerright">                  
+                    <!--dropdown-->
+                    <div class="dropdown userinfo">
+                        <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="/newweb">@(admin_name),您好! <b class="caret"></b></a>
+                        <ul class="dropdown-menu">                            
+                            <li><a href="@Url.Action("PwdEdit", "NwAbout")"><span class="icon-edit"></span>修改密碼</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("Logout", "NwHome")"><span class="icon-off"></span>登出</a></li>
+                            @if (power_id == 1 || power_id == 2)
+                                {
+                            <li><a>___________________</a></li>                                
+                            <li><a href="http://hi.h365_web.com.tw/Content/Download/Drugstore Pharmacist account opening process.pdf">1.藥師藥局帳號申請SOP</a></li>
+                                }
+                        </ul>
+                    </div>
+                    <!--dropdown-->
+                </div>
+                <!--headerright-->
+            </div>
+            <!--headerpanel-->
+            <div class="breadcrumbwidget">
+                <ul class="skins">
+ @*                   <li><a href="default" class="skin-color default" xx="default"></a></li>
+                    <li><a href="orange" class="skin-color orange" xx="orange"></a></li>
+                    <li><a href="dark" class="skin-color dark" xx="dark"></a></li>
+                    <li>&nbsp;</li>
+                    <li class="fixed"><a href="" class="skin-layout fixed"></a></li>
+                    <li class="wide"><a href="" class="skin-layout wide"></a></li>*@
+                </ul>
+                <!--skins-->
+                @Html.Action("template_breadcrumb", "NwHome", new { controller = controller, action= action})
+            </div>
+            <!--breadcrumbs-->
+            @Html.Action("template_pagetitle", "NwHome", new { controller = controller, action= action})
+            <!--pagetitle-->
+           @RenderBody()
+        </div>
+        <!--mainright-->
+        <!-- END OF RIGHT PANEL -->
+        <div class="clearfix"></div>
+        <div class="footer">
+            <div class="footerleft">健康資訊讚-銷售後台&nbsp;</div>
+            <div class="footerright">&copy; 1995 - 2013 YuCan Inc. 請尊重智慧財產權勿任意轉載違者依法必究。</div>
+        </div>
+        <!--footer-->
+        <script type="text/javascript">
+            jQuery(document).ready(function () {
+                jQuery('a[data-rel]').each(function () {
+                    jQuery(this).attr('rel', jQuery(this).data('rel'));
+                });
+            });
+        </script>
+
+    </div>
+    <script type="text/javascript">jQuery(function () { var msg = "@(ViewBag.jgrowl)"; if (msg != '') { $.jGrowl(msg, { life: 5000 }); } })</script>
+    <script type="text/javascript">$(function () { $('.btnX').click(function () { $(this).button('loading') }); })</script>
+</body>
+</html>

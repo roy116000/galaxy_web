@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@(NW.ssTitle)</title>
+
+    @{
+        Html.RenderPartial("template_css");
+        Html.RenderPartial("template_js");      
+    }
+
+
+</head>
+
+@{
+    
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    var aData = NW.admin(NW.DESDeCode(User.Identity.Name));
+   
+}
+
+<body>
+
+    <div class="mainwrapper fullwrapper">
+
+        <!-- 左邊側邊攔 -->
+        <div class="leftpanel">
+            <div class="logopanel" style="min-height: 108px; background: url(/Areas/newweb/images/bg_left.jpg); border: none;">
+                <a href="@(Url.Action("Page", "NwAbout"))">
+                    @*<img style="max-width: 100%; display: list-item; margin: auto;" src="~/Areas/newweb/images/lgx.png" />*@
+                    <img src="~/Areas/newweb/images/lgx.png" style="margin: 0 auto; padding-top: 15px" />
+                </a>
+            </div>
+            <!--logopanel-->
+            @*<div class="datewidget">@DateTime.Now</div>*@
+
+            @*<div class="searchwidget" style="height: 26px; border-bottom: 0px;">
+                @(aData != null ? aData.name + ",您好!" : "")
+            </div>*@
+
+            <div class="leftmenu">
+                <ul class=" nav nav-tabs nav-stacked">
+
+                    <li class="dropdown"><a href="#"><span class="icon-user"></span>@(aData.name)</a>
+                        <ul>
+                            <li><a href="@(Url.Action("PwdEdit", "NwAbout"))"><span class="icon-refresh"></span>修改密碼</a></li>
+                            <li><a href="@(Url.Action("LogOut", "NwHome"))"><span class="icon-off"></span>登出</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+
+            <!--searchwidget-->
+            @*@Html.Action("Template_left", "NwHome", new { controller = controller, action = action })*@
+            @{Html.RenderAction("template_left", "NwHome", new { controller = controller, action = action });}
+            <!--leftmenu-->
+
+        </div>
+
+        <!-- START OF RIGHT PANEL -->
+        <div class="rightpanel">
+            <div class="headerpanel" style="background: url(/Areas/newweb/images/bg_top.jpg) no-repeat; min-height: 108px; border: none;">
+
+                @*<img src="~/Areas/newweb/images/bg_top.jpg" />*@
+                <a href="" class="showmenu"></a>
+
+                <div class="headerright">
+
+                    <!--dropdown-->
+
+
+                    <!--dropdown-->
+
+                </div>
+                <!--headerright-->
+
+            </div>
+
+            <!--headerpanel-->
+
+            <!--breadcrumbwidget-->
+
+            @*@Html.Action("template_pagetitle", "NwHome", new { controller = controller, action = action })*@
+            <!--pagetitle-->
+
+            <div class=" animate4   content-dashboard">
+                @RenderBody()
+                <!--contentinner-->
+            </div>
+            <!--maincontent-->
+
+        </div>
+        <!--mainright-->
+        <!-- END OF RIGHT PANEL -->
+
+        <div class="clearfix"></div>
+
+        <div class="footer">
+            <div class="footerleft">Katniss Premium Admin Template v1.0</div>
+            <div class="footerright">&copy; ThemePixels - <a href="http://twitter.com/themepixels">Follow me on Twitter</a> - <a href="http://dribbble.com/themepixels">Follow me on Dribbble</a></div>
+        </div>
+        <!--footer-->
+
+    </div>
+
+
+
+    <script type="text/javascript">$(function () { $('input[type="datetime"]').datepicker(); })</script>
+    <script type="text/javascript">$(function () { var msg = "@(ViewBag.jgrowl)"; if (msg != '') { $.jGrowl(msg, { life: 5000 }); } })</script>
+    <script type="text/javascript">$(function () { var msg = "@(ViewBag.jgrowl)"; if (msg != '') { alert(msg); } })</script>
+    <script type="text/javascript">$(function () { $('.btnX').click(function () { $(this).button('loading') }); })</script>
+
+
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+
+            // basic chart
+            var flash = [[0, 2], [1, 6], [2, 3], [3, 8], [4, 5], [5, 13], [6, 8]];
+            var html5 = [[0, 5], [1, 4], [2, 4], [3, 1], [4, 9], [5, 10], [6, 13]];
+
+            function showTooltip(x, y, contents) {
+                jQuery('<div id="tooltip" class="tooltipflot">' + contents + '</div>').css({
+                    position: 'absolute',
+                    display: 'none',
+                    top: y + 5,
+                    left: x + 5
+                }).appendTo("body").fadeIn(200);
+            }
+
+
+            var plot = jQuery.plot(jQuery("#chartplace2"),
+                   [{ data: flash, label: "Flash(x)", color: "#fb6409" }, { data: html5, label: "HTML5(x)", color: "#096afb" }], {
+                       series: {
+                           lines: { show: true, fill: true, fillColor: { colors: [{ opacity: 0.05 }, { opacity: 0.15 }] } },
+                           points: { show: true }
+                       },
+                       legend: { position: 'nw' },
+                       grid: { hoverable: true, clickable: true, borderColor: '#ccc', borderWidth: 1, labelMargin: 10 },
+                       yaxis: { min: 0, max: 15 }
+                   });
+
+            var previousPoint = null;
+            jQuery("#chartplace2").bind("plothover", function (event, pos, item) {
+                jQuery("#x").text(pos.x.toFixed(2));
+                jQuery("#y").text(pos.y.toFixed(2));
+
+                if (item) {
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
+
+                        jQuery("#tooltip").remove();
+                        var x = item.datapoint[0].toFixed(2),
+                        y = item.datapoint[1].toFixed(2);
+
+                        showTooltip(item.pageX, item.pageY,
+                                        item.series.label + " of " + x + " = " + y);
+                    }
+
+                } else {
+                    jQuery("#tooltip").remove();
+                    previousPoint = null;
+                }
+
+            });
+
+            jQuery("#chartplace2").bind("plotclick", function (event, pos, item) {
+                if (item) {
+                    jQuery("#clickdata").text("You clicked point " + item.dataIndex + " in " + item.series.label + ".");
+                    plot.highlight(item.series, item.datapoint);
+                }
+            });
+
+
+            // bar graph
+            var d2 = [];
+            for (var i = 0; i <= 10; i += 1)
+                d2.push([i, parseInt(Math.random() * 30)]);
+
+            var stack = 0, bars = true, lines = false, steps = false;
+            jQuery.plot(jQuery("#bargraph2"), [d2], {
+                series: {
+                    stack: stack,
+                    lines: { show: lines, fill: true, steps: steps },
+                    bars: { show: bars, barWidth: 0.6 }
+                },
+                grid: { hoverable: true, clickable: true, borderColor: '#bbb', borderWidth: 1, labelMargin: 10 },
+                colors: ["#06c"]
+            });
+
+            // calendar
+            jQuery('#calendar').datepicker();
+
+
+        });
+    </script>
+
+    <script>
+        jQuery('.abgne_tab').tabs();
+    </script>
+
+</body>
+</html>
+
+<style>
+    .contentinner {
+        min-height: inherit;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+

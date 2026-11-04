@@ -1,0 +1,76 @@
+﻿@model List<h365_web.Models.order_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    int sTotal = 0;
+    double sCost = 0;
+    
+}
+<div class="row-fluid">
+    <div class="span12 editprofileform">
+
+        <form method="post" id="form1" name="form1" action="@(Url.Action("Export", controller, new { id = ViewBag.ID }))">
+            <input type="submit" value="匯出發票明細" class="btn btn-primary" />
+        </form>
+
+        <h4 class="widgettitle">發票詳細明細</h4>
+        <div class="">
+            <div id="List_ajax">
+                <table class="table table-striped">
+                    <colgroup>
+                        <col class="width12" />
+                        <col class="width12" />
+                        <col class="width12" />
+                        <col class="width12" />
+                        <col />
+                        <col class="width12" />
+                        <col class="width12" />
+                        @*<col class="width12" />*@
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>商品交貨日期</th>
+                            <th>訂單編號</th>
+                            <th>訂購方</th>
+                            <th>收件方</th>
+                            <th>商品名稱</th>
+                            <th>藥局收款金額</th>
+                            <th>銷貨分潤</th>
+                            @*<th>退款日期</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            sTotal += item.total;
+                            sCost += item.cost_total;
+              
+                            <tr>
+                                <td>@(item.freight_datetime.HasValue ? item.finish_datetime.Value.ToString("yyyy/MM月/dd日") : "未填寫")</td>
+                                <td>@(item.order_id)</td>
+                                <td>@(item.order_name)</td>
+                                <td>@(item.send_name)</td>
+                                <td title="@(item.pro_web_name + "-" + item.pro_item_name)">@NW.word(item.pro_item_name, 21, "...")</td>
+                                <td class="right">NT @(item.total.ToString("N0")) 元</td>
+                                <td class="right">NT @(item.cost_total.ToString("N0")) 元</td>
+                                @*<td>@(item.back_datetime)</td>*@
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="1"></td>
+                            <td class="right">銷貨金額合計</td>
+                            <td class="left">NT @(sTotal.ToString("N0")) 元</td>
+
+
+                            <td class="right">銷貨分潤合計</td>
+                            <td class="left">NT @(sCost.ToString("N0")) 元</td>
+
+                            <td class="right">匯款金額</td>
+                            <td class="left">NT @((sTotal - sCost).ToString("N0")) 元</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

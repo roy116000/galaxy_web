@@ -1,0 +1,76 @@
+﻿@using MvcPaging
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwReportController.order_m>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    int a = 1;
+
+}
+
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width5" />
+            <col class="width8" />
+            <col class="width8" />
+            <col />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width10" />
+            <col class="width10" />
+            <col class="width8" />
+        </colgroup>
+        <thead>
+            <tr>
+                @*<th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>*@
+                <th class="center">項次</th>
+                <th class="center">訂單日期</th>
+                <th class="center">訂單編號</th>
+                <th class="center">商品名稱</th>
+                <th class="center">訂單業績</th>
+                <th class="center">藥局名稱</th>
+                <th class="center">藥局分潤</th>
+                <th class="center">加盟主分潤</th>
+                <th class="center">加盟經銷分潤</th>
+                <th class="center">業務經銷分潤</th>
+                <th class="center">耐特分潤</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {               
+                
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="center">#@(item.id)</td>
+                    <td class="center" title="@(item.order_datetime)">@(NW.getDate(item.order_datetime))</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.order_id)</td>
+                    <td title="@(item.item_name)">@(NW.word(item.item_name, 13, "..."))</td>
+                    <td class="right">@("$ " + item.sales_total.ToString("N0"))</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.drugstore_name)</td>
+                    <td class="right">@("$ " + item.drugstore_num.ToString("N0"))</td>
+                    <td class="right">@("$ " + item.partner_member_num.ToString("N0"))</td>
+                    <td class="right">@("$ " + item.partner_sales_num.ToString("N0"))</td>
+                    <td class="right">@("$ " + item.salesman_num.ToString("N0"))</td>
+                    <td class="right">@("$ " + item.net_num.ToString("N0"))</td>
+                </tr>
+                
+                a++;
+            }
+
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+
+</div>

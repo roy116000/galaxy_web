@@ -1,0 +1,151 @@
+﻿@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Company = (List<ListItem>)ViewData["Company"];
+    bool isC = true;
+    isC = ViewBag.isC ?? false;
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            <form id="form1" action="@(Url.Action(action, controller))" method="post">
+
+                @if (!isC)
+                {
+                    <span style="padding-right: 10px">廠商：
+                        @Html.SelectList("cid", Company)
+                    </span>
+                }
+
+                <span>年份：</span>
+                <select name="year" class="span2" style="text-align: center">
+                    <option value="">請選擇</option>
+                    @for (int i = NW.Now.Year; i >= NW.Now.Year - 5; i--)
+                    {
+                        <option value="@(i)" selected="@(i == ViewBag.year)">@(i)</option>
+                    }
+                </select>
+
+                &emsp;<span>月份：</span>
+                <select name="month" class="span2" style="text-align: center">
+                    <option value="">請選擇</option>
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@(i)" selected="@(i == ViewBag.month)">@(i)</option>
+                    }
+                </select>
+
+                <span style="float: right">
+                    <input type="text" name="kw" autocomplete="off" placeholder="搜尋相關..." value="@(ViewBag.kw)"/>
+                    <input type="submit" value="查詢" class="btn btn-primary" />
+
+                    <input name="type" type="hidden" />
+                    <button type="button" onclick="Type('1')" class="btn">匯出</button>
+                </span>
+
+
+            </form>
+            &emsp;
+            @* 請款日才顯示 *@
+            @if (ViewBag.bills_flag != null && ViewBag.nation != "TS")
+            {
+                var days = DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month);
+                
+                <form id="form2" action="@(Url.Action("StayAddSave", "NwBills"))" method="post">
+
+                    <input name="year2" value="2017" type="hidden">
+                    <input name="month2" value="@(ViewBag.month)" type="hidden">
+
+                    <span>請款區間：</span>
+                    <select name="date" class="span2" style="text-align: center">
+                        <option value="0" id="lastday">1號~@(days)號</option>
+                    </select>
+                    @*                    @switch ((int)ViewBag.bills_flag)
+                    {
+                        case 0:
+                            //月結
+                        <select name="date" class="span2" style="text-align: center">
+                            <option value="0" id="lastday">1號~@(days)號</option>
+                        </select>
+                    
+                            break;
+                        case 1:
+                            //半月結
+                        <select name="date" class="span2" style="text-align: center">
+                            <option value="0">1號~15號</option>
+                            <option value="1" id="lastday">16號~@(days)號</option>
+                        </select>
+                            break;
+
+                    }*@
+
+                   @* @{
+                var nation_list = new string[] { "TW", "CN" };
+                    }*@
+                    <span>訂單國別：</span>
+                    <select name="nation" class="span2" style="text-align: center">
+                        @foreach (var item in NW.nation_list)
+                        {
+                            <option value="@(item)" @(item == ViewBag.nation ? "selected" : "")>@(item)</option>
+                        }
+                    </select>
+
+                    <span>
+                        <input type="submit" value="建立請款資料" class="btn btn-primary" />
+                    </span>
+                    <script type="text/javascript">
+                        $(function () {
+
+                            $('select[name=year]').change(function () {
+                                var y = $('select[name=year]').val();
+                                $('input[name=year2]').val(y);
+                            })
+                            $('select[name=month]').change(function () {
+                                var m = $('select[name=month]').val();
+                                $('input[name=month2]').val(m);
+
+                                //change last day
+                                var y = $('input[name=year2]').val();
+                                var m2 = $('input[name=month2]').val();
+
+                                //get last day of this month
+                                var myDate = new Date(y, m2, 0);
+                                var day = myDate.getDate();
+                                if ('@ViewBag.bills_flag' == '0') {
+                                    $('#lastday').text('1號~' + day + '號');
+                                } else {
+                                    $('#lastday').text('16號~' + day + '號');
+                                }
+                            })
+
+                        })
+
+
+                    </script>
+
+                </form>
+            }
+        </div>
+
+        <br />
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax")
+    </div>
+</div>
+
+<script>
+    function Type(o) {
+
+        $('input[name="type"]').val(o);
+        $('#form1').submit();
+
+        $('input[name="type"]').val('0');
+    }
+</script>

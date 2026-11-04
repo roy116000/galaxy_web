@@ -1,0 +1,75 @@
+現在時間：2017/6/19 下午 05:08:44，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:09:14，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:12:44，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:12:49，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/favicon.ico' 的控制器或是未實作 IController。
+現在時間：2017/6/19 下午 05:12:52，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:13:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:13:12，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/favicon.ico' 的控制器或是未實作 IController。
+現在時間：2017/6/19 下午 05:13:15，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:13:16，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:14:25，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:14:30，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:14:32，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:14:53，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:14:58，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:15:18，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:15:31，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:15:54，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:15:57，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:16:02，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:16:05，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/favicon.ico' 的控制器或是未實作 IController。
+現在時間：2017/6/19 下午 05:16:05，Url：System.Web.HttpRequest，Code：404，Message：找不到路徑 '/favicon.ico' 的控制器或是未實作 IController。
+現在時間：2017/6/19 下午 05:21:00，Url：System.Web.HttpRequest，Code：500，Message：找不到檢視 'CNList' 或其主版，或沒有任何檢視引擎支援搜尋的位置。已搜尋過下列位置: 
+~/Areas/newweb/Views/NwProduct/CNList.aspx
+~/Areas/newweb/Views/NwProduct/CNList.ascx
+~/Areas/newweb/Views/Shared/CNList.aspx
+~/Areas/newweb/Views/Shared/CNList.ascx
+~/Views/NwProduct/CNList.aspx
+~/Views/NwProduct/CNList.ascx
+~/Views/Shared/CNList.aspx
+~/Views/Shared/CNList.ascx
+~/Areas/newweb/Views/NwProduct/CNList.cshtml
+~/Areas/newweb/Views/NwProduct/CNList.vbhtml
+~/Areas/newweb/Views/Shared/CNList.cshtml
+~/Areas/newweb/Views/Shared/CNList.vbhtml
+~/Views/NwProduct/CNList.cshtml
+~/Views/NwProduct/CNList.vbhtml
+~/Views/Shared/CNList.cshtml
+~/Views/Shared/CNList.vbhtml
+現在時間：2017/6/19 下午 05:21:03，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:21:11，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:21:46，Url：System.Web.HttpRequest，Code：404，Message：檔案不存在。
+現在時間：2017/6/19 下午 05:21:48，Url：System.Web.HttpRequest，Code：500，Message：找不到檢視 'CNList' 或其主版，或沒有任何檢視引擎支援搜尋的位置。已搜尋過下列位置: 
+~/Areas/newweb/Views/NwProduct/CNList.aspx
+~/Areas/newweb/Views/NwProduct/CNList.ascx
+~/Areas/newweb/Views/Shared/CNList.aspx
+~/Areas/newweb/Views/Shared/CNList.ascx
+~/Views/NwProduct/CNList.aspx
+~/Views/NwProduct/CNList.ascx
+~/Views/Shared/CNList.aspx
+~/Views/Shared/CNList.ascx
+~/Areas/newweb/Views/NwProduct/CNList.cshtml
+~/Areas/newweb/Views/NwProduct/CNList.vbhtml
+~/Areas/newweb/Views/Shared/CNList.cshtml
+~/Areas/newweb/Views/Shared/CNList.vbhtml
+~/Views/NwProduct/CNList.cshtml
+~/Views/NwProduct/CNList.vbhtml
+~/Views/Shared/CNList.cshtml
+~/Views/Shared/CNList.vbhtml
+現在時間：2017/6/19 下午 05:22:19，Url：System.Web.HttpRequest，Code：500，Message：找不到檢視 'CNList' 或其主版，或沒有任何檢視引擎支援搜尋的位置。已搜尋過下列位置: 
+~/Areas/newweb/Views/NwProduct/CNList.aspx
+~/Areas/newweb/Views/NwProduct/CNList.ascx
+~/Areas/newweb/Views/Shared/CNList.aspx
+~/Areas/newweb/Views/Shared/CNList.ascx
+~/Views/NwProduct/CNList.aspx
+~/Views/NwProduct/CNList.ascx
+~/Views/Shared/CNList.aspx
+~/Views/Shared/CNList.ascx
+~/Areas/newweb/Views/NwProduct/CNList.cshtml
+~/Areas/newweb/Views/NwProduct/CNList.vbhtml
+~/Areas/newweb/Views/Shared/CNList.cshtml
+~/Areas/newweb/Views/Shared/CNList.vbhtml
+~/Views/NwProduct/CNList.cshtml
+~/Views/NwProduct/CNList.vbhtml
+~/Views/Shared/CNList.cshtml
+~/Views/Shared/CNList.vbhtml

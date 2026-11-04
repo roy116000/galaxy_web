@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="h365_web.MvcApplication" Language="C#" %>

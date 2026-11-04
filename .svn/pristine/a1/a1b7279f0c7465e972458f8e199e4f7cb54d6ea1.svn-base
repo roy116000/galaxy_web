@@ -1,0 +1,178 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwOrderController._order>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var Solt = (IEnumerable<h365_web.Models.solt_data>)ViewData["Solt"];
+    
+}
+
+<div id="List_ajax">
+    <div style="text-align: left; font-size: 20px; padding-bottom: 20px">
+        @ViewBag.total
+
+    </div>
+
+    @foreach (var item in Model)
+    {
+
+        var O = item.O;
+        int n = Array.IndexOf(Model.Select(m => m.O.order_id).ToArray(), O.order_id);
+
+        var So = Solt.Where(m => m.order_id == O.order_id).FirstOrDefault();
+
+        int Totle = O.total - (So != null ? So.prize : 0);
+
+        <table class="table table-bordered mailinbox">
+            <colgroup>
+                <col class="width4" />
+                <col class="width8" />
+                <col class="width10" />
+                <col class="width8" />
+                <col class="width8" />
+                <col class=""/>
+                <col class="width7" />
+                <col class="width7" />
+                <col class="width7" />
+                <col class="width7" />
+                <col class="width8" />
+            </colgroup>
+
+            @if (n == 0)
+            {
+                <thead>
+                    <tr>
+                        <th class="center">
+                            @*<input type="checkbox" name="del_id" class="checkall" />*@</th>
+                        <th class="center">訂單狀態</th>
+                        <th class="center">單號 </th>
+                        <th class="center">訂購方</th>
+                        <th class="center">收件方</th>
+                        <th class="center">寄送地址</th>
+                        <th class="center">訂購時間</th>
+                        <th class="center">出貨時間</th>
+                        <th class="center">完成時間</th>
+
+                        <th class="center">總價格</th>
+                        <th class="center">&nbsp;</th>
+                    </tr>
+                </thead>
+            }
+            <tbody>
+
+
+                <tr class="@NW.echoBool(O.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@O.order_id" /></td>
+                    <td class="center"><span class="label label-success@(action == "ExportList" ? 2 : 5)">@(action == "ExportList" ? "請出貨" : "請匯入")</span> </td>
+                    <td>@(O.order_sn)</td>
+                    <td>@(O.order_name)</td>
+                    <td>@(O.send_name)</td>
+                    <td>@(O.send_address)</td>
+                    <td>@(NW.getDate(O.order_datetime))</td>
+                    <td>@(NW.getDate(O.goods_datetime))</td>
+                    <td>@(NW.getDate(O.finish_datetime))</td>
+
+                    <td class="right" style="@(So != null ? "color:red" : "")" title="健康紅利：@(So!= null ? So.prize : 0)">@(Totle.ToString("N0"))</td>
+                    <td class="center">@Html.ActionLink("編輯", "Edit", new { id = O.order_id }, new { @class = "title" })
+                        || <a onclick="Data('@(O.order_id)')">明細</a>
+                    </td>
+                </tr>
+
+
+                <table class="table table-striped table-bordered table-hover table-condensed" id="S_@(O.order_id)" style="display:none">
+                    <colgroup>
+                        <col class="width4" />
+                        <col class="width8" />
+                        <col />
+                        <col class="width15" />
+                        <col class="width8" />
+                        <col class="width8" />
+
+                    </colgroup>
+
+
+                    <thead>
+                        <tr>
+                            <th class="center">#</th>
+                            <th class="center">商品編號</th>
+                            <th class="center">商品名稱</th>
+                            <th class="center">商品品牌</th>
+                            <th class="center">購買數量</th>
+                            <th class="center">售價</th>
+
+
+                        </tr>
+                    </thead>
+
+
+
+                    <tbody>
+                        @foreach (var item2 in item.S)
+                        {
+                            var S = item2.order_sub;
+                            var P = item2.product_data;
+                            var C = item2.company_data;
+
+                            int num = Array.IndexOf(item.S.Select(m => m.order_sub.sub_id).ToArray(), S.sub_id) + 1;
+                                            
+                            <tr>
+                                <td class="center">@(num)</td>
+                                <td class="center">@(P.item_no)</td>
+                                <td>@(S.item_name)</td>
+                                <td>@(C != null ? C.name : "")</td>
+                                <td>@(S.num)</td>
+                                <td class="right">@(S.price)</td>
+                            </tr>
+                    
+                        }
+                    </tbody>
+                </table>
+            </tbody>
+        </table>
+    }
+
+
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber()
+            //.AddRouteValue("start_date", ViewBag.start_date)
+            //.AddRouteValue("end_date", ViewBag.end_date)
+            //.AddRouteValue("flag", ViewBag.vflag)
+            //.AddRouteValue("pay_visible", ViewBag.vpay_visible)
+            .AddRouteValue("kw", ViewBag.kw)
+                //.AddRouteValue("pay_id", ViewBag.vpay_id)
+            )
+    </div>
+</div>
+<!--pagination-->
+
+
+<style>
+    .label-default {
+        background-color: red;
+    }
+
+    .label-success1 {
+        background-color: #DB8F00;
+    }
+
+    .label-success2 {
+        background-color: green;
+    }
+
+    .label-success5 {
+        background-color: #0033FF;
+    }
+</style>
+
+<script>
+    function Data(o)
+    {
+        $('#S_' + o).toggle();
+    }
+</script>

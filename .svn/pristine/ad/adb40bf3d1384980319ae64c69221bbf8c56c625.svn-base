@@ -1,0 +1,82 @@
+﻿@model h365_web.Models.company_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.company_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>                
+
+                @Html.EditorFor(model => model.inv_sn)
+
+                @Html.EditorFor(model => model.name)
+
+                @Html.EditorFor(model=>model.boss)
+
+                @Html.EditorFor(model => model.address)
+
+                @Html.EditorFor(model=>model.tel)
+
+                @Html.EditorFor(model=>model.fax)
+
+                @Html.EditorFor(model=>model.contact)
+
+                @Html.EditorFor(model=>model.contact_tel)
+
+                @Html.EditorFor(model=>model.mail)
+
+                @Html.EditorFor(model => model.bills_flag)
+
+                @Html.EditorFor(model=>model.freight)
+
+                @Html.EditorFor(model => model.web)
+
+                @Html.EditorFor(model => model.visible)
+
+                @Html.EditorFor(model=>model.uploadimage)
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                inv_sn: "required",
+                name: "required",
+                contact: "required",
+                contact_tel: "required",
+                mail: "required",
+
+            },
+            messages: {
+                inv_sn: "廠商編號，必需選擇！",
+                name: "廠商名稱，必需選擇！",
+                contact: "聯絡窗口，必需填寫！",
+                contact_tel: "窗口電話，必需填寫！",
+                mail: "窗口聯絡信箱，必需選擇！",
+
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>

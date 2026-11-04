@@ -1,0 +1,158 @@
+﻿@model galaxy_web.Models.product_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+
+<div class="maincontent">
+    <div class="contentinner stdform">
+
+        @*<form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">*@
+
+        @*            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)*@
+
+        <h4 class="widgettitle">商品資料</h4>
+
+        <div class="control-group">
+            <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_no))</label>
+            <div style="padding: 5px 5px;" class="field">
+                @(Model.item_no)&nbsp;&nbsp;
+   
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.web_name))</label>
+            <div style="padding: 5px 5px;" class="field">
+                @(Model.web_name)&nbsp;&nbsp;
+   
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.item_name))</label>
+            <div style="padding: 5px 5px;" class="field">
+                @(Model.item_name)&nbsp;&nbsp;
+   
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.status))</label>
+            <div style="padding: 5px 5px;" class="field">
+                @(ViewBag.status)&nbsp;&nbsp;
+   
+            </div>
+        </div>
+
+
+        <div class="abgne_tab">
+            <ul class="tabs">
+                <li><a href="#tab1">相關設定</a></li>
+
+                <li><a href="#tab2">產品價格</a></li>
+                <li><a href="#tab3">產品資訊</a></li>
+                <li><a href="#tab4">產品圖檔</a></li>
+                <li><a href="#tab6">產品數量</a></li>
+                <li><a href="#tab5">變更記錄</a></li>
+
+            </ul>
+
+            <div>
+
+                @*相關設定*@
+                <div id="tab1" class="tab_content">
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.group_ids))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            @(ViewBag.group_ids)&nbsp;&nbsp;
+   
+                        </div>
+                    </div>
+                </div>
+
+                @*產品價格*@
+                <div id="tab2" class="tab_content">
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.cost))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            @(Model.cost)&nbsp;&nbsp;
+   
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.price))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            @(Model.price)&nbsp;&nbsp;
+   
+                        </div>
+                    </div>
+
+
+                    @*@Html.EditorFor(model => model.erp_cost)*@
+                </div>
+
+                @*產品資訊*@
+                <div id="tab3" class="tab_content">
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.info))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            @(Model.info)&nbsp;&nbsp;
+   
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.introduce))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            @(Html.Raw(Model.introduce))&nbsp;&nbsp;
+   
+                        </div>
+                    </div>
+
+                </div>
+
+                @*產品圖檔*@
+                <div id="tab4" class="tab_content">
+
+                    <div class="control-group">
+                        <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.Img))</label>
+                        <div style="padding: 5px 5px;" class="field">
+                            <img style="width:30%" src="@(Model.Img)" />&nbsp;&nbsp;  
+                        </div>
+                    </div>
+
+                </div>
+
+                @*產品數量*@
+                <div id="tab6" class="tab_content">
+
+                    @{Html.RenderPartial("Add_Tab6");}
+
+                </div>
+
+                @*變更紀錄*@
+                <div id="tab5" class="tab_content">
+
+                    @{Html.RenderPartial("Add_Tab5");}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        @*        </form>*@
+
+    </div>
+</div>
+
+

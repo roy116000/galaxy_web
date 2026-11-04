@@ -1,0 +1,73 @@
+﻿@{
+    string guid2 = Guid.NewGuid().ToString();
+    Layout = null;
+    string group_id = "1-";
+    @*分類ID*@
+}
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <link href="~/Areas/newweb/Content/css/style.default.css" rel="stylesheet" />
+  <script src="~/Areas/newweb/Content/js/jquery-1.9.1.min.js"></script>
+  <script src="~/Areas/newweb/Content/js/jquery-migrate-1.1.1.min.js"></script>
+  <script src="~/Areas/newweb/Content/js/jquery.validate.min.js"></script>
+
+
+
+      
+          <h5>歡迎使用QRCODE登入系統</h5>
+          <span class="subtitle">有效倒數計時：</span>
+          <button class="btn btn-default btn-block" onclick="self.location.href='@(Url.Action("Index","NwHome"))'">返回一般登入</button>
+          <button class="btn btn-default btn-block" onclick="self.location.href='@(Url.Action("MedicineLogin","NwHome"))'">重新整理</button>
+    
+            
+      <!--loginwrapperinner-->
+
+
+
+<div style="margin: 20px auto; text-align: center; width: 180px;">
+    @*QRCODE用JS*@
+    <script src="~/Content/js/jquery.qrcode-0.12.0.min.js"></script>
+    <script src="~/Content/js/jquery.timers.min.js"></script>
+
+    @*以group_id+guid2組成qrcode*@
+    <div id="qrlogin" rel="@(group_id+guid2)" style="width:180px; height:180px;"></div>
+
+                                                         @*QRCODE參數*@                               @*純文字組成*@
+    <script>$(function () { $('#qrlogin').qrcode({ "render": "image", "size": 180, "color": "#3a3",  "text": "@(group_id)" + "@(guid2)" }).append(""); })</script>
+                                                                                                
+</div>
+
+<script>
+    var i = 300;
+
+    $(function () {
+        $("body").everyTime('3s', 'myTimer1', timerFunc, 100);
+        //每秒3執行一次timerFunc共100次
+    })
+    
+    function timerFunc() {
+       
+        
+        i--;
+        $('.subtitle').html('有效倒數計時：' + i);
+        if (i < 0)
+        {
+            $('.subtitle').html('QRCODE已失效!請重新整理。');
+        }
+        //顯示QRCODE有效期限
+
+        var guid2 = $('#qrlogin').attr('rel');
+        $.post('@(Url.Action("checkLogin", "NwHome"))', { 'sn': guid2 }, function (data) {            
+            if (data.type == "ok" && i > 0) {               
+                parent.location = data.url;
+            };
+        }, 'json');
+        //回傳QRCODE資訊給controller判斷是否正確後type將設為ok且qrcode並未失效則自動導入url之連結
+    }
+        
+</script>

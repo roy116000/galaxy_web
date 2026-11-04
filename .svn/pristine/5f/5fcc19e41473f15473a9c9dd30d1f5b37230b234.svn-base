@@ -1,0 +1,20 @@
+﻿@model String
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    IDictionary<string, object> htmlAttributes2 = new Dictionary<string, object>();
+    htmlAttributes2.Add("class", "span2");
+    htmlAttributes2.Add("placeholder", ViewData.ModelMetadata.Watermark); //浮水印
+    
+    string id = ViewData.ModelMetadata.PropertyName;
+}
+<script type="text/javascript">jQuery(function () { jQuery("#@(id)").mask('0999-999-999'); })</script>
+<div class="control-group">
+    @Html.Label("",htmlAttributes)
+    <div class="controls">
+    @Html.TextBox("", ViewData.TemplateInfo.FormattedModelValue.ToString(), htmlAttributes2)
+    <span class="help-inline"></span>
+    </div>
+    <small class="desc">請輸入手機號碼，範例：0912-345-678</small>
+</div>

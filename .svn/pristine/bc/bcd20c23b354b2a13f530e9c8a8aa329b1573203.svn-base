@@ -1,0 +1,57 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.health_news>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width18" />
+            <col class="width23" />
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center"><input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().parent_idx))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().title))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().info))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().inx))</th>
+                <th class="center">@(Html.DisplayNameFor(m => m.FirstOrDefault().visible))</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {              
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center"><input type="checkbox" name="block_id" class="block_check" value="@(item.news_id)" /></td>
+                    <td class="center">@Html.DisplayFor(m => item.parent_idx)</td>
+                    <td class="center" title="@(item.title)">@(NW.word(item.title, 18, "..."))</td>
+                    <td class="center" title="@(item.info)">@(NW.word(item.info, 15, "..."))</td>
+                    <td class="center">@Html.DisplayFor(m => item.inx)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible)</td>
+                    <td class="center">@Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.news_id }, new { @class = "title", target = "_blank" })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid))
+
+    </div>
+
+</div>

@@ -1,0 +1,99 @@
+﻿@model h365_web.Areas.newweb.Controllers.NwBillsController._Bill
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+
+        @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <input value="@(Model.bill.bill_id)" name="bill_id" type="hidden" />
+            
+            <div class="widgetcontent">
+                <h4 class="widgettitle">請款資訊</h4>
+
+                <div class="control-group">
+                    <label for="" class="control-label">所屬廠商</label>
+                    <span class="field">
+                        <span class="label label-info" style="font-size: 150%;">@(Model.c_name)</span>
+                    </span>
+                </div>
+
+                @Html.EditorFor(m => m.bill.invoice_datetime, null, "invoice_datetime")
+
+                @Html.EditorFor(m => m.bill.invoice_no, null, "invoice_no")
+
+                @if (ViewBag.power_id == 2 && Model.bill.invoice_datetime != null) 
+                {
+                    @Html.EditorFor(m => m.bill.pay_datetime, null, "pay_datetime")
+                }
+
+                
+                <div class="control-group">
+                    <label for="" class="control-label">請款總額</label>
+
+                    <h2 class="field" style="font-size: 200%;">@(Model.order.Select(m => m.cost_total).DefaultIfEmpty(0).Sum().ToString("N0"))
+
+                        @if (ViewBag.power_id == 4)
+                        {
+                            <button class="btn btn-primary">請款</button>
+                        }
+                        else
+                        {
+                            if (ViewBag.power_id == 2)
+                            {
+                                if (Model.bill.pay_datetime == null) 
+                                {
+                                    <button class="btn btn-primary">確認付款</button>
+                                }
+                            }
+
+                            else
+                            {
+                                <span style="font-weight:bold; color:red; padding:5px 5px">廠商尚未請款</span>
+                            }
+                        }
+                        
+
+                    </h2>  
+                </div>
+
+                @{Html.RenderPartial("_Order_data", Model.order);}
+
+
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+        $('.hasDatepicker').attr("required", "required");
+    })
+
+</script>
+
+
+@*<script>
+    function getDetail(o) {
+
+        $.post('@(Url.Action("getDetail", "NwBills"))', { oid: o }, function (data) {
+
+            $('#order_title').html(data.title);
+            $('#order_body').html(data.s);
+
+            $('#order_detail').modal();
+
+        }, 'json')
+    }
+
+</script>*@
+

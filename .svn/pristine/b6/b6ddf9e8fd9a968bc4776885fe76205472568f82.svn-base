@@ -1,0 +1,25 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+        //Layout = null;
+}
+<div class="maincontent">
+    <div class="contentinner">
+        <div class="alert alert-error" style="font-size: large;">
+            @*        <button type="button" class="close" data-dismiss="alert">×</button>*@
+            <strong>系統發生錯誤!!</strong>
+            <br />
+            已將錯誤記錄，並發給系統管理人員處理...
+        </div>
+        <pre class="prettyprint linenums" style="font-size: medium;">
+    action:@(Model.ActionName)
+controller:@(Model.ControllerName)
+    target:@(Model.Exception.TargetSite)
+     error:@(Model.Exception.Message)</pre>
+        <br>
+        <button onclick="history.back()" class="btn btn-primary">回上一頁</button>
+        &nbsp; 
+               
+    @*<button class="btn" onclick="location.href='dashboard.html'">Go Back to Dashboard</button>*@
+    </div>
+</div>

@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using System.Web.Mvc;
+
+namespace h365_web.Models
+{
+
+    public class msg_note
+    {
+
+
+        [Key]
+        public int msg_id {get;set;}
+
+        public int drugstore_id {get;set;}
+
+        public DateTime? note_time {get;set;}
+
+        public string note {get;set;}
+
+        public virtual drugstore_data drugstore_data { get; set; }
+
+    }
+}

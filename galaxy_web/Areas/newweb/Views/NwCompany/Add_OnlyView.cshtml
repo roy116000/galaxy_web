@@ -1,0 +1,64 @@
+﻿@model galaxy_web.Models.sys_admin_data
+
+<div class="control-group">
+    <label for="create_user" class="control-label">廠商等級</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(ViewBag.level)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.introduce_uid))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.introduce_uid)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.company_uid))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.company_uid)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.name))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.name)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.name_full))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.name_full)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.sn))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.sn)&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.start_date))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(NW.getDate(Model.start_date))&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.end_date))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(NW.getDate(Model.end_date))&nbsp;&nbsp;  
+    </div>
+</div>
+
+<div class="control-group">
+    <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.info))</label>
+    <div style="padding: 5px 5px;" class="field">
+        @(Model.info)&nbsp;&nbsp;  
+    </div>
+</div>

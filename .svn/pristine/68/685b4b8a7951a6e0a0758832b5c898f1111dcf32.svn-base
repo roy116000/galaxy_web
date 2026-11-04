@@ -1,0 +1,78 @@
+﻿@using MvcPaging;
+@*@model IPagedList<h365_web.Models.product_data>*@
+@*@Html.Partial("template_list_fix")*@
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var sData = (List<h365_web.Models.product_sales>)ViewData["sData"];
+    
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width8" />
+            <col class="width12" />
+
+            <col class="width6" />
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            @*<col class="width8" />*@
+            <col class="width10" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().price))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().cost))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().visible_num))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().num))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().visible_date))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().start_datetime))</th>
+                <th class="center">@(Html.DisplayNameFor(m => sData.FirstOrDefault().end_datetime))</th>
+
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in sData)
+            {
+                   
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="block_id" class="block_check" value="@(item.sales_id)" /></td>
+                    <td class="center">@Html.DisplayFor(m => item.price)</td>
+                    <td class="center">@Html.DisplayFor(m => item.cost)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible_num)</td>
+                    <td class="center">@Html.DisplayFor(m => item.num)</td>
+                    <td class="center">@Html.DisplayFor(m => item.visible_date)</td>
+                    <td class="center">@Html.DisplayFor(m => item.start_datetime)</td>
+                    <td class="center">@Html.DisplayFor(m => item.end_datetime)</td>
+
+                    <td class="center">
+                        @Html.ActionLink("編輯", action.Replace("List", "Edit").Replace("_ajax", ""), new { id = item.sales_id }, new { @class = "title" })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @*<div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid)
+            .AlwaysAddFirstPageNumber().AddRouteValue("flag", ViewBag.flag)
+            )      
+
+    </div>*@
+
+  
+
+</div>

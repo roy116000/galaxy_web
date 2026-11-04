@@ -1,0 +1,85 @@
+﻿@using MvcPaging
+@model IPagedList<h365_web.Areas.newweb.Controllers.NwReportController.rank_detail>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    //var salesall = (List<h365_web.Areas.newweb.Controllers.NwReportController.rank_detail>)ViewData["salesall"];
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width6" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">排名</th>
+                <th class="center">縣市地區</th>
+                <th class="center">藥局名稱</th>
+                <th class="center">銷售分類</th>
+                <th class="center">貨號</th>
+                <th class="center">品名</th>
+                <th class="center">銷售數量</th>
+                <th class="center">銷售業績</th>
+                <th class="center">成本</th>
+                <th class="center">毛利率</th>
+                <th class="center">毛利額</th>
+                <th class="center">紅利點數</th>
+                <th class="center">紅利點數占比</th>
+                <th class="center">淨毛利額</th>
+                <th class="center">供貨廠商</th>
+                <th class="center">商品狀態</th>
+            </tr>
+        </thead>
+        <tbody>
+    @*class="@NW.echoBool(item.visible, "unread", "visible")"*@
+            @foreach(var item in Model)
+            {
+                <tr >
+                    <td class="center">@(item.rank)</td>
+                    <td class="center">@(item.city)</td>
+                    <td class="left">@(item.drugstore)</td>
+                    <td class="center">@(item.group)</td>
+                    <td class="center" title="@(item.item_no)">@(NW.word(item.item_no, 3, "..."))</td>
+                    <td class="left" title="@(item.item_name)">@(NW.word(item.item_name, 6, "..."))</td>
+                    <td class="center">@(item.num)</td>
+                    <td class="right">@(item.price.ToString("N0"))</td>
+                    <td class="right">@(item.cost.ToString("N0"))</td>
+                    <td class="center">@(item.maori_rate.ToString("F2"))</td>
+                    <td class="right">@(item.maori.ToString("F2"))</td>
+                    <td class="right">@(item.bonus.ToString("F2"))</td>
+                    <td class="right">@(item.bonus_p.ToString("F2"))</td>
+                    <td class="right">@(item.net_maori.ToString("F2"))</td>
+                    <td class="left" title="@(item.name_company)">@(NW.word(item.name_company, 2, "..."))</td>
+                    <td class="center">@if(item.pro_flag == 3){@("上架中")}else if(item.pro_flag == 4){@("下架中")}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("start_date", ViewBag.start)
+            .AlwaysAddFirstPageNumber().AddRouteValue("end_date", ViewBag.end))
+    </div>
+
+</div>
+<!--pagination-->

@@ -1,0 +1,227 @@
+﻿@model h365_web.Models.order_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "span6");
+
+    int total = ViewBag.total;
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "editprofileform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.order_id)
+            <input type="hidden" id="index" name="index" value="0" />
+            <div class="widgetcontent">
+
+                <div class="row-fluid">
+
+                    @*訂單資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">訂單資訊</h4>
+                        <div class="widgetcontent bordered">
+                            <p>
+                                <label>訂單單號：</label><span class="label label-info">@(Model.order_id)</span>
+                            </p>
+                            <p>
+                                <label>前台單號：</label>@(Model.order_sn)
+                            </p>
+                            <p>
+                                <label>訂購時間：</label>@(Model.order_datetime)
+                            </p>
+                            <p>
+                                <label>訂單狀態：</label><span class="label label-@(Model.flag > 0 ? "success" : "default")">@((Model.finish_datetime != null && Model.goods_datetime == null) ? NW.Name_flag[1] : NW.Name_flag[Model.flag])</span>
+                            </p>
+                            <p>
+                                <label>金額：</label>
+                                $ @(total.ToString("N0"))
+                            </p>
+                        </div>
+                    </div>
+
+                    @*訂購資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">訂購資訊</h4>
+                        <div class="widgetcontent bordered">
+                            <p>
+                                <label>訂購人姓名：</label>@(Model.order_name != null ? Model.order_name : "- - -")
+                            </p>
+                            <p>
+                                <label>訂購人電話：</label>@(Model.order_phone)
+                            </p>
+                            <p>
+                                <label>收款藥師：</label>@(ViewBag.getphar)
+                            </p>
+                            <p>
+                                <label>交貨藥師：</label>@(ViewBag.goodsphar)
+                            </p>
+
+                        </div>
+                    </div>
+
+                    @*收件人資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">收件人資訊</h4>
+                        <div class="widgetcontent bordered">
+                            <p>
+                                <label>收件方姓名：</label>@(Model.send_name)
+                            </p>
+                            <p>
+                                <label>收件方電話：</label>@(Model.send_tel)
+                            </p>
+                            <p>
+                                <label>收件方地址：</label>@(Model.send_zip != 0 ? Model.send_zip.ToString() : "未填郵遞區號-") - @(Model.send_address)
+                            </p>
+                            <p>
+                                <label>收件日期：</label>@(Model.goods_datetime != null ? Model.goods_datetime.ToString() : "- - -")
+                            </p>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row-fluid">
+
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">退貨申請</h4>
+                        <div class="widgetcontent bordered">
+
+                            <div>
+                                @Html.EditorFor(m => m.back_money_type)
+                            </div>
+                            <div>
+                                @Html.EditorFor(model => model.back_datetime) @*申請退貨時間*@
+                            </div>
+                            <div>
+                                <label>申請退貨原因</label><textarea name="back_info" id="back_info" class="span8" rows="2">@(Model.back_info)</textarea>
+                                @*<label>退貨備註：</label><textarea name="backed_info" id="backed_info" class="span8" rows="2">@(Model.backed_info)</textarea>*@
+                            </div>
+
+                            @if (Model.back_money_type == 0)
+                            { 
+                                <p>
+                                    <label></label>
+                                    <a class="btn btn-primary" onclick="submit(0);">儲存退貨資訊</a>
+                                </p>
+                            }
+
+                        </div>
+                    </div>
+
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">退貨流程(廠商填寫)</h4>
+                        <div class="widgetcontent bordered">
+
+                            @*回收退貨單號*@
+                            <div>@Html.EditorFor(m => m.back_freight_no)</div>
+
+                            @*回收時間*@
+                            <div>@Html.EditorFor(model => model.backok_datetime)</div>
+
+                            @*商品回收狀況*@
+                            @*<div>@Html.EditorFor(m => m.back_flag)</div>*@
+
+                            @*退款金額*@
+                            @*<div id="dis">@Html.EditorFor(model => model.discount)</div>*@
+
+                            @*<script>
+
+                                $(function () {
+                                    var o = $('input:radio:checked[name="back_flag"]').val();
+                                    $('#discount').val((o == 0 || o == 1) ? '0' : '@(Model.discount)');
+                                    (o == 0 || o == 1) ? $('#dis').hide() : $('#dis').show();
+                                })
+
+                                $('input:radio[name="back_flag"]').change(function () {
+                                    var o = $(this).val();
+                                    $('#discount').val((o == 0 || o == 1) ? '0' : '@(Model.discount)');
+                                    (o == 0 || o == 1) ? $('#dis').hide() : $('#dis').show();
+                                })
+
+                            </script>*@
+
+                            @if (Model.backok_datetime == null)
+                            {
+                                <div>
+                                    <label></label>
+                                    <a class="btn btn-primary" onclick="submit(1);">儲存退貨資訊</a>
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+
+                    @*<div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">發票資訊</h4>
+                        <div class="widgetcontent bordered">
+                            @Html.EditorFor(model => model.invoice_no)
+
+                            @Html.EditorFor(m => m.invoice_datetime)
+
+                            @if (Model.back_flag != 0 && Model.backok_datetime != null && Model.back_datetime > Model.invoice_datetime)
+                            { 
+                                <div class="stdformbutton" style="text-align: center;">
+                                    &nbsp;
+                                    <a class="btn btn-primary" onclick="submit(3);">儲存發票資訊</a>
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function submit(o) {
+        if (o == 1) {
+            $("#form1").validate({
+                rules: {
+                    back_freight_no: "required",
+                    backok_datetime: "required"
+                },
+                messages: {
+                    back_freight_no: "必須填寫！",
+                    backok_datetime: "必須填寫！"
+                },
+                highlight: function (label) {
+                    jQuery(label).closest('.control-group').addClass('error');
+                }
+            });
+        }
+        if (o == 3) {
+            $("#form1").validate({
+                rules: {
+                    invoice_datetime: "required",
+                    invoice_no: "required"
+
+                },
+                messages: {
+                    invoice_datetime: "發票發送時間，必須填寫！",
+                    invoice_no: "必須填寫！"
+                },
+                highlight: function (label) {
+                    jQuery(label).closest('.control-group').addClass('error');
+                }
+            });
+        }
+
+        $('#index').val(o);
+        $('#form1').submit();
+    }
+</script>
+<style>
+    #backed_datetime, #backok_datetime, #discount, #back_datetime, #back_money_type, #invoice_datetime {
+        width: 100px;
+        height: 36px;
+    }
+</style>

@@ -1,0 +1,281 @@
+﻿@model galaxy_web.Models.order_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var note = (galaxy_web.Models.order_note)ViewData["note"];
+    var sub = (galaxy_web.Models.order_sub)ViewData["sub"];
+}
+
+<style>
+    .dl-horizontal dt {
+        /*text-align: left;*/
+        width: 32%;
+    }
+
+    .dl-horizontal dd {
+        text-align: left;
+        margin-left: 40%;
+    }
+</style>
+
+<div class="maincontent">
+    <div class="contentinner">
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "editprofileform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            <input type="hidden" name="note_id" value="@(note.note_id)" />   
+            <input type="hidden" name="order_id" value="@(Model.order_id)" />   
+            <input type="hidden" name="company_id" value="@(Model.company_id)" />      
+           @* <input type="hidden" name="index" />*@
+            
+            <div class="widgetcontent">
+
+                <div class="row-fluid">
+
+                    @*訂購資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">訂購資訊</h4>
+                        <div class="widgetcontent bordered">
+
+                            <dl class="dl-horizontal">
+                                <dt>ERP單號：</dt>
+                                <dd>@(Model.order_sn)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>平台訂購時間：</dt>
+                                <dd>
+                                    @if (Model.create_datetime.HasValue)
+                                    {
+                                        @(Model.create_datetime.Value)                                 
+                                    }
+                                </dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>當前狀態：</dt>
+                                <dd>
+                                    @(NW.Flag_ArrS.Where(m => m.Key == Model.status).Select(m => m.Value).FirstOrDefault())
+                                </dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>備註：</dt>
+                                <dd>
+                                    @(sub.info)
+                                </dd>
+                            </dl>
+
+                            @*<dl class="dl-horizontal">
+                                <dt>接收訂單時間：</dt>
+                                <dd>
+                                    @if (Model.order_data.order_datetime.HasValue)
+                                    {
+                                        @(Model.order_data.order_datetime)
+                                    }
+                                </dd>
+                            </dl>*@
+
+                        </div>
+                    </div>
+
+                    @*訂購方資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">訂購(下單)方資訊</h4>
+                        <div class="widgetcontent bordered">
+
+                            <dl class="dl-horizontal">
+                                <dt>姓名：</dt>
+                                <dd>@(Model.order_name)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>電話：</dt>
+                                <dd>@(Model.order_tel)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>郵遞區號：</dt>
+                                <dd>@(Model.order_zip)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>地址：</dt>
+                                <dd>@(Gs.getAddress(Model.order_address, Model.order_zip))</dd>
+                            </dl>
+
+                        </div>
+                    </div>
+
+                    @*收件方資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">收件(預約)方資訊</h4>
+                        <div class="widgetcontent bordered">
+
+                            <dl class="dl-horizontal">
+                                <dt>姓名：</dt>
+                                <dd>@(Model.send_name)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>電話：</dt>
+                                <dd>@(Model.send_tel)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>郵遞區號：</dt>
+                                <dd>@(Model.send_zip)</dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>地址：</dt>
+                                <dd>@(Gs.getAddress(Model.send_address, Model.send_zip))</dd>
+                            </dl>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row-fluid">
+
+                    @*物流資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">物流資訊</h4>
+                        <div class="widgetcontent bordered">
+
+                            @*<dl class="dl-horizontal">
+                                <dt>通知出貨：</dt>
+                                <dd>@(Model.order_data.order_datetime)</dd>
+                            </dl>*@
+
+                            @*                                
+                                <dl class="dl-horizontal">
+                                    <dt>宅配公司：</dt>
+                                    <dd>
+                                        @(Goods.Where(m => m.Value == Model.order_data.goods_id.ToString())
+                                         .Select(m => m.DisplayText).FirstOrDefault() ?? null)
+                                    </dd>
+                                </dl>
+                                
+                                <dl class="dl-horizontal">
+                                    <dt>宅配單號：</dt>
+                                    <dd>
+                                        @(Model.order_status.Where(m => m.status == 2 && m.status_old != 3).OrderByDescending(m => m.status_id)
+                                        .Select(m => m.info).FirstOrDefault() ?? null)
+
+                                    </dd>
+                                </dl>*@
+
+                            <dl class="dl-horizontal">
+                                <dt>出貨時間(療程結束)：</dt>
+                                <dd>
+                                    @(Model.goods_datetime)
+                                </dd>
+                            </dl>
+
+                        </div>
+                    </div>
+
+                    @*預約資訊*@
+                    <div class="span4">
+                        <h4 class="widgettitle nomargin" style="margin-bottom: 0px;">預約資訊<a style="float:right" target="_blank" href="@(Url.Action("Edit", "NwOrder", new { id = Model.order_id }))">點此前往訂單詳細資訊</a></h4> 
+                        <div class="widgetcontent bordered">
+                            @{
+            var date = note.note_time.HasValue ? note.note_time.Value.ToShortDateString() : "";
+
+                                }
+                            <dl class="dl-horizontal">
+                                <dt>預約日期：</dt>
+                                <dd>
+                                    <input id="note_time" name="note_time" class="span10" type="datetime" value="@(date)" autocomplete="off" />
+
+                                </dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt>預約時間：</dt>
+                                <dd>
+                                    <select class="span4" id="hour" name="hour">
+                                        @for (int i = 0; i < 24; i++)
+                                        {
+                                            var h = i.ToString().PadLeft(2, '0');
+                                            
+                                            <option value="@(h)" @(note.note_time.HasValue ? (note.note_time.Value.ToString("HH") == h ? "selected" : "") : "")>@(h)</option>
+                                        }
+                                    </select>
+                                    點
+                                    <select class="span4" id="minute" name="minute">
+                                        @for (int i = 0; i < 60; i++)
+                                        {
+                                            var mm = i.ToString().PadLeft(2, '0');
+                                            
+                                            <option value="@(mm)" @(note.note_time.HasValue ? (note.note_time.Value.ToString("mm") == mm ? "selected" : "") : "")>@(mm)</option>
+                                        }
+                                    </select>
+                                    分
+
+                                </dd>
+                            </dl>
+
+                            <dl class="dl-horizontal">
+                                <dt></dt>
+                                <dd>
+                                    <button class="btn" onclick="$('#form1').submit();">儲存</button>
+                                </dd>
+                            </dl>
+
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    //function go(o) {
+    //    $('input[name="index"]').val(o);
+
+    //    if (o == 2) {
+
+    //        $('#goods_id, #goods_sn, #goods_datetime').attr('required', true);
+
+    //    }
+    //    else if (o == 4) {
+
+    //        $('#backed_datetime').attr('required', true);
+    //    }
+    //    else if (o == 5) {
+
+    //    } else if (o == 6) {
+
+    //    } else { }
+
+
+    //    return false;
+
+    //}
+
+    //function exch(i) {
+    //    if (i == 6) {
+
+    //        $('#cus_inv input').attr('disabled', false);
+    //        $('#com_inv input').attr('disabled', true);
+    //        $('#cus_inv select').attr('disabled', false);
+    //        $('#com_inv select').attr('disabled', true);
+    //    } else if (i == 5) {
+
+    //        $('#cus_inv input').attr('disabled', true);
+    //        $('#com_inv input').attr('disabled', false);
+    //        $('#cus_inv select').attr('disabled', true);
+    //        $('#com_inv select').attr('disabled', false);
+    //    }
+    //}
+</script>

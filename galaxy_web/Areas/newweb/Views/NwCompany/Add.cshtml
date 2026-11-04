@@ -1,0 +1,326 @@
+﻿@model galaxy_web.Models.sys_admin_data
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var sys_admin_bills = (galaxy_web.Models.sys_admin_bills)ViewData["bills"];
+
+    var bank_data = (List<string>)ViewData["bank"];
+    var code_data = (List<string>)ViewData["code"];
+    string model_bank = ViewBag.model_bank;
+    string bank_g = "0";
+    string account_name = "";
+    string account_c = "";
+    if (!string.IsNullOrEmpty(model_bank))
+    {
+        var arr = model_bank.Split(',');
+        bank_g = arr[0];
+        account_name = arr[2];
+        account_c = arr[1];
+    }
+}
+
+<div class="maincontent">
+    <div class="contentinner">
+
+        <form id="form1" class="stdform" method="post" action="@(Url.Action(action.Replace("Add", "Edit") + "Save", controller))" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(m => m.admin_id)
+
+            <div class="abgne_tab">
+
+                <ul class="tabs">
+
+                    <li><a href="#tab1">基本資訊</a></li>
+
+                    <li><a href="#tab2">相關資訊</a></li>
+
+                    <li><a href="#tab3">聯絡資訊</a></li>
+
+                    <li><a href="#tab4">相關文件證明</a></li>
+
+                    <li><a href="#tab5">請款資訊設定</a></li>
+
+
+                </ul>
+
+                <div>
+
+                    @*基本資訊*@
+                    <div id="tab1" class="tab_content">
+
+                        @if (ViewBag.aPower > 2)
+                        {
+                            Html.RenderPartial("Add_OnlyView");
+
+                        }
+                        else
+                        {
+                            
+                            <div class="control-group">
+                                <label for="create_user" class="control-label">@(Html.DisplayNameFor(m => m.erp_sn))</label>
+                                <div style="padding: 5px 5px;" class="field">
+                                    @(Model.erp_sn)&nbsp;&nbsp;  
+                                </div>
+                            </div>
+                            
+                            
+                            @Html.EditorFor(m => m.introduce_uid)
+                            
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label"></label>
+                                <button class="select_uid" type="button">查詢</button>
+                                <div id="introduce_uids" style="padding: 5px 5px; font-size: x-large; color: #f00; font-weight: bold; display: none;" class="field">
+                                    &nbsp;&nbsp;  
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(m => m.company_uid)
+
+                            <div class="control-group">
+                                <label for="create_user" class="control-label"></label>
+                                <button class="select_uid" type="button">查詢</button>
+                                <div id="company_uids" style="padding: 5px 5px; font-size: x-large; color: #f00; font-weight: bold; display: none;" class="field">
+                                    &nbsp;&nbsp;  
+                                </div>
+                            </div>
+
+                            @Html.EditorFor(m => m.group_id)
+
+
+                            @Html.EditorFor(m => m.name)
+
+                            @Html.EditorFor(m => m.name_full)
+
+                            @Html.EditorFor(m => m.sn)
+
+
+                            <div class="control-group">
+                                <label class="control-label" for="pwd">密碼</label>
+                                <div class="controls">
+                                    <input class="span2" id="pwdx" maxlength="50" name="pwdx" placeholder="" value="@(Model.pwd)">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+
+                            if (Model.admin_id == 0)
+                            {
+                            <div class="control-group">
+                                <label class="control-label" for="pwd">確認密碼</label>
+                                <div class="controls">
+                                    <input class="span2" id="pwdy" maxlength="50" name="pwdy" placeholder="" value="@(Model.pwd)">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>
+                            }
+                            
+                            @Html.EditorFor(m => m.note_visible)
+
+                            @Html.EditorFor(m => m.visible)
+
+                            @Html.EditorFor(m => m.start_date)
+
+                            @Html.EditorFor(m => m.end_date)
+
+                            @Html.EditorFor(m => m.info)
+
+                        }
+
+                    </div>
+
+                    @*相關資訊*@
+                    <div id="tab2" class="tab_content">
+
+                        @Html.EditorFor(m => m.zip)
+
+                        @Html.EditorFor(m => m.address)
+
+                        @Html.EditorFor(m => m.zip2)
+
+                        @Html.EditorFor(m => m.address2)
+
+                        @Html.EditorFor(m => m.tel)
+
+                        @Html.EditorFor(m => m.tel2)
+
+                        @Html.EditorFor(m => m.fax)
+
+                        @Html.EditorFor(m => m.mail)
+
+                    </div>
+
+                    @*聯絡資訊*@
+                    <div id="tab3" class="tab_content">
+
+                        @Html.EditorFor(m => m.boss)
+
+                        @Html.EditorFor(m => m.boss_tel)
+
+                        @Html.EditorFor(m => m.contact)
+
+                        @Html.EditorFor(m => m.contact_tel)
+
+                        @Html.EditorFor(m => m.contact2)
+
+                        @Html.EditorFor(m => m.contact2_tel)
+
+                        @Html.EditorFor(m => m.contact3)
+
+                        @Html.EditorFor(m => m.contact3_tel)
+
+                    </div>
+
+                    @*圖片資訊*@
+                    <div id="tab4" class="tab_content">
+
+                        @Html.EditorFor(m => m.PDF)
+
+                        @Html.EditorFor(m => m.Img)
+
+
+                    </div>
+
+
+                    @*請款資訊*@
+                    <div id="tab5" class="tab_content">
+
+
+
+                        @*<div class="control-group">
+                                <label class="control-label" for="pwd">密碼</label>
+                                <div class="controls">
+                                    <input class="span2" id="000" maxlength="50" name="pwdx" placeholder="" value="@(Model.pwd)">
+                                    <span class="help-inline"></span>
+                                </div>
+                            </div>*@
+
+                        <div class="control-group" @(ViewBag.aPower > 2 ? "style=display:none" : "")>
+                            <label class="control-label" for="sys_admin_bills.bills_flag">結算類型</label>
+                            <div class="controls">
+                                <select name="sys_admin_bills.bills_flag" id="sys_admin_bills_bills_flag" style="width: 100px">
+                                    <option value="0" @(sys_admin_bills.bills_flag == 0 ? "selected" : "")>月結</option>
+                                    <option value="1" @(sys_admin_bills.bills_flag == 1 ? "selected" : "")>半月結</option>
+                                </select>
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">銀行資訊</label>
+                            <div class="controls">
+                                <select id="bank">
+                                    <option>請選擇銀行</option>
+                                    @foreach (var item in bank_data)
+                                    {
+                                        var c = item.Split(',');
+                                        <option value="@(c[1])" @(c[1].ToString() == bank_g ? "selected=selected" : "")>@(c[0])</option>
+                                    }
+                                </select>
+
+                                <select id="bank2" name="sys_admin_bills.receiving_code">
+                                    <option id="@(bank_g)" value="@(account_c)" selected="selected">@(account_name)</option>
+                                </select>
+                                <span class="help-inline"></span>
+                            </div>
+                        </div>
+
+                        <select id="data" style="display: none">
+                            @foreach (var item in code_data)
+                            {
+                                var c = item.Split(',');
+                                <option id="@(c[1])" value="@(c[2])">@(c[0])</option>
+                            }
+                        </select>
+                        <script>
+                            $(function () {
+                                $('#bank').change(function () {
+                                    var i = $(this).val();
+                                    $('#bank2').html('');
+                                    $('#data option[id=' + i + ']').each(function () {
+                                        var j = $(this).val();
+                                        var v = $(this).attr('id');
+                                        var t = $(this).html();
+                                        $('#bank2').append('<option id=' + v + ' value=' + j + '>' + t + '</option>')
+                                    })
+                                })
+                            })
+                        </script>
+
+
+                        @*                        @Html.EditorFor(m => sys_admin_bills.bank)
+
+                        @Html.EditorFor(m => sys_admin_bills.bank2)*@
+
+                        @Html.EditorFor(m => sys_admin_bills.receiving_name)
+
+                        @Html.EditorFor(m => sys_admin_bills.receiving_account)
+
+                        <div class="control-group">
+                            <label class="control-label">收款行代號</label>
+                            <div style="padding: 5px 5px;" class="field">
+                                @(sys_admin_bills.receiving_code)
+
+                            </div>
+                        </div>
+
+
+
+                        @*    @Html.EditorFor(m => sys_admin_bills.receiving_code)*@
+
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="control-group">
+                <div class="stdformbutton">
+                    <button class="btn btn-primary">儲存</button>
+                    @*<button type="button" onclick="location.href = '@(Request.RawUrl)'" class="btn">回列表</button>*@
+                    <button type="button" onclick="location.href = '@Url.Action(action.Replace("Add", "").Replace("Edit", "") + "List")'" class="btn">回列表</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#name, #pwdx, #pwdy, #group_id, #sn').attr('required', true);
+        //$('#boss, #contact, #contact_tel').attr('required', true);
+    })
+
+    $('.select_uid').click(function () {
+        var n = $('.select_uid').index(this);
+
+        var mm = n == 0 ? 'introduce_uid' : 'company_uid';
+
+        var o = '';
+        switch (n) {
+            case 0:
+
+                o = $('#introduce_uid').val();
+                break;
+            case 1:
+
+                o = $('#company_uid').val();
+                break;
+        }
+
+
+
+        $.post('@(Url.Action("getMember", "NwHome"))', { uid: o }, function (result) {
+
+            $('#' + mm + 's').show();
+            var msg = result.msg;
+            $('#' + mm + 's').html(result.msg);
+        }, "json");
+
+    })
+
+</script>

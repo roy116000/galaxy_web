@@ -1,0 +1,81 @@
+﻿@model h365_web.Models.adv_data
+@{
+    string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action.Replace("Add", "Edit") + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.adv_id)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">廣告設定</h4>
+
+
+                @Html.EditorFor(model => model.group_id)
+
+                @if (Model.group_id == 11 || Model.group_id == 4 || Model.group_id == 12)
+                { 
+                    @Html.EditorFor(model => model.g_id)               
+                }
+                
+                @Html.EditorFor(model => model.info)
+
+                @Html.EditorFor(m => m.flag)
+
+                @Html.EditorFor(model => model.url)
+
+                @Html.EditorFor(model => model.s_img)
+
+                @Html.EditorFor(model => model.inx)
+
+                @Html.EditorFor(model => model.start_date)
+
+                @Html.EditorFor(model => model.end_date)
+
+                @*@Html.EditorFor(model => model.target)*@
+
+                @Html.EditorFor(model => model.visible)
+
+                @if (Model.adv_id != 0)
+                { 
+                    <h4 class="widgettitle">顯示藥局(被選者才會顯示此則廣告)</h4>
+
+                    @Html.EditorFor(m => m.drugstore_id)
+                
+                }
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="button" onclick="location.href = '@Url.Action("List")'" class="btn">回列表</button>
+                        @*<button type="reset" class="btn">取消</button>*@
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#form1").validate({
+            rules: {
+                group_id: "required",
+                //url: "required"
+            },
+            messages: {
+                group_id: "分類標題，必需選擇！",
+                //url: "*"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').removeClass('success').addClass('error');
+            }
+        });
+    })
+</script>

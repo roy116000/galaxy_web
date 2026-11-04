@@ -1,0 +1,74 @@
+﻿@{
+    var orders = (List<galaxy_web.Models.order_data>)ViewData["orders"];
+}
+
+<div class="row-fluid">
+    <div class="span12 editprofileform">
+        <h4 class="widgettitle">當月訂單</h4>
+        <div class="">
+            <div id="List_ajax">
+                <table class="table table-striped">
+                    <colgroup>
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />                  
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>訂單單號</th>
+                            <th>廠商貨號</th>
+                            <th>貨號</th>
+                            <th>商品名稱</th>
+                            <th>數量</th>
+                            <th>請款金額</th>
+                            <th>出貨日期</th>
+                            <th>貨運公司</th>
+                            <th>宅配單號</th>
+                            <th>訂單國別</th>                     
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{decimal sub_total = 0;}
+
+                        @foreach (var item in orders)
+                        {
+                            var goods = NW.goods_info(item.order_id);
+                            var g = goods.Split(',');
+
+                            var sub = NW.bills_sub(item.order_id);
+                            sub_total = sub_total + (sub.num * sub.cost) + sub.freight;
+                                                                        
+                            <tr>
+                                <td>@(item.order_sn)</td>
+                                 <td>@(NW.bills_product(sub.product_id).item_no)</td>
+                                <td>@(sub.item_no)</td>
+                                <td>@(sub.item_name)</td>
+                                 <td>@(sub.num)</td>
+                                <td>@(((sub.num * sub.cost) + sub.freight).ToString("F2"))</td>
+                                <td>@(item.goods_datetime.Value.ToString("yyyy/MM/dd"))</td>
+                                <td>@(g[0])</td>
+                                <td>@(g[1])</td>
+                                <td>@(item.nation)</td>                          
+                            </tr>  
+                        }
+
+                        <tr>
+                            <td colspan="4"></td>
+                            <td style="color: red;">總額</td>
+                            <td style="color: red;">@(sub_total.ToString("F2"))</td>
+                            <td>&nbsp;</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

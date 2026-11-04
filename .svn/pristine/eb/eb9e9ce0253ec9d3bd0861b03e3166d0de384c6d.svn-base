@@ -1,0 +1,168 @@
+﻿@using h365_web.Models;
+@{   
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+    var pay_visible = (List<ListItem>)ViewData["pay_visible"];
+
+    var F = (List<data_group>)ViewData["F"];
+
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "span1");
+}
+
+<script type="text/javascript" src="~/Areas/newweb/Content/js/jquery.unobtrusive-ajax.min.js"></script>
+@Html.ValidationSummary(true)
+<script type="text/javascript">
+    function cbHandel(flag) {
+        if ($("input[name='block_id']:checked").length == 0) { alert('請至少選擇一項'); return false; }
+        var name = '刪除';
+        switch (flag) { case 1: name = "啟用"; break; case 2: name = "作廢"; break; }
+        if (confirm('確定要' + name + '？')) {
+            var arrVal = new Array();
+            $("input[name='block_id']:checked").each(function (i) {
+                arrVal[i] = this.value;
+            });
+        }
+        $('#cb_flag').val(flag);
+        $('#cb_id').val(arrVal.toString());
+        $('#frmCheckbox').submit();
+    }
+</script>
+@using (Html.BeginForm(action + "Del", controller, FormMethod.Post, new { @id = "frmCheckbox" }))
+{
+    <input type="hidden" id="cb_flag" name="cb_flag" value="0" />
+    <input type="hidden" id="cb_id" name="cb_id" value="" />
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+            <div class="msghead">
+
+                <form id="form1">
+
+
+                    @*                @using (Html.BeginRouteForm("", FormMethod.Post))
+                { *@
+
+                    <div>
+                        訂單日期：
+                    <input type="text" value="@ViewBag.sD" name="sD" id="sD" class="span2">
+                        ～
+                    <input type="text" value="@ViewBag.eD" name="eD" id="eD" class="span2">
+
+                        <script type="text/javascript">$(function () { $('#sD').datepicker(); $('#eD').datepicker(); })</script>
+
+                        
+
+                        &ensp; 付款狀態：@Html.SelectList("pay_visible", pay_visible, htmlAttributes)
+
+                        @Html.CheckBox("oexport", false)
+
+                        <span style="float: right">&ensp; 資訊查詢：<input type="text" id="kw" name="kw" class="filekeyword" placeholder="搜尋姓名或電話" value="@ViewBag.kw" />
+                            <button type="button" onclick="oExport('0')" class="btn btn-primary">查詢</button>
+                            <button type="button" onclick="oExport('1')" class="btn">匯出</button>
+                        </span>
+
+                    </div>
+
+                    <div style="height: 1em;"></div>
+
+                    <div style="text-align: left; font-size: 20px; padding-bottom: 10px">@ViewBag.total</div>
+
+
+                    <ul class="msghead_menu">
+                        <li>
+                            <div class="btn-group">
+                                <span class="btn dropdown-toggle" data-toggle="dropdown"><span class="icon-check"></span>選擇設定<span class="caret"></span></span>
+                                <ul class="dropdown-menu">
+
+                                    @if (ViewBag.flag == 99)
+                                    {
+                                        <li><a onclick="cbHandel(1);" href="#"><span class="icon-ok-sign"></span>啟用</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a onclick="cbHandel(2);" href="#"><span class="icon-ban-circle"></span>作廢</a></li>
+                                    }
+
+                                </ul>
+
+
+                            </div>
+
+                        </li>
+
+
+                        <li style="float: right">
+                            <div>
+
+                                @*<input id="flag" name="flag" value="2" />*@
+                                <input id ="flag" name ="flag" value="@(ViewBag.flag)" type="hidden" />
+
+                                <ul class="nav nav-pills">
+                                    <li @NW.echoBool(ViewBag.flag == null, "class=active", "")>
+                                        <a style="cursor: pointer" class="flag">全部</a>
+                                    </li>
+                                    @*<li @NW.echoBool(ViewBag.flag == null, "class=active", "")>@Html.ActionLink("全部", action)</li>*@
+
+                                    @foreach (var item in F)
+                                    {
+                                                
+                                        <li @(item.group_id == ViewBag.flag ? "class=active" : "")>
+                                            <a class="flag" id="@(item.group_id)" style="cursor:pointer">@(item.name)(@(item.counts))</a>
+                                            @*<a href="@Url.Action(action, new { flag = item.group_id })">@item.name (@item.counts)</a>*@
+                                        </li>
+                                    }
+
+                                    @*<li @NW.echoBool(ViewBag.flag == 99, "class=active", "")>@Html.ActionLink("作廢專區", action, new { flag = 99 })</li>*@
+                                </ul>
+
+                            </div>
+                        </li>
+                    </ul>
+          
+                </form>
+                <span class="clearall"></span>
+            </div>
+            <!--msghead-->
+            <br />
+        </div>
+        <!--#chat-->
+
+        @Html.Partial(action + "_ajax")
+        <!--list-->
+    </div>
+    <!--contentinner-->
+</div>
+
+<script>
+    $(function () {
+        $('#uniform-oexport').hide();
+    })
+
+    function oExport(o) {
+        var s = $('#oexport');
+        o == 1 ? s.prop("checked", true) : s.prop("checked", false);
+
+        $('#form1').submit();
+    }
+
+    $('.flag').click(function () {
+        var flag = $(this).attr('id');
+
+        flag == "" ? "" : flag;
+
+        $('#flag').val(flag);
+
+        $('#oexport').prop("checked", false); //關匯出
+
+        $('#form1').submit();
+
+    })
+</script>
+

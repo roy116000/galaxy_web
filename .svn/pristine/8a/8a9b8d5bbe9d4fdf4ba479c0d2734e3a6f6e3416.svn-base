@@ -1,0 +1,272 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+using h365_web.Models;
+using MvcPaging;
+using System.IO;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwEducationController : _BaseController
+    {
+        //
+        // GET: /newweb/NwAbout/
+
+        #region"文章區"
+
+        #region"列表"
+
+        public ActionResult List(int? page, int? gid, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var linq = this._DB.education_data.Where(m => m.education_id > 0);
+            if (gid.HasValue) { 
+                ViewBag.gid = gid; 
+                //linq = linq.Where(m => ("," + m.group_id + ",").Contains("," + gid + ","));
+                linq = linq.Where(m => ("," + m.group_id + ",").Contains("," + gid.ToString() + ","));
+            }
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                linq = linq.Where(m => m.title.Contains(kw) || m.cont.Contains(kw));
+            }
+
+            IPagedList data = linq.OrderByDescending(m => m.create_datetime).OrderBy(m => m.visible).ToPagedList(currentPageIndex, 50);
+
+            #region"下拉選單"
+
+            var ListItems = new List<ListItem> { };
+            var gData = this._DB.education_group.Where(m => m.visible).OrderBy(m => m.name.Length).ThenBy(m => m.group_id).ToList();
+            foreach (var item in gData)
+            {
+                item.counts = this._DB.education_data.Where(m => ("," + m.group_id + ",").Contains("," + item.group_id + ",")).Count();
+            }
+
+            string[] a = gData.Select(m => m.group_id + "," + m.name + " 【" + m.counts + "】").ToArray();
+            ListItems.Add(new ListItem("", "請選擇", false));
+            ListItems.AddRange(NW.sList(a, gid.ToString()));
+
+            ViewData["gData"] = ListItems;
+
+            #endregion
+          
+            if(page.HasValue)
+            {
+                return  PartialView(RouteData.Values["action"].ToString(), data);
+            }else
+            {
+                return View(data);
+            }
+                 
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public education_data P_AoE(int id)
+        {
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            var data = this._DB.education_data.Where(m => m.education_id == id).FirstOrDefault(); //資料
+            data = data != null ? data : new education_data { };
+            if (data.education_id == 0)
+            {
+                data.visible = true;
+                data.inx = 0;
+                data.start_date = DateTime.Today;
+                data.end_date = data.start_date.Value.AddMonths(3).AddDays(-1);
+            }
+
+            #region"複選"
+
+            var Group_All = this._DB.education_group.Where(m => m.visible).ToLookup(m => ("," + data.group_id + ",").Contains("," + m.group_id.ToString() + ","));
+            ViewData["group_id_s"] = Group_All[true].ToDictionary(m => m.group_id, m => m.name);
+
+            var group_No = Group_All[false].Select(m => m.group_id + "," + m.name).ToArray();
+            var ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("", "請選擇", false));
+            ListItems.AddRange(NW.sList(group_No));
+            ViewData["group_id"] = ListItems;
+
+            #endregion
+          
+            return data;
+        }
+
+        public ActionResult Add(int id)
+        {
+            var data = P_AoE(id);
+
+            return View(data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+
+            var data = P_AoE(id);
+
+            return View(data);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult Save(education_data education_data) 
+        {
+            var data = this._DB.education_data.Where(m => m.education_id == education_data.education_id).FirstOrDefault();
+            data = data != null ? data : new education_data();
+
+            data.title = education_data.title; //標題
+            data.cont = education_data.cont; //內容
+            data.group_id = education_data.group_id_s.Trim(','); //分類
+            data.start_date = education_data.start_date;
+            data.end_date = education_data.end_date;
+            data.visible = education_data.visible;
+            data.inx = education_data.inx;
+
+            if (data.education_id == 0)
+            {
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                this._DB.education_data.Add(data);
+
+                TempData["jgrowl"] = "新增成功";
+            }
+            else 
+            {
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+
+                TempData["jgrowl"] = "修改成功";
+            }
+
+            this._DB.SaveChanges();
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", "Edit").Replace("Add", "Edit"), new { id = data.education_id });
+        }
+
+        #endregion
+
+        #endregion
+
+        #region"文章分類區"
+
+        #region"列表"
+
+        public ActionResult GroupList(int? page, string kw) 
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var linq = this._DB.education_group.Where(m => m.group_id > 0);
+            IPagedList data = linq.OrderBy(m => m.group_id).ToPagedList(currentPageIndex, 50);
+
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString(), data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult P_G_AoE(int id) 
+        {
+            var data = this._DB.education_group.Where(m => m.group_id == id).FirstOrDefault();
+            data = data != null ? data : new education_group();
+
+            if (data.group_id == 0)
+            {
+                data.visible = true;
+                data.inx = 0;
+            }
+            else 
+            {
+                data.img = NW.Path_Img(data.img, "education");
+            }
+
+            return View(data);
+        }
+
+        public ActionResult GroupAdd(int id) 
+        {
+
+              return P_G_AoE(id);
+        }
+
+        public ActionResult GroupEdit(int id)
+        {
+
+            return P_G_AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupSave(education_group education_group, HttpPostedFileBase img) 
+        {
+            var data = this._DB.education_group.Where(m => m.group_id == education_group.group_id).FirstOrDefault();
+            if (education_group.group_id != 0 && data == null) { TempData["jgrowl"] = "查無相關資訊"; }
+
+            data = data != null ? data : new education_group();
+            data.name = education_group.name; //名稱
+            data.inx = education_group.inx; //排序
+            data.visible = education_group.visible; //啟用
+
+            #region"圖片專區"
+
+            if (img != null && img.ContentLength > 0 && NW.getFileType(img, 1)) //有無上傳
+            {
+
+                string tmpPath = Server.MapPath("~/Content/images/" + RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()); //存放路徑
+                if (!Directory.Exists(tmpPath)) { Directory.CreateDirectory(tmpPath); } //建資料夾
+
+                data.img = Images.Helps.ImageHelper.Rebmp(img, tmpPath, 166, 166);
+
+            }
+
+            #endregion
+
+            if (data.group_id == 0)
+            {
+                TempData["jgrowl"] = "新增成功";
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+                this._DB.education_group.Add(data);
+            }
+            else
+            {
+                TempData["jgrowl"] = "修改成功";
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+            }
+
+            this._DB.SaveChanges();
+
+
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", "Edit"), new { id = data.group_id});
+        }
+
+        #endregion
+
+        #endregion
+    }
+}

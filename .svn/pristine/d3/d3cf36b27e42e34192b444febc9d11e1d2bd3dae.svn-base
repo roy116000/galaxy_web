@@ -1,0 +1,225 @@
+﻿@using MvcPaging;
+@model MvcPaging.IPagedList<h365_web.Areas.newweb.Controllers.NwReportController.drug_list>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+}
+
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width8" />
+            <col />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width7" />
+            <col class="width6" />
+            <col class="width6" />
+            <col class="width7" />
+            <col class="width10" />
+            <col class="width8" />
+            <col class="width7" />
+           @* <col class="width6" />*@
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">地區</th>
+                <th class="center">藥局名稱</th>
+                <th class="center">業務</th>
+                <th class="center">天數</th>
+                <th class="center">開機-起</th>
+                <th class="center">開機-結</th>
+                <th class="center">開機次數</th>
+                <th class="center">開機率</th>
+                <th class="center">訂單數</th>
+                <th class="center">訂單業績</th>
+                <th class="center">訂單成本</th>
+                <th class="center">毛利額</th>
+                <th class="center">毛利率</th>
+                @*<th>&nbsp;</th>*@
+            </tr>
+        </thead>
+    </table>
+    @foreach (var item in Model)
+    {
+        <table class="table table-bordered mailinbox">
+            <colgroup>
+                <col class="width8" />
+                <col />
+                <col class="width6" />
+                <col class="width6" />
+                <col class="width7" />
+                <col class="width7" />
+                <col class="width7" />
+                <col class="width6" />
+                <col class="width6" />
+                <col class="width7" />
+                <col class="width10" />
+                <col class="width8" />
+                <col class="width7" />
+                @*<col class="width6" />*@
+            </colgroup>
+            <tbody>
+                @{
+        item.order_cost = NW.Math_gRound(item.order_cost, 2);
+        item.open_days = DateTime.Now.Subtract((item.date_s.HasValue) ? (DateTime)item.date_s : DateTime.Now).Days;
+        item.open_par = (item.open_num != 0 && item.open_days != 0) ? (item.open_num * 100 / item.open_days) : 0;
+        item.gross_profit = NW.Math_gRound(item.order_total - item.order_cost, 2); //毛利額
+        item.gross_margin = item.gross_profit != 0 ? NW.Math_gRound((item.gross_profit * 100 / item.order_total), 2) : 0; //毛利率
+        string s = NW.getDate(item.date_s);
+        string e = NW.getDate(item.date_e);
+                }
+                <tr class="@NW.echoBool(true, "unread", "visible")">
+                    <td title="@(Html.Raw(item.zip))">@(Html.Raw(NW.word(item.zip, 4, "...")))</td>
+                    <td>@(item.name)</td>
+                    <td>@(item.drug_sales)</td>
+                    <td class="right">@(item.open_days)</td>
+                    <td title="@(NW.getDate(item.date_s))">@(NW.word(s, 3, "..."))</td>
+                    <td title="@(NW.getDate(item.date_e))">@(NW.word(e, 3, "..."))</td>
+                    <td class="right">@(item.open_num)</td>
+                    <td class="right">@(item.open_par) %</td>
+                    <td class="right">@(item.order_num)</td>
+                    <td class="right">$ @(item.order_total.ToString("N0"))</td>
+                    <td class="right">$ @(item.order_cost.ToString("N2"))</td>
+                    <td class="right">$ @(item.gross_profit.ToString("N2"))</td>
+                    <td class="right">@(item.gross_margin) %</td>
+                    @*<td class="center" id="@(item.drugstore_id)">詳細內容</td>*@
+                </tr>
+            </tbody>
+        </table>@*
+
+        <table class="table table-striped table-bordered table-hover table-condensed" id="table_all_@(item.drugstore_id)" style="display: none">
+            <colgroup>
+                <col class="width10" />
+                <col class="width6" />
+                <col class="width6" />
+                <col />
+                <col class="width6" />
+                <col class="width12" />
+                <col class="width8" />
+                <col class="width6" />
+                <col class="width4" />
+                <col class="width6" />
+                <col class="width4" />
+                <col class="width4" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="center">訂購時間</th>
+                    <th class="center">訂單編號</th>
+                    <th class="center">產品編號</th>
+                    <th class="center">產品名稱</th>
+                    <th class="center">收件人</th>
+                    <th class="center">貨號</th>
+                    <th class="center">廠商</th>
+                    <th class="center">購買數量</th>
+                    <th class="center">紅利</th>
+                    <th class="center">健康紅利</th>
+                    <th class="center">成本</th>
+                    <th class="center">售價</th>
+                </tr>
+            </thead>
+            <tbody>
+               
+                <tr class="danger" id="loadPage_@(item.drugstore_id)"></tr>
+
+                <tr id="temlate" style="display: none">
+                                  <td class="right">{datetime}</td>
+                    <td class="right">{order_id}</td>
+                    <td class="right">{product_id}</td>
+                    <td>{item_name}</td>
+                    <td>{send_name}</td>
+                    <td class="center">{item_no}</td>
+                    <td>{name_company}</td>
+                    <td class="right">{num}</td>
+                    <td class="right">{bonus}</td>
+                    <td class="right">{h_bonus}</td>
+                    <td class="right">{cost}</td>
+                    <td class="right">{price}</td>
+
+                </tr>
+
+            </tbody>
+        </table>*@
+
+        <script>
+
+            @*String.prototype.toCustomDateString = function () {
+                var r;
+                var d = eval("new " + this.replace(/\//g, ""));
+
+                //自定義格式
+                if (d.getFullYear() > 1000) {
+                    month = d.getMonth() + 1;
+                    r = d.getFullYear() + "-" + month + "-" + d.getDate();
+                }
+
+                return r;
+            }
+
+            $('#@(item.drugstore_id)').click(function () {
+
+
+            $('#table_all_@(item.drugstore_id)').toggle();*@
+
+            @* $.post('@Url.Action("MonthlyEditSave", controller)', { id: '@(item.drugstore_id)' }, function (result) {
+
+
+
+                                    $('#loadPage').html('');
+                                    $('#loadPage_@(item.drugstore_id)').html('');
+
+                                    //alert(result.msg);
+
+                                            var data = JSON.parse(JSON.stringify(result.data)); //轉換
+
+                                            var temp = $('#temlate').html();
+                                            for (var item in data) {
+
+                                                var html = temp;
+                                                //轉換日期格式
+                                                //var date = eval(data[item].order_datetime.replace(/\/Date\((.*?)\)\//gi, "new Date($1)"));
+                                                var date1 = data[item].order_datetime.toCustomDateString();
+
+                                                html = html.replace(/{order_id}/g, data[item].order_id);
+                                                html = html.replace(/{product_id}/g, data[item].product_id);
+                                                html = html.replace(/{item_name}/g, data[item].item_name);
+                                                html = html.replace(/{item_no}/g, data[item].item_no);
+                                                html = html.replace(/{name_company}/g, data[item].name_company);
+                                                html = html.replace(/{num}/g, data[item].num);
+                                                html = html.replace(/{price}/g, data[item].price);
+                                                html = html.replace(/{cost}/g, data[item].cost);
+                                                html = html.replace(/{datetime}/g, date1);
+                                                html = html.replace(/{bonus}/g, data[item].bonus);
+                                                html = html.replace(/{send_name}/g, data[item].send_name);
+                                                html = html.replace(/{h_bonus}/g, data[item].h_bonus);
+                                                //毛利
+                                                //gross = data[item].price - data[item].cost;
+                                                //html = html.replace(/{gross}/g, gross);
+
+                                                $('#loadPage').append(html);
+                                                $('#loadPage_@(item.drugstore_id)').append(html);
+
+                                            }
+
+                                    //window.location.reload(true); //強制重整
+
+                                }, 'json');*@
+        })
+        </script>
+    }
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount
+        , new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw)
+            .AlwaysAddFirstPageNumber().AddRouteValue("gid", ViewBag.gid))
+    </div>
+
+</div>
+<!--pagination-->

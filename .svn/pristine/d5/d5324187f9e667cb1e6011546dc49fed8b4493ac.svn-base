@@ -1,0 +1,71 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.product_data>
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+
+
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "span2");
+    var fData = (List<ListItem>)ViewData["fData"];
+
+
+    var F = (List<h365_web.Models.data_group>)ViewData["F"];
+
+    var aData = (h365_web.Models.sys_admin_data)ViewData["aData"];    
+}
+
+<!--pagetitle-->
+<div class="maincontent">
+    <div class="contentinner">
+
+        <!--widgetsource-->
+        <div id="mail">
+
+            @if (aData.power_id <= 2)
+            {
+                @Html.Partial("template_select")
+            }
+
+
+            <form action="@(Url.Action(action, controller))" method="post">
+
+                <div>
+
+                    <ul class="nav nav-pills">
+                        <li @NW.echoBool(ViewBag.flag == null, "class=active", "")>@Html.ActionLink("全部", action)</li>
+                        @foreach (var item in F)
+                        {
+                                                
+                            <li @(item.group_id == ViewBag.flag ? "class=active" : "")>
+                                <a href="@Url.Action(action, new { flag = item.group_id })">@item.name (@item.counts)</a>
+                            </li>
+                        }
+                    </ul>
+
+                    @if (aData.power_id > 2)
+                    {
+                        <a class="btn" href="@(Url.Action(action.Replace("List", "Add"), new { id = 0 }))">新增</a>
+                    }
+
+                    <input hidden="hidden" name="flag" value="@(ViewBag.flag)" />
+
+                    <span style="float: right">
+                        <input type="text" name="kw" placeholder="請輸入關鍵字" value="@(ViewBag.kw)"/>
+                        <input type="submit" value="查詢" class="btn btn-primary" />
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+        <br />
+        <!--#chat-->
+
+        @*先跑View，再跑資料*@
+        @Html.Partial(action + "_ajax", Model)
+
+    </div>
+    <!--contentinner-->
+</div>

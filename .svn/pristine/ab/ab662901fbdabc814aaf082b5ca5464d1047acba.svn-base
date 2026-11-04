@@ -1,0 +1,63 @@
+﻿@using MvcPaging;
+@model IPagedList<h365_web.Models.index_data>
+@Html.Partial("template_list_fix")
+@{
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+    
+    
+}
+
+<!--widgetcontent-->
+<div id="List_ajax">
+    <table class="table table-bordered mailinbox">
+        <colgroup>
+            <col class="width4" />
+            <col class="width14" />
+            <col class="width12" />
+            <col class="width12" />
+            <col class="width8" />
+            <col class="width8" />
+            <col class="width4" />
+            <col class="width4" />
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="center">
+                    <input type="checkbox" name="del_id" class="checkall" /></th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().url) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().text_eng) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().text_cht) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().start_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().end_date) </th>
+                <th class="center">@Html.DisplayNameFor(model => model.First().visible)</th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {                  
+                <tr class="@NW.echoBool(item.visible, "unread", "visible")">
+                    <td class="center">
+                        <input type="checkbox" name="index_id" class="index_check" value="@item.vid" />
+                    </td>
+                    <td class="center" title="@Html.DisplayFor(modelItem => item.url)">@(NW.word(item.url, 10, "..."))</td>
+                    <td class="center" title="@Html.DisplayFor(modelItem => item.text_eng)">@(NW.word(item.text_eng, 10, "..."))</td>
+                    <td class="center" title="@Html.DisplayFor(modelItem => item.text_cht)">@(NW.word(item.text_cht, 10, "..."))</td>
+                    <td>@Html.DisplayFor(modelItem => item.start_date)</td>
+                    <td>@Html.DisplayFor(modelItem => item.end_date)</td>
+                    <td class="center">@Html.DisplayFor(modelItem => item.visible)</td>
+                    <td>@Html.ActionLink("編輯", action + "Edit", new { id = item.vid })</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="pagination pagination-centered">
+
+        @Html.Pager(Model.PageSize, Model.PageNumber, Model.TotalItemCount, new AjaxOptions { UpdateTargetId = "List_ajax", OnSuccess = "uniform" }).Options(o => o.Action(action.Replace("_ajax", "") + "_ajax").DisplayTemplate("BootstrapPagination")
+            .MaxNrOfPages(10)
+            .AlwaysAddFirstPageNumber().AddRouteValue("kw", ViewBag.kw))
+    </div>
+
+</div>
+<!--pagination-->

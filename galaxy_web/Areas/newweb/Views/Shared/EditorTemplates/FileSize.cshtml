@@ -1,0 +1,19 @@
+﻿@model int?
+@{
+    IDictionary<string, object> htmlAttributes = new Dictionary<string, object>();
+    htmlAttributes.Add("class", "control-label");
+
+    
+}
+
+
+@if (Model.HasValue && Model.Value > 0)
+{ 
+    <div class="control-group">
+        @Html.Label("", htmlAttributes)
+        <div class="controls">
+            <span class="help-inline" style="padding: 5px 5px;">@((((double)Model.Value)/(1024*1024)).ToString("F3")) MB</span>
+        </div>
+    </div>
+}
+

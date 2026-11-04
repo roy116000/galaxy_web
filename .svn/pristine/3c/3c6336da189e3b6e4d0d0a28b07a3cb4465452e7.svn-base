@@ -1,0 +1,1871 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+using h365_web.Models;
+using MvcPaging;
+using ClosedXML.Excel;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwDrugBillsController : _BaseController
+    {
+        //
+         //GET: /manage/NwBills/
+
+        #region "廠商請款"
+        //public ActionResult CBillsList()
+        //{
+        //    int currentPageIndex = 0;
+
+        //    //Export("303,304,305");
+
+        //    sys_admin_data admin = NW.admin(User.Identity.Name);
+
+        //    var company = this._DB.sys_admin_data.Where(m => m.company_id == admin.company_id).FirstOrDefault();
+
+        //    List<data_list> Linq = new List<data_list> { };
+
+        //    Linq = getBills(company, 1);
+
+        //    IPagedList data = Linq.Where(m => m.visible_index).OrderByDescending(m => m.hits).ToPagedList(currentPageIndex, 12);
+
+        //    ViewBag.jgrowl = TempData["jgrowl"];
+
+        //    return View(data);
+        //}
+
+        //public ActionResult CBillsList_ajax(int? page)
+        //{
+
+        //    int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+        //    sys_admin_data admin = NW.admin(User.Identity.Name);
+
+        //    var company = this._DB.company_data.Where(m => m.company_id == admin.company_id).FirstOrDefault();
+
+        //    List<data_list> Linq = new List<data_list> { };
+
+        //    Linq = getBills(company, 1);
+
+        //    IPagedList data = Linq.Where(m => m.visible_index).OrderByDescending(m => m.hits).ToPagedList(currentPageIndex, 12);
+
+        //    return PartialView(RouteData.Values["action"].ToString(), data);
+        //}
+
+        //public ActionResult CBillsEdit(int id, DateTime? sD, DateTime? eD)
+        //{
+        //    var data = this._DB.order_bills.Where(m => m.bills_id == id).FirstOrDefault();
+
+        //    sys_admin_data admin = NW.admin(User.Identity.Name);
+        //    var data2 = this._DB.order_data.Where(m => m.bills_id == id && m.company_id == admin.company_id).OrderBy(m => m.goods_datetime).ToList();
+        //    if (id != 0)
+        //    {
+        //        if (data == null) { return RedirectToAction("List"); }
+        //    }
+        //    else
+        //    {
+        //        data2 = this._DB.order_data.Where(m => m.visible && m.company_id == admin.company_id && m.flag >= 2 && m.bills_id == 0 && m.goods_datetime >= sD && m.goods_datetime < eD).OrderBy(m => m.goods_datetime).ToList();
+        //    }
+
+        //    ViewData["data2"] = data2;
+
+        //    double cost_total = 0;
+
+        //    double discount = 0;
+        //    double cost = 0;
+        //    int freight = 0;
+
+        //    bills_money bm = getBillsMoney(data2);
+        //    discount = bm.discount;
+        //    cost = bm.cost;
+        //    freight = bm.freight;
+
+        //    cost_total = cost + discount + freight;
+        //    ViewBag.ctotal = cost_total;
+
+
+        //    return View(data);
+        //}
+
+        ////未用
+        //[HttpPost]
+        //public ActionResult CBillsEditSave(order_data order_data, int index)
+        //{
+        //    var data = this._DB.order_data.Find(order_data.order_id);
+
+        //    switch (index)
+        //    {
+        //        case 0:    //金流資料
+        //            data.pay_id = order_data.pay_id;
+        //            data.pay_visible = order_data.pay_visible;
+        //            data.pay_note = order_data.pay_note;
+        //            if (order_data.pay_visible) { if (data.pay_datetime == null) { data.pay_datetime = DateTime.Now; } } else { data.pay_datetime = null; }
+        //            data.flag = order_data.pay_visible ? 1 : 0;
+        //            this._DB.SaveChanges();
+        //            TempData["jgrowl"] = "金流資訊儲存成功!!";
+        //            break;
+        //        case 1:    //物流資料
+
+        //            if (data.pay_visible)
+        //            {
+        //                data.freight_name = order_data.freight_name;
+        //                data.freight_no = order_data.freight_no;
+        //                data.freight_datetime = order_data.freight_datetime;
+        //                data.goods_datetime = order_data.freight_datetime;
+        //                data.goods_info = "WEB填入";
+        //                if (!string.IsNullOrEmpty(data.freight_name)) { data.flag = 2; }
+        //                this._DB.SaveChanges();
+
+
+        //                DateTime dt = DateTime.Now;
+        //                foreach (var item in data.order_sub)
+        //                {
+        //                    var data2 = new order_goods { };
+        //                    data2.order_id = data.order_id;
+        //                    data2.sub_id = item.sub_id;
+        //                    data2.name = data.freight_name;
+        //                    data2.sn = data.freight_no;
+        //                    data2.num = item.num;
+        //                    data2.goods_datetime = data.goods_datetime;
+        //                    data2.create_user = User.Identity.Name;
+        //                    data2.create_datetime = dt;
+
+        //                    _DB.order_goods.Add(data2);
+        //                    this._DB.SaveChanges();
+
+        //                }
+
+        //                TempData["jgrowl"] = "物流資訊儲存成功!!";
+        //            }
+        //            else
+        //            {
+        //                TempData["jgrowl"] = "請先確定付款完成，在處理物流資料";
+        //            }
+
+        //            break;
+        //        case 2: //發票資料
+        //            if (data.pay_visible && data.flag == 2)
+        //            {
+        //                data.invoice_datetime = order_data.invoice_datetime;
+        //                data.invoice_no = order_data.invoice_no;
+        //                //data.invoice_note = order_data.invoice_note;
+        //                if (!string.IsNullOrEmpty(data.invoice_no)) { data.flag = 5; }
+        //                this._DB.SaveChanges();
+        //                TempData["jgrowl"] = "發票資訊儲存成功!!";
+        //            }
+        //            else
+        //            {
+        //                TempData["jgrowl"] = "請先確定付款完成或出貨完成，在處理發票資料";
+        //            }
+
+        //            break;
+        //    }
+
+        //    return RedirectToAction("Edit", new { @id = order_data.order_id });
+        //}
+
+        //public ActionResult CBillsAdd(int id, int yymm, int bills_flag, DateTime sD, DateTime eD)
+        //{
+        //    order_bills data = new order_bills();
+        //    data.bills_datetime = DateTime.Now;
+        //    data.invoice_datetime = DateTime.Now;
+
+        //    sys_admin_data admin = NW.admin(User.Identity.Name);
+        //    var data2 = this._DB.order_data.Where(m => m.visible && m.company_id == admin.company_id && m.flag >= 2 && m.bills_id == 0 && m.back_flag == null && m.goods_datetime >= sD && m.goods_datetime < eD).OrderBy(m => m.goods_datetime).ToList();
+        //    ViewData["data2"] = data2;
+
+        //    TempData["sD"] = sD;
+        //    TempData["eD"] = eD;
+        //    TempData["yymm"] = yymm;
+        //    TempData["bills_flag"] = bills_flag;
+
+        //    double cost_total = 0;
+
+        //    double discount = 0;
+        //    double cost = 0;
+        //    int freight = 0;
+
+        //    bills_money bm = getBillsMoney(data2);
+        //    discount = bm.discount;
+        //    cost = bm.cost;
+        //    freight = bm.freight;
+
+        //    cost_total = cost + discount + freight;
+        //    ViewBag.ctotal = cost_total;
+
+        //    return View(data);
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult CBillsAddSave(order_bills order_bills)
+        //{
+        //    //var data = this._DB.product_data.Find(product_data.product_id);
+        //    //var data1 = this._DB.product_data.Where(m => m.product_id.Equals(product_data.product_id)).Select(m => m).SingleOrDefault();
+        //    var data = new order_bills { };
+
+        //    if (data == null)
+        //    {
+        //        ModelState.AddModelError("", "查無此筆資料");
+        //    }
+        //    else
+        //    {
+        //        //DateTime sD = (DateTime)TempData["sD"];
+
+        //        sys_admin_data admin = NW.admin(User.Identity.Name);
+        //        data.company_id = admin.company_id;
+
+        //        data.invoice_no = order_bills.invoice_no;
+        //        data.invoice_datetime = order_bills.invoice_datetime;
+
+        //        data.bills_datetime = order_bills.bills_datetime;
+
+        //        data.yymm = (int)TempData["yymm"];
+        //        data.bills_flag = (int)TempData["bills_flag"];
+        //        data.sdate = (DateTime)TempData["sD"];
+        //        data.edate = (DateTime)TempData["eD"];
+
+        //        //0未請款 1處理中 2請款完成
+        //        data.flag = 1;
+
+        //        data.create_user = admin.company_data.name;
+        //        data.create_datetime = DateTime.Now;
+
+        //        _DB.order_bills.Add(data);
+        //        this._DB.SaveChanges();
+
+        //        order_bills.bills_id = data.bills_id;
+
+        //        var data2 = this._DB.order_data.Where(m => m.visible && m.company_id == admin.company_id && m.flag >= 2 && m.bills_id == 0 && m.goods_datetime >= data.sdate && m.goods_datetime < data.edate).OrderBy(m => m.goods_datetime).ToList();
+
+        //        double cost_total = 0;
+
+        //        double discount = 0;
+        //        double cost = 0;
+        //        int freight = 0;
+
+        //        bills_money bm = getBillsMoney(data2);
+        //        discount = bm.discount;
+        //        cost = bm.cost;
+        //        freight = bm.freight;
+
+        //        cost_total = cost + discount + freight;
+
+        //        data.total = cost_total;
+        //        this._DB.SaveChanges();
+
+        //        foreach (var item in data2)
+        //        {
+        //            cost_total += item.cost_total;
+        //            item.bills_id = data.bills_id;
+        //            this._DB.SaveChanges();
+        //        }
+
+
+        //    }
+
+        //    return RedirectToAction("CBillsEdit", new { id = order_bills.bills_id });
+        //}
+
+        //[HttpPost]
+        //public ActionResult CBillsListDel(int cb_flag, string cb_id)
+        //{
+        //    string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢" };
+        //    //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+        //    string sql = "";
+        //    switch (cb_flag)
+        //    {
+        //        case 1: //啟用
+        //            sql = "Update order_data set visible = 1 Where order_id in (" + cb_id + ")";
+        //            break;
+        //        case 2: //停用
+        //            sql = "Update order_data set visible = 0 Where order_id in (" + cb_id + ")";
+        //            break;
+        //        case 0: //刪除
+        //            //圖片刪除
+        //            sql = "Delete From order_data Where order_id in (" + cb_id + ")";
+        //            if (_DB.Database.ExecuteSqlCommand(sql) > 0)
+        //            {
+        //                sql = " Delete From order_sub Where order_id in (" + cb_id + ")";
+        //            }
+        //            else
+        //            {
+        //                sql = "";
+        //            }
+
+        //            break;
+        //    }
+
+        //    if (sql != "")
+        //    {
+        //        _DB.Database.ExecuteSqlCommand(sql);
+        //    }
+
+        //    TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        //    if (cb_flag != 2)
+        //    {
+        //        return RedirectToAction("Visible" + RouteData.Values["action"].ToString().Replace("Del", ""));
+        //    }
+        //    else
+        //    {
+        //        return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        //    }
+        //}
+
+        #endregion
+
+        #region "待請款"
+        public ActionResult StayList(string kw)
+        {
+            int currentPageIndex = 0;
+
+            //Export("303,304,305");
+
+            var company_data = this._DB.drugstore_data.Where(m => m.visible).OrderBy(m => m.drugstore_id).ToList();
+
+         
+
+
+            //var company_data = this._DB.company_data.Where(m => m.visible && m.company_id==6).OrderBy(m => m.company_id).ToList();
+
+            List<data_list> Linq = new List<data_list> { };
+
+            foreach (var com in company_data)
+            {
+                List<data_list> data2 = getBills(com);
+                Linq.AddRange(data2);
+
+            }
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.create_user.Contains(kw)).ToList();
+            }
+
+            IPagedList data = Linq.Where(m => m.cost != 0 && m.status_flag == 0).OrderByDescending(m => m.post_datetime).ToPagedList(currentPageIndex, 12);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+            ViewBag.kw = kw;
+            
+
+            return View(data);
+        }
+
+        public ActionResult StayList_ajax(int? page, string kw)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var company_data = this._DB.drugstore_data.Where(m => m.visible && m.drugstore_id != 0).OrderBy(m => m.drugstore_id).ToList();
+
+            List<data_list> Linq = new List<data_list> { };
+
+            foreach (var com in company_data)
+            {
+                List<data_list> data2 = getBills(com);
+                Linq.AddRange(data2);
+
+            }
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                Linq = Linq.Where(m => m.create_user.Contains(kw)).ToList();
+            }
+
+            IPagedList data = Linq.Where(m => m.cost != 0 && m.status_flag == 0).OrderByDescending(m => m.hits).ToPagedList(currentPageIndex, 12);
+
+            ViewBag.kw = kw;
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult StayEdit(int id, int cid, DateTime? sD, DateTime? eD)
+        {
+            var data = this._DB.order_bills2.Where(m => m.bills_id == id).FirstOrDefault();
+        
+            //sys_admin_data admin = NW.admin(User.Identity.Name);
+            
+
+            var data2 = this._DB.order_data2.Where(m => m.bills_id == id && m.drugstor_id == cid).OrderBy(m => m.goods_datetime).ToList();
+            if (id != 0)
+            {
+                if (data == null) { return RedirectToAction("List"); }
+            }
+            else
+            {
+                data2 = this._DB.order_data2.Where(m => m.visible && m.drugstor_id == cid && m.flag >= 1 && m.bills_id == id && m.order_datetime >= sD && m.order_datetime < eD).OrderBy(m => m.goods_datetime).ToList();
+            }
+
+
+            ViewData["data2"] = data2;
+
+            var company = this._DB.drugstore_data.Where(m => m.drugstore_id == cid).FirstOrDefault();
+            ViewData["company"] = company;
+
+            double cost_total = 0;
+
+            double discount = 0;
+            double cost = 0;
+            int freight = 0;
+
+            bills_money2 bm = getBillsMoney(data2);
+            discount = bm.discount;
+            cost = bm.cost;
+            freight = bm.freight;
+
+            cost_total = cost + discount + freight;
+            ViewBag.ctotal = cost_total;
+
+
+            return View(data);
+        }
+
+        //未用
+        [HttpPost]
+        public ActionResult StayEditSave(order_data2 order_data, int index)
+        {
+            var data = this._DB.order_data2.Find(order_data.order_id);
+
+            switch (index)
+            {
+                case 0:    //金流資料
+                    data.pay_id = order_data.pay_id;
+                    data.pay_visible = order_data.pay_visible;
+                    data.pay_note = order_data.pay_note;
+                    if (order_data.pay_visible) { if (data.pay_datetime == null) { data.pay_datetime = DateTime.Now; } } else { data.pay_datetime = null; }
+                    data.flag = order_data.pay_visible ? 1 : 0;
+                    this._DB.SaveChanges();
+                    TempData["jgrowl"] = "金流資訊儲存成功!!";
+                    break;
+                case 1:    //物流資料
+
+                    if (data.pay_visible)
+                    {
+                        data.freight_name = order_data.freight_name;
+                        data.freight_no = order_data.freight_no;
+                        data.freight_datetime = order_data.freight_datetime;
+                        data.goods_datetime = order_data.freight_datetime;
+                        data.goods_info = "WEB填入";
+                        if (!string.IsNullOrEmpty(data.freight_name)) { data.flag = 2; }
+                        this._DB.SaveChanges();
+
+
+                        DateTime dt = DateTime.Now;
+                        foreach (var item in data.order_sub2)
+                        {
+                            var data2 = new order_goods2 { };
+                            data2.order_id = data.order_id;
+                            data2.sub_id = item.sub_id;
+                            data2.name = data.freight_name;
+                            data2.sn = data.freight_no;
+                            data2.num = item.num;
+                            data2.goods_datetime = data.goods_datetime;
+                            data2.create_user = User.Identity.Name;
+                            data2.create_datetime = dt;
+
+                            _DB.order_goods2.Add(data2);
+                            this._DB.SaveChanges();
+
+                        }
+
+                        TempData["jgrowl"] = "物流資訊儲存成功!!";
+                    }
+                    else
+                    {
+                        TempData["jgrowl"] = "請先確定付款完成，在處理物流資料";
+                    }
+
+                    break;
+                case 2: //發票資料
+                    if (data.pay_visible && data.flag == 2)
+                    {
+                        data.invoice_datetime = order_data.invoice_datetime;
+                        data.invoice_no = order_data.invoice_no;
+                        //data.invoice_note = order_data.invoice_note;
+                        if (!string.IsNullOrEmpty(data.invoice_no)) { data.flag = 5; }
+                        this._DB.SaveChanges();
+                        TempData["jgrowl"] = "發票資訊儲存成功!!";
+                    }
+                    else
+                    {
+                        TempData["jgrowl"] = "請先確定付款完成或出貨完成，在處理發票資料";
+                    }
+
+                    break;
+            }
+
+            return RedirectToAction("Edit", new { @id = order_data.order_id });
+        }
+
+        public ActionResult StayAdd(int id, int yymm, int bills_flag, DateTime sD, DateTime eD)
+        {
+            order_bills2 data = new order_bills2();
+            data.bills_datetime = DateTime.Now;
+            data.invoice_datetime = DateTime.Now;
+            data.company_id = id;
+            string msg = "";
+
+            //sys_admin_data admin = NW.admin(User.Identity.Name);
+            var data2 = this._DB.order_data2.Where(m => m.visible && m.drugstor_id == id && m.flag >= 1 && m.bills_id == 0 && m.order_datetime >= sD && m.order_datetime < eD).OrderBy(m => m.goods_datetime).ToList();
+            ViewData["data2"] = data2;
+
+            foreach (var item in data2)
+            {
+                if (item.freight_datetime == null)
+                {
+                    msg = "目前尚有貨品未出貨，可填入預計出貨日期，如無法正常出貨請作廢該筆訂單，如還是要清帳，請直接點選清帳按鈕。";
+                }
+            }
+
+            ViewBag.msg = msg;
+
+            TempData["sD"] = sD;
+            TempData["eD"] = eD;
+            TempData["yymm"] = yymm;
+            TempData["bills_flag"] = bills_flag;
+
+            var company = this._DB.drugstore_data.Where(m => m.drugstore_id == id).FirstOrDefault();
+            ViewData["company"] = company;
+
+            double cost_total = 0;
+
+            double discount = 0;
+            double cost = 0;
+            int freight = 0;
+
+            bills_money2 bm = getBillsMoney(data2);
+            discount = bm.discount;
+            cost = bm.cost;
+            freight = bm.freight;
+
+            cost_total = cost + discount + freight;
+            ViewBag.ctotal = cost_total;
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult StayAddSave(order_bills2 order_bills)
+        {
+            //var data = this._DB.product_data.Find(product_data.product_id);
+            //var data1 = this._DB.product_data.Where(m => m.product_id.Equals(product_data.product_id)).Select(m => m).SingleOrDefault();
+            var data = new order_bills2 { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                //DateTime sD = (DateTime)TempData["sD"];
+
+                var admin = NW.admin(User.Identity.Name);
+                data.company_id = order_bills.company_id;
+
+                data.invoice_no = order_bills.invoice_no;
+                data.invoice_datetime = order_bills.invoice_datetime;
+
+                data.bills_datetime = order_bills.bills_datetime;
+
+                data.yymm = (int)TempData["yymm"];
+                data.bills_flag = (int)TempData["bills_flag"];
+                data.sdate = (DateTime)TempData["sD"];
+                data.edate = (DateTime)TempData["eD"];
+
+                //0未請款 1處理中 2請款完成
+                data.flag = 1;
+
+                var company = this._DB.drugstore_data.Where(m => m.drugstore_id == order_bills.company_id).FirstOrDefault();
+                data.create_user = admin.name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.order_bills2.Add(data);
+                this._DB.SaveChanges();
+
+                order_bills.bills_id = data.bills_id;
+
+                var data2 = this._DB.order_data2.Where(m => m.visible && m.drugstor_id == order_bills.company_id && m.flag >= 1 && m.bills_id == 0 && m.back_flag == null && m.order_datetime >= data.sdate && m.order_datetime < data.edate).OrderBy(m => m.goods_datetime).ToList();
+
+
+                foreach (var item in data2)
+                {
+                    //cost_total += item.cost_total;
+                    item.bills_id = data.bills_id;
+                    this._DB.SaveChanges();
+                }
+
+                double cost_total = 0;
+                double discount = 0;
+                double cost = 0;
+                int freight = 0;
+
+                bills_money2 bm = getBillsMoney(data2);
+                discount = bm.discount;
+                cost = bm.cost;
+                freight = bm.freight;
+
+                cost_total = cost + discount + freight;
+
+                data.total = cost_total;
+                this._DB.SaveChanges();
+
+            }
+
+            return RedirectToAction("StayEdit", new { id = order_bills.bills_id, cid = order_bills.company_id });
+        }
+
+        [HttpPost]
+        public ActionResult StayListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update order_data2 set visible = 1 Where order_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update order_data2 set visible = 0 Where order_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    //圖片刪除
+                    sql = "Delete From order_data2 Where order_id in (" + cb_id + ")";
+                    if (_DB.Database.ExecuteSqlCommand(sql) > 0)
+                    {
+                        sql = " Delete From order_sub2 Where order_id in (" + cb_id + ")";
+                    }
+                    else
+                    {
+                        sql = "";
+                    }
+
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            if (cb_flag != 2)
+            {
+                return RedirectToAction("Visible" + RouteData.Values["action"].ToString().Replace("Del", ""));
+            }
+            else
+            {
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+            }
+        }
+
+        #endregion
+
+        #region "請款中"
+        public ActionResult List()
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_bills2.Where(m => m.flag == 1);
+
+
+            Linq = Linq.OrderByDescending(m => m.create_datetime);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, 20);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult List_ajax(int? page)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_bills2.Where(m => m.flag == 1);
+
+            Linq = Linq.OrderByDescending(m => m.create_datetime);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, 20);
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var data = this._DB.order_bills2.Find(id);
+            if (data == null) { return RedirectToAction("List"); }
+
+            var data2 = this._DB.order_data2.Where(m => m.bills_id == id).OrderBy(m => m.goods_datetime).ToList();
+            ViewData["data2"] = data2;
+
+            var company = this._DB.sys_admin_data.Where(m => m.drugstore_id == data.company_id).FirstOrDefault();
+            ViewBag.cname = company.name;
+
+            //ViewBag.receivingbankaccount = company.receivingbankaccount;
+            //ViewBag.receivingbankcode = company.receivingbankcode;
+            //ViewBag.bankunmber = company.bankunmber;
+            //ViewBag.ranchunmber = company.ranchunmber;
+
+
+            //請款
+            List<ListItem> ListItems = new List<ListItem> { };
+            ListItems = new List<ListItem> { };
+            ListItems.Add(new ListItem("1", "處理中", 1 == data.flag));
+            ListItems.Add(new ListItem("2", "確認請款", 2 == data.flag));
+            ViewData["flag"] = ListItems;
+
+            double cost_total = 0;
+
+            double discount = 0;
+            double cost = 0;
+            int freight = 0;
+
+            bills_money2 bm = getBillsMoney(data2);
+            discount = bm.discount;
+            cost = bm.cost;
+            freight = bm.freight;
+
+            cost_total = cost + discount + freight;
+            ViewBag.ctotal = cost_total;
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View(data);
+        }
+
+        [HttpPost]
+        public ActionResult EditSave(order_bills2 order_bills, int flag)
+        {
+            var data = this._DB.order_bills2.Find(order_bills.bills_id);
+            //var data1 = this._DB.product_data.Where(m => m.product_id.Equals(product_data.product_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+
+                //sys_admin_data admin = NW.admin(User.Identity.Name);
+                //data.company_id = admin.company_id;
+
+                data.invoice_no = order_bills.invoice_no;
+                data.invoice_datetime = order_bills.invoice_datetime;
+
+                data.bills_datetime = order_bills.bills_datetime;
+                data.info = order_bills.info;
+
+                //0未請款 1處理中 2請款完成
+                data.flag = flag;
+
+
+
+                data.check_user = User.Identity.Name;
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+
+                this._DB.SaveChanges();
+
+
+                
+
+
+                if (flag == 2)
+                {
+
+                    //暫時關掉
+                    //var data2 = this._DB.company_data.Where(m => m.company_id == data.company_id).FirstOrDefault();
+
+                    //string subject = "中時團購系統-請款完成通知信";
+                    //string body = data2.name + " 您好，貴公司 " + data.yymm.ToString() + " 的款項已於" + data.change_datetime.Value.ToString("yyyy/MM/dd") + "完成請款，總金額：" + data.total.ToString("N0") + "。";
+
+                    //body = string.Format(body, data2.name, order_bills.bills_id);
+
+                    //NW.sendMail(data2.mail + ";" + data2.mail, subject, body);
+
+
+                }
+
+            }
+
+            string action = "";
+            switch (flag)
+            {
+                case 1:
+                    action = "Edit";
+                    TempData["jgrowl"] = "儲存成功！";
+                    break;
+                case 2:
+                    action = "FinishEdit";
+                    TempData["jgrowl"] = "請款完成！";
+                    var company = this._DB.company_data.Where(m => m.company_id == data.company_id).FirstOrDefault();
+                    if (company != null)
+                    {
+                        string bills = "";
+                        switch (data.bills_flag)
+                        {
+                            case 1:
+                                bills = "-上";
+                                break;
+                            case 2:
+                                bills = "-下";
+                                break;
+                        }
+
+                        string bills_name = data.yymm.ToString() + bills;
+                        //轉所有訂單為已付款
+                        var order_data = this._DB.order_data2.Where(m => m.bills_id == data.bills_id && m.visible && !string.IsNullOrEmpty(m.back_info) && !string.IsNullOrEmpty(m.back_flag)).ToList();
+                        foreach (var item in order_data)
+                        {
+                            item.flag = 5;
+                            item.pay_visible = true;
+                            item.pay_note = "已月結清款";
+                            item.invoice = data.invoice_no;
+                            this._DB.SaveChanges();
+                        }
+
+                        //暫時關掉
+                        //string subject = "中時團購系統-請款完成通知信";
+                        //string body = company.name + " 您好，貴公司 " + bills_name + " 的款項已於" + data.change_datetime.Value.ToString("yyyy/MM/dd") + "完成請款，總金額：" + data.total.ToString("N0") + "。";
+                        //NW.sendMail(company.mail + ";" + company.mail, subject, body);
+
+                    }
+
+                    break;
+            }
+
+
+
+            return RedirectToAction(action, new { @id = order_bills.bills_id });
+        }
+
+        [HttpPost]
+        public ActionResult ListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update order_data2 set visible = 1 Where order_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update order_data2 set visible = 0 Where order_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除                    
+                    sql = "Update order_data2 set bills_id = 0 Where bills_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+                    sql = "Delete From order_bills2 Where bills_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region "請款完成"
+        public ActionResult FinishList()
+        {
+            int currentPageIndex = 0;
+
+            var Linq = this._DB.order_bills2.Where(m => m.flag == 2);
+
+
+            Linq = Linq.OrderByDescending(m => m.create_datetime);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, 20);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        public ActionResult FinishList_ajax(int? page)
+        {
+
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Linq = this._DB.order_bills2.Where(m => m.flag == 2);
+
+            Linq = Linq.OrderByDescending(m => m.create_datetime);
+
+            IPagedList data = Linq.ToPagedList(currentPageIndex, 20);
+
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+        public ActionResult FinishEdit(int id)
+        {
+            var data = this._DB.order_bills2.Find(id);
+            if (data == null) { return RedirectToAction("FinishList"); }
+
+            var data2 = this._DB.order_data2.Where(m => m.bills_id == id).OrderBy(m => m.goods_datetime).ToList();
+            ViewData["data2"] = data2;
+
+            var company = this._DB.drugstore_data.Where(m => m.drugstore_id == data.company_id).FirstOrDefault();
+            ViewBag.cname = company.name;
+
+            double cost_total = 0;
+
+            double discount = 0;
+            double cost = 0;
+            int freight = 0;
+
+            bills_money2 bm = getBillsMoney(data2);
+            discount = bm.discount;
+            cost = bm.cost;
+            freight = bm.freight;
+
+            cost_total = cost + discount + freight;
+            ViewBag.ctotal = cost_total;
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View(data);
+        }
+
+        [HttpPost]
+        public ActionResult FinishEditSave(order_bills2 order_bills)
+        {
+            var data = this._DB.order_bills2.Find(order_bills.bills_id);
+            //var data1 = this._DB.product_data.Where(m => m.product_id.Equals(product_data.product_id)).Select(m => m).SingleOrDefault();
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+
+                //sys_admin_data admin = NW.admin(User.Identity.Name);
+                //data.company_id = admin.company_id;
+
+                data.invoice_no = order_bills.invoice_no;
+                data.invoice_datetime = order_bills.invoice_datetime;
+
+                data.bills_datetime = order_bills.bills_datetime;
+                data.info = order_bills.info;
+
+                //0未請款 1處理中 2請款完成
+                data.flag = 2;
+
+                data.check_user = User.Identity.Name;
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+
+                this._DB.SaveChanges();
+
+            }
+
+
+            return RedirectToAction("Edit", new { @id = order_bills.bills_id });
+        }
+
+        [HttpPost]
+        public ActionResult FinishListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "作廢" };
+            //int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = "Update order_data2 set visible = 1 Where order_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = "Update order_data2 set visible = 0 Where order_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = "Update order_data2 set bills_id = 0 Where bills_id in (" + cb_id + ")";
+                    _DB.Database.ExecuteSqlCommand(sql);
+                    sql = "Delete From order_bills2 Where bills_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        public ActionResult BillsExport(int id, int? yymm, int? cid, DateTime? sD, DateTime? eD)
+        {
+            string msg = "匯出失敗，請洽系統工程師，謝謝!!";
+
+            string FileName = "";
+            string syymm = "";
+            if (id == 0)
+            {
+                syymm = yymm.ToString();
+                if (cid.HasValue)
+                {
+                    FileName = Export(id, yymm, cid, sD, eD);
+                }
+                else
+                {
+                    FileName = Export(id, yymm, null, sD, eD);
+                }
+
+            }
+            else
+            {
+                var data = this._DB.order_bills2.Where(m => m.bills_id == id).FirstOrDefault();
+                syymm = data.yymm.ToString();
+                FileName = Export(id, null, null, null, null);
+            }
+
+            if (!string.IsNullOrEmpty(FileName))
+            {
+                return File(FileName, "application/vnd.ms-excel", Server.UrlPathEncode(syymm + "請款列表.xlsx"));
+            }
+            else
+            {
+                TempData["jgrowl"] = msg;
+            }
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+            if (admin.power_id > 2) { return RedirectToAction("CBillsList"); }
+            else { return RedirectToAction("List"); }
+
+        }
+
+        private string Export(int id, int? yymm, int? cid, DateTime? sD, DateTime? eD)
+        {
+            string value = "";
+            string[] cols = "".Split(',');
+            List<order_data2> data;
+
+            cols = "訂單編號,購買日期,商品名稱,組數,成本,運費成本,無,金額,品項規格,數量,出貨日期,物流代號(請參考物流公司對照表),貨運單號,出貨備註".Split(',');
+
+            //測試
+            //cols = "訂單編號1,購買日期2,商品名稱3,組數4,成本5,折讓6,總計7,品項規格8,數量9,出貨日期10,物流代號(請參考物流公司對照表)11,貨運單號12,出貨備註13".Split(',');
+
+            //var Linq1 = this._DB.order_data.Where(m => m.visible == true && m.export_datetime == null && m.flag == 1);
+
+            var Linq1 = this._DB.order_data2.Where(m => m.visible && m.flag >= 1);
+
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+            if (admin.power_id > 2) { Linq1 = Linq1.Where(m => m.drugstor_id == admin.drugstore_id); }
+            else
+            {
+                if (cid.HasValue)
+                {
+                    Linq1 = Linq1.Where(m => m.drugstor_id == cid);
+                }
+            }
+
+            if (id == 0)
+            {
+                Linq1 = Linq1.Where(m => m.bills_id == 0 && m.order_datetime >= sD && m.order_datetime < eD && m.pay_id == 5);
+            }
+            else
+            {
+                Linq1 = Linq1.Where(m => m.bills_id == id);
+            }
+
+            Linq1 = Linq1.OrderBy(m => m.goods_datetime);
+            data = Linq1.ToList();
+
+            XLWorkbook workbook = new XLWorkbook();
+            var sheet = workbook.Worksheets.Add("請款列表");
+            int colIdx = 1;
+            int rowIdx = 2;
+
+
+            foreach (string colName in cols)
+            {
+                sheet.Cell(1, colIdx++).Value = colName;
+            }
+
+            sheet.Cell(1, 10).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            sheet.Cell(1, 11).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            sheet.Cell(1, 12).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+            sheet.Cell(1, 13).Style.Fill.BackgroundColor = XLColor.PaleTurquoise;
+
+            string p = "'";
+
+            foreach (var item in data)
+            {
+
+                if (admin.power_id <= 2) { item.order_sub2 = item.order_sub2.OrderBy(m => m.sub_id).ToList(); }
+                else { item.order_sub2 = item.order_sub2.OrderBy(m => m.sub_id).ToList(); }
+
+                //int payment = item.order_sub2.OrderBy(m => m.sub_id).FirstOrDefault().payment;
+                bool isStyle = true;
+                foreach (var subitem in item.order_sub2)
+                {
+
+                    //訂單資料
+                    if (isStyle)
+                    {
+                        sheet.Cell(rowIdx, 1).Value = p + item.order_sn;
+                        sheet.Cell(rowIdx, 2).Value = p + ((DateTime)item.order_datetime).ToString("yyyy/MM/dd");
+                    }
+
+                    //商品資料
+                    switch (item.buy_flag)
+                    {
+                        case 1:
+                            sheet.Cell(rowIdx, 3).Value = p + subitem.item_name;
+                            sheet.Cell(rowIdx, 4).Value = p + subitem.num.ToString();
+
+                            if (string.IsNullOrEmpty(item.back_money_type) && string.IsNullOrEmpty(item.back_type))
+                            {
+                                sheet.Cell(rowIdx, 5).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? subitem.cost.ToString("N2") : "");
+                                sheet.Cell(rowIdx, 6).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? item.freight_money.ToString("N2") : "");
+                                sheet.Cell(rowIdx, 7).Value = p + "0";
+                                sheet.Cell(rowIdx, 8).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? (subitem.price * subitem.num  + item.freight_money).ToString("N2") : "");
+                            }
+                            else
+                            {
+                                sheet.Cell(rowIdx, 5).Value = p + "0";
+                                sheet.Cell(rowIdx, 6).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? item.freight_money.ToString("N2") : "");
+                                sheet.Cell(rowIdx, 7).Value = p + item.discount.ToString("N0");
+                                sheet.Cell(rowIdx, 8).Value = p + item.discount.ToString("N0");
+                            }
+
+                            sheet.Cell(rowIdx, 9).Value = p;
+                            sheet.Cell(rowIdx, 10).Value = p;
+
+                            //物流
+                            sheet.Cell(rowIdx, 11).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+
+                            if (item.goods_datetime !=null)
+                            sheet.Cell(rowIdx, 11).Value = p + ((DateTime)item.goods_datetime).ToString("yyyy/MM/dd");
+                            else
+                                sheet.Cell(rowIdx, 11).Value = p + "尚為出貨";
+
+                            sheet.Cell(rowIdx, 12).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                            sheet.Cell(rowIdx, 12).Value = p + (!string.IsNullOrEmpty(item.freight_name) ? item.freight_name.Split(':')[0] : "");
+
+                            sheet.Cell(rowIdx, 13).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                            sheet.Cell(rowIdx, 13).Value = p + item.freight_no;
+
+                            sheet.Cell(rowIdx, 14).Style.Fill.BackgroundColor = XLColor.PaleTurquoise;
+                            sheet.Cell(rowIdx, 14).Value = p + item.goods_info;
+
+                            if (subitem.product_id != 101 && subitem.product_id != 102) { isStyle = false; }
+
+                            break;
+
+                        case 2:
+
+                            if (subitem.product_id != 101 && subitem.product_id != 102)
+                            {
+                                sheet.Cell(rowIdx, 3).Value = p + subitem.item_name;
+                                sheet.Cell(rowIdx, 4).Value = p ; //payment.ToString();
+
+                                if (string.IsNullOrEmpty(item.back_money_type) && string.IsNullOrEmpty(item.back_type))
+                                {
+                                    sheet.Cell(rowIdx, 5).Value = p + subitem.cost.ToString("N2");
+                                    sheet.Cell(rowIdx, 6).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? item.freight_money.ToString("N2") : "");
+                                    sheet.Cell(rowIdx, 7).Value = p + "0";
+                                    sheet.Cell(rowIdx, 8).Value = p + item.total.ToString("N2");
+                                }
+                                else
+                                {
+                                    sheet.Cell(rowIdx, 5).Value = p + "0";
+                                    sheet.Cell(rowIdx, 6).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? item.freight_money.ToString("N2") : "");
+                                    sheet.Cell(rowIdx, 7).Value = p + item.discount.ToString("N0");
+                                    sheet.Cell(rowIdx, 8).Value = p + item.discount.ToString("N0");
+                                }
+
+
+                                sheet.Cell(rowIdx, 9).Value = p;
+                                sheet.Cell(rowIdx, 10).Value = p;
+
+                                //物流
+                                sheet.Cell(rowIdx, 11).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                                sheet.Cell(rowIdx, 11).Value = p + ((DateTime)item.goods_datetime).ToString("yyyy/MM/dd");
+
+                                sheet.Cell(rowIdx, 12).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                                sheet.Cell(rowIdx, 12).Value = p + (!string.IsNullOrEmpty(item.freight_name) ? item.freight_name.Split(':')[0] : "");
+
+                                sheet.Cell(rowIdx, 13).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                                sheet.Cell(rowIdx, 13).Value = p + item.freight_no;
+
+                                sheet.Cell(rowIdx, 14).Style.Fill.BackgroundColor = XLColor.PaleTurquoise;
+                                sheet.Cell(rowIdx, 14).Value = p + item.goods_info;
+
+                                rowIdx += 1;
+                            }
+
+                            sheet.Cell(rowIdx, 3).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? subitem.product_data2.item_name : subitem.item_name);
+                            sheet.Cell(rowIdx, 4).Value = p + (subitem.num * subitem.payment).ToString();
+                            sheet.Cell(rowIdx, 5).Value = p;
+                            sheet.Cell(rowIdx, 6).Value = p + (subitem.product_id != 101 && subitem.product_id != 102 ? item.freight_money.ToString("N2") : "");
+                            sheet.Cell(rowIdx, 8).Value = p;
+                            sheet.Cell(rowIdx, 9).Value = p;
+                            sheet.Cell(rowIdx, 10).Value = p;
+
+                            //物流
+                            sheet.Cell(rowIdx, 11).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                            sheet.Cell(rowIdx, 11).Value = p + ((DateTime)item.goods_datetime).ToString("yyyy/MM/dd");
+
+                            sheet.Cell(rowIdx, 12).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                            sheet.Cell(rowIdx, 12).Value = p + (!string.IsNullOrEmpty(item.freight_name) ? item.freight_name.Split(':')[0] : "");
+
+                            sheet.Cell(rowIdx, 13).Style.Fill.BackgroundColor = XLColor.PastelYellow;
+                            sheet.Cell(rowIdx, 13).Value = p + item.freight_no;
+
+                            sheet.Cell(rowIdx, 14).Style.Fill.BackgroundColor = XLColor.PaleTurquoise;
+                            sheet.Cell(rowIdx, 14).Value = p + item.goods_info;
+                            isStyle = false;
+                            break;
+
+                    }
+
+                    rowIdx += 1;
+                }
+            }
+
+            sheet.Cell(rowIdx, 6).Style.Fill.BackgroundColor = XLColor.CoralPink;
+            sheet.Cell(rowIdx, 7).Style.Fill.BackgroundColor = XLColor.CoralPink;
+
+            sheet.Cell(rowIdx, 6).Value = p + "請款總額(含稅)";
+
+
+            sheet.Cell(rowIdx, 7).Value = p + (data.Where(m => string.IsNullOrEmpty(m.back_money_type) && string.IsNullOrEmpty(m.back_type)).Sum(m => m.total) + data.Where(m => !string.IsNullOrEmpty(m.back_money_type) && !string.IsNullOrEmpty(m.back_type)).Sum(m => m.discount) + data.Where(m => string.IsNullOrEmpty(m.back_money_type) && string.IsNullOrEmpty(m.back_type)).Sum(m => m.freight_money)).ToString("N0");
+
+
+            for (int i = 1; i <= cols.Length; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+            }
+
+            //物流公司分頁
+            sheet = workbook.Worksheets.Add("物流公司對照表");
+            colIdx = 1;
+            rowIdx = 2;
+
+            string[] colname = { "物流代號", "物流公司名稱" };
+            foreach (string cn in colname)
+            {
+                sheet.Cell(1, colIdx++).Value = cn;
+            }
+            //sheet.Cell(1, 1).Value = "物流代號";
+            //sheet.Cell(1, 2).Value = "物流公司名稱";
+
+            foreach (string fname in NW.FreightName)
+            {
+                sheet.Cell(rowIdx, 1).Value = p + (rowIdx - 1).ToString();
+                sheet.Cell(rowIdx, 2).Value = p + fname;
+
+                rowIdx++;
+            }
+
+            for (int a = 1; a <= colname.Length; a++)
+            {
+                sheet.Column(a).AdjustToContents();
+            }
+
+
+            value = Server.MapPath("~/Content/files/" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+            return value;
+        }
+
+        [HttpPost]
+        public ActionResult getDetail(int oid)
+        {
+            sys_admin_data admin = NW.admin(User.Identity.Name);
+
+            var Linq = this._DB.order_data2.Where(m => m.order_id == oid);
+
+            if (admin.power_id > 2) { Linq = Linq.Where(m => m.drugstor_id == admin.drugstore_id); }
+            var data = Linq.Where(m => m.order_id == oid).FirstOrDefault();
+
+            string title = "";
+            string s = "";
+
+            int payment = data.order_sub2.OrderBy(m => m.sub_id).FirstOrDefault().payment;
+            var osub = data.order_sub2.OrderBy(m => m.order_id).ToList();
+
+            foreach (var item in osub)
+            {
+                s += "<tr><td>" + item.item_no + "</td><td>" + item.item_name + "</td><td>" + item.num.ToString() + "</td></tr> ";
+            }
+
+            title = osub.FirstOrDefault().item_no;
+            //s += "<tr><td>" + osub.item_no + "</td><td>" + osub.item_name + "</td><td>" + osub.style_name + "</td><td>" + osub.num.ToString() + "</td></tr> ";
+
+
+
+            var model = new { title = "購買產品明細", s = s };
+            return Json(model, JsonRequestBehavior.AllowGet);
+            
+        }
+
+        private List<data_list> getBills(drugstore_data com, int type = 0)
+        {
+
+            //type 0 待請款列表(管理員用) 1 廠商請款列表
+            int type_flag = 1;
+
+            List<data_list> Linq = new List<data_list>();
+
+            DateTime today = DateTime.Today;
+
+            //請款截止日
+            DateTime lastday = new DateTime(today.Year, today.Month, 1);
+            lastday = lastday.AddMonths(1).AddDays(-1);
+
+            //廠商請款起始日
+            DateTime company_bills_date = new DateTime(2016,3,1);
+
+            //請款起始計算日
+            DateTime bills_date = company_bills_date;
+
+            //開啟請款日(月結)
+            DateTime month_bills_date = new DateTime(today.Year, today.Month, 25);
+
+            //開啟請款日(半月結)
+            DateTime sqmonth_bills_date = new DateTime(today.Year, today.Month, 16);
+            DateTime eqmonth_bills_date = new DateTime(today.Year, today.Month, 20);
+
+            //原鑑賞賞日
+            int ofresh_day = 10;
+
+            //新鑑賞日
+            int nfresh = 0;
+
+            //訂單限制日(出貨時間)(月結) 25~月底請款
+            int mslimit_day = 1 - nfresh;
+            int melimit_day = 1 - nfresh;
+
+            //訂單限制日(出貨時間)(半月結) 16，31請款
+            int slimit_day = DateTime.Now.AddMonths(1).AddDays(-1).Day - nfresh;
+            int elimit_day = 16 - nfresh;
+
+            //取因修改鑑賞日，新舊請款訂單日期區間
+            int afresh_day = 0;
+
+            //第一個月訂單請款整合 有調整鑑賞日才預設true
+            bool isFirst = false;
+            if (isFirst)
+            {
+                afresh_day = ofresh_day - nfresh;
+            }
+
+            //測試
+            //sbills_date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            //today = DateTime.Today.AddMonths(1);
+            //sD = new DateTime(DateTime.Now.Year, 3, 1);
+
+
+            int i = 0;
+            do
+            {
+                data_list data2 = new data_list();
+
+                bool isBills = true;
+                bool showBills = true;
+                double cost_total = 0;
+
+                //有未出貨的訊息
+                string msg = "";
+
+
+                bills_date = bills_date.AddMonths(1);
+
+                int yymm = Convert.ToInt32(bills_date.ToString("yyyyMM"));
+
+                //用bills_date的年月加上廠商id 取請款資料
+                var cbills = this._DB.order_bills2.Where(m => m.company_id == com.drugstore_id && m.yymm == yymm).OrderByDescending(m => m.bills_id).ToList();
+
+                //可請款的訂單區間(已出貨日)
+                DateTime sdd;
+                DateTime edd;
+
+                //order_bills的bills_flag 0月結 1半月結上 2半月結下
+
+                if (bills_date >= company_bills_date && bills_date <= DateTime.Today.AddMonths(1))
+                {
+
+                    //假設無，新增空白list
+                    if (cbills.Count == 0)
+                    {
+                        var oLinq = this._DB.order_data2.Where(m => m.visible && m.drugstor_id == com.drugstore_id && m.flag >= 1 && m.bills_id == 0 && m.pay_id == 5);
+
+                        int aa = oLinq.Count();
+
+                        double discount = 0;
+                        double cost = 0;
+                        int freight = 0;
+
+                        //company_data.bills_flag 0月結 1半月結
+                       // switch (com.bills_flag)
+                       // {
+                          //  case 0:
+
+                                if (type == type_flag)
+                                {
+                                    if (today >= month_bills_date && today <= lastday) { isBills = true; }
+                                    else { isBills = false; }
+
+                                    if (yymm.ToString() == DateTime.Today.ToString("yyyyMM") && !isBills)
+                                    {
+                                        showBills = false;
+                                    }
+
+                                }
+
+                                sdd = new DateTime(bills_date.Year, bills_date.Month, mslimit_day).AddMonths(-1);
+                                edd = new DateTime(bills_date.Year, bills_date.Month, melimit_day);
+
+                                var omLinq = oLinq.Where(m => m.order_datetime >= sdd && m.order_datetime <= edd).ToList();
+
+                                if (omLinq.Count > 0 && isFirst)
+                                {
+                                    isFirst = false;
+                                    sdd = sdd.AddDays(-afresh_day);
+                                    omLinq = oLinq.Where(m => m.order_datetime >= sdd && m.order_datetime < edd).ToList();
+                                }
+
+                                bills_money2 bm = getBillsMoney(omLinq);
+                                discount = bm.discount;
+                                cost = bm.cost;
+                                freight = bm.freight;
+
+                                cost_total = cost + discount + freight;
+                                
+                                
+                                //foreach (var item in omLinq)
+                                //{
+                                //    if (item.freight_datetime == null)
+                                //        msg = "目前尚有貨品未出貨，可填入預計出貨日期，如無法正常出貨請作廢該筆訂單";
+                                //}
+                                //DateTime dt = DateTime.Parse(string.Format("{0}/{1}/1", DateTime.Today.Year, DateTime.Today.Month));
+                                //string LastDay = dt.AddDays(-1).Date.ToString("yyMMdd");
+
+                                if ( yymm <= Convert.ToInt32(DateTime.Now.ToString("yyyyMM")) )
+                                {
+                                    isBills = true;
+                                }
+
+                                data2 = new data_list()
+                                {
+                                    data_id = 0,
+                                    order_style = com.drugstore_id,
+                                    hits = yymm,
+                                    status_flag = 0,
+                                    group_id = 0,
+                                    start_date = sdd,
+                                    end_date = edd,
+                                    visible = isBills,
+                                    cost = cost_total,
+                                    create_user = type == type_flag ? "" : com.name,
+                                    visible_index = showBills,
+                                    post_datetime = bm.order_date,
+                                    mail = bm.msg
+                                };
+
+                                Linq.Add(data2);
+
+                               // break;
+
+                            //case 1:
+
+                            //    for (int a = 1; a <= 2; a++)
+                            //    {
+                            //        showBills = true;
+
+                            //        //a 1 上 2下
+                            //        if (a == 1)
+                            //        {
+                            //            if (type == type_flag)
+                            //            {
+                            //                if (today >= sqmonth_bills_date && today <= eqmonth_bills_date) { isBills = true; }
+                            //                else if (today >= lastday && today <= lastday.AddDays(4)) { isBills = true; }
+                            //                else { isBills = false; }
+
+                            //                if (yymm.ToString() == DateTime.Today.ToString("yyyyMM") && !isBills)
+                            //                {
+                            //                    showBills = false;
+                            //                }
+                            //            }
+
+                            //            sdd = new DateTime(bills_date.Year, bills_date.Month, slimit_day).AddMonths(-1);
+                            //            edd = new DateTime(bills_date.Year, bills_date.Month, elimit_day);
+                            //        }
+                            //        else
+                            //        {
+                            //            if (type == type_flag)
+                            //            {
+                            //                if (today >= lastday && today <= lastday.AddDays(4)) { isBills = true; }
+                            //                else if (today >= sqmonth_bills_date && today <= eqmonth_bills_date && bills_date.ToString("yyyymm") != today.ToString("yyyymm")) { isBills = true; }
+                            //                else { isBills = false; }
+                            //            }
+
+                            //            if (yymm.ToString() == DateTime.Today.ToString("yyyyMM") && !isBills)
+                            //            {
+                            //                showBills = false;
+                            //            }
+
+                            //            sdd = new DateTime(bills_date.Year, bills_date.Month, elimit_day);
+                            //            edd = new DateTime(bills_date.Year, bills_date.Month, slimit_day);
+                            //        }
+
+                            //        cost_total = 0;
+
+                            //        var oLinq2 = oLinq.Where(m => m.goods_datetime >= sdd && m.goods_datetime < edd).ToList();
+
+                            //        if (oLinq2.Count > 0 && isFirst)
+                            //        {
+                            //            isFirst = false;
+                            //            sdd = sdd.AddDays(-afresh_day);
+                            //            omLinq = oLinq.Where(m => m.goods_datetime >= sdd && m.goods_datetime < edd).ToList();
+                            //        }
+
+                            //        bills_money bm2 = getBillsMoney(oLinq2);
+                            //        discount = bm2.discount;
+                            //        cost = bm2.cost;
+                            //        freight = bm2.freight;
+
+                            //        cost_total = cost + discount + freight;
+
+                            //        data2 = new data_list()
+                            //        {
+                            //            data_id = 0,
+                            //            order_style = com.company_id,
+                            //            hits = yymm,
+                            //            status_flag = 0,
+                            //            group_id = a,
+                            //            start_date = sdd,
+                            //            end_date = edd,
+                            //            visible = isBills,
+                            //            cost = cost_total,
+                            //            create_user = type == type_flag ? "" : com.title,
+                            //            visible_index = showBills
+                            //        };
+
+
+                            //        Linq.Add(data2);
+
+
+                            //    }
+
+
+                            //    break;
+                        //}
+
+                    }
+                    else//假設有，帶有
+                    {
+                        foreach (var item in cbills)
+                        {
+                            cost_total += item.total;
+
+                            data2 = new data_list()
+                            {
+                                data_id = item.bills_id,
+                                order_style = com.drugstore_id,
+                                hits = yymm,
+                                status_flag = item.flag,
+                                group_id = item.bills_flag,
+                                start_date = item.sdate,
+                                end_date = item.edate,
+                                visible = false,
+                                create_datetime = item.bills_datetime,
+                                cost = cost_total,
+                                create_user = item.create_user,
+                                visible_index = true
+                            };
+
+                            Linq.Add(data2);
+                        }
+
+                
+                            if (cbills.Count < 2)
+                            {
+                                cost_total = 0;
+                                var cbill = cbills.FirstOrDefault();
+
+                                if (type == type_flag)
+                                {
+                                    if (today >= sqmonth_bills_date && today <= eqmonth_bills_date) { isBills = true; }
+                                    else if (today.Day >= lastday.AddDays(-1).Day && today.Day <= lastday.AddDays(4).Day) { isBills = true; }
+                                    else { isBills = false; }
+                                }
+
+                                if (cbill.bills_flag == 1)
+                                {
+                                    sdd = new DateTime(bills_date.Year, bills_date.Month, elimit_day);
+                                    edd = new DateTime(bills_date.Year, bills_date.Month, slimit_day);
+                                }
+                                else
+                                {
+                                    sdd = new DateTime(bills_date.Year, bills_date.AddMonths(-1).Month, slimit_day);
+                                    edd = new DateTime(bills_date.Year, bills_date.Month, elimit_day);
+                                }
+
+                                cost_total += cbill.total;
+
+                                data2 = new data_list()
+                                {
+
+                                    data_id = cbill.bills_id,
+                                    status_flag = cbill.flag,
+                                    //data_id = 0,
+                                    order_style = com.drugstore_id,
+                                    hits = yymm,
+                                    //status_flag = 0,
+                                    group_id = cbill.bills_flag,
+                                    start_date = sdd,
+                                    end_date = edd,
+                                    visible = isBills,
+                                    cost = cost_total,
+                                    create_user = cbill.create_user,
+                                    visible_index = true
+                                };
+
+                                Linq.Add(data2);
+                            }
+                       
+
+                    }
+                }
+
+                i++;
+
+            }
+            while (bills_date >= company_bills_date && bills_date <= DateTime.Today);
+
+            return Linq;
+
+        }
+
+        public class bills_money2
+        {
+            public double discount { get; set; }
+
+            public double cost { get; set; }
+
+            public int freight { get; set; }
+
+            public DateTime? order_date { get; set; }
+
+            public string msg { get; set; }
+        }
+
+        public bills_money2 getBillsMoney(List<order_data2> order)
+        {
+            var data = new bills_money2();
+
+            data.discount = order.Where(m => !string.IsNullOrEmpty(m.back_money_type) && !string.IsNullOrEmpty(m.back_type) && m.pay_id ==5).Select(m => m.discount).DefaultIfEmpty(0).Sum();
+            data.cost = order.Where(m => string.IsNullOrEmpty(m.back_money_type) && string.IsNullOrEmpty(m.back_type) && m.pay_id == 5).Select(m => m.total).DefaultIfEmpty(0).Sum();
+            data.freight = order.Where(m => string.IsNullOrEmpty(m.back_money_type) && string.IsNullOrEmpty(m.back_type) && m.pay_id == 5).Select(m => m.freight).DefaultIfEmpty(0).Sum();
+
+            if (order.Count() != 0)
+            {
+                data.order_date = order.OrderByDescending(m => m.order_datetime).FirstOrDefault().order_datetime;
+                int count = 0;
+
+                count = order.Where(m => m.freight_datetime == null).Count();
+
+                if (count == 0)
+                    data.msg = "目前無未出貨訂單。";
+                else
+                    data.msg = "目前尚有" + count + "筆訂單未出貨";
+            }
+             
+
+
+
+            return data;
+        }
+
+
+
+        public ActionResult ClearEdit(int id)
+        {
+            var data = this._DB.order_data2.Find(id);
+
+            var mdata = this._DB.pharmacist_data.Find(data.member_id);
+            ViewData["sys_admin_data"] = mdata;
+
+            var pdata = this._DB.order_pay2.Where(m => m.pay_visible == true && m.pay_id == 4).OrderBy(m => m.pay_id).ToList();
+            List<ListItem> ListItems_pay_id = new List<ListItem> { };
+            //ListItems.Add(new ListItem("", "請選擇", false));
+            foreach (var item in pdata)
+            {
+                ListItems_pay_id.Add(new ListItem(item.pay_id.ToString(), item.pay_name, item.pay_id == data.pay_id));
+            }
+            ViewData["pay_id"] = ListItems_pay_id;
+
+            List<ListItem> ListItems_pay_visible = new List<ListItem> { };
+            ListItems_pay_visible.Add(new ListItem("false", "未付款", data.pay_visible));
+            ListItems_pay_visible.Add(new ListItem("true", "已付款", data.pay_visible));
+            ViewData["pay_visible"] = ListItems_pay_visible;
+
+            List<ListItem> ListItems_freight_name = new List<ListItem> { };
+            ListItems_freight_name.Add(new ListItem("", "請選擇", false));
+            foreach (var item in NW.FreightName)
+            {
+                ListItems_freight_name.Add(new ListItem(item, item, item == data.freight_name));
+            }
+            ViewData["freight_name"] = ListItems_freight_name;
+
+            var fdata = this._DB.order_goods2.Where(m => m.order_id == id).OrderBy(m => m.goods_datetime).Select(m => new NW.order_goods_tmp { name = m.name, sn = m.sn, goods_datetime = m.goods_datetime }).Distinct().ToList();
+            ViewData["order_goods_tmp"] = fdata;
+
+            var cdata = this._DB.order_charge2.Where(m => m.order_id == id).OrderBy(m => m.freight_id).ToList();
+            ViewData["order_charge_tmp"] = cdata;
+
+            var idata = this._DB.order_druginvoice.Where(m => m.order_id == id).OrderBy(m => m.invoice_datetime).Select(m => new NW.order_invoice_tmp { invoice = m.invoice, tax = m.tax, invoice_datetime = m.invoice_datetime }).Distinct().ToList();
+            ViewData["order_invoice_tmp"] = idata;
+
+
+            #region"發票資訊"
+
+            data.invoice_datetime = data.invoice_datetime == null ? DateTime.Now : data.invoice_datetime;
+
+            #endregion
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+
+            return View(data);
+        }
+
+        [HttpPost]
+        public ActionResult ClearEditSave(order_data2 order_data, int index)
+        {
+            var data = this._DB.order_data2.Find(order_data.order_id);
+
+            switch (index)
+            {
+                case 0:    //金流資料
+                    data.pay_id = order_data.pay_id;
+                    data.pay_visible = order_data.pay_visible;
+                    data.pay_note = order_data.pay_note;
+                    if (order_data.pay_visible) { if (data.pay_datetime == null) { data.pay_datetime = DateTime.Now; } } else { data.pay_datetime = null; }
+                    data.flag = order_data.pay_visible ? 1 : 0;
+                    this._DB.SaveChanges();
+                    TempData["jgrowl"] = "金流資訊儲存成功!!";
+                    break;
+                case 1:    //物流資料
+
+                    if (data.pay_id ==5)
+                    {
+
+                        data.freight_name = order_data.freight_name;
+                        data.freight_no = order_data.freight_no;
+                        data.freight_datetime = order_data.freight_datetime;
+
+                        data.goods_datetime = DateTime.Now ;
+              
+
+                        if (!string.IsNullOrEmpty(data.freight_name)) { data.flag = 2; }
+
+                        var checkfdata = this._DB.order_goods2.Where(m => m.order_id == data.order_id).ToList();
+                        var subdata = this._DB.order_sub2.Where(m => m.order_id == data.order_id).ToList();
+
+                        if (checkfdata.Count() == 0)
+                        {
+                            foreach (var item in subdata)
+                            {
+                                var fdata = new order_goods2();
+                                fdata.order_id = item.order_id;
+                                fdata.sn = data.freight_no;
+                                fdata.sub_id = item.sub_id;
+                                fdata.name = data.freight_name;
+                                fdata.num = item.num;
+                                fdata.goods_datetime = DateTime.Now;
+                                fdata.create_user = "1";
+                                fdata.create_datetime = DateTime.Now;
+                                this._DB.order_goods2.Add(fdata);
+                                this._DB.SaveChanges();
+
+                            }
+                        }
+                        else
+                        {
+
+                            foreach (var item in checkfdata)
+                            {
+
+                                item.name = data.freight_name;
+                                item.sn = data.freight_no;
+                                item.goods_datetime = DateTime.Now;
+                                item.create_user = "1";
+                                item.create_datetime = DateTime.Now;
+                                this._DB.SaveChanges();
+                            }
+
+                        }
+
+
+                        this._DB.SaveChanges();
+                        TempData["jgrowl"] = "物流資訊儲存成功!!";
+                    }
+                    else
+                    {
+                        TempData["jgrowl"] = "此訂單非月結訂單，請至原訂單列表處理出貨。";
+                    }
+
+                    break;
+
+                case 99:
+        
+                    data.visible = false;
+                    this._DB.SaveChanges();
+                    TempData["jgrowl"] = "訂單作廢成功。";
+
+                    break;
+
+
+                //case 2: //發票資料
+                //    if (data.pay_visible)
+                //    {
+                //        data.invoice_datetime = order_data.invoice_datetime;
+                //        data.invoice_no = order_data.invoice_no;
+                //        data.invoice_note = order_data.invoice_note;
+                //        if (!string.IsNullOrEmpty(data.invoice_no)) { data.flag = 5; }
+                //        this._DB.SaveChanges();
+                //        TempData["jgrowl"] = "發票資訊儲存成功!!";
+                //    }
+                //    else
+                //    {
+                //        TempData["jgrowl"] = "請先確定付款完成，在處理發票資料";
+                //    }
+
+                //    break;
+            }
+
+            if(index != 99)
+            return RedirectToAction("ClearEdit", new { id = data.order_id });
+            else
+            return RedirectToAction("StayList");
+        }
+
+
+
+    }
+}

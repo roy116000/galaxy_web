@@ -1,0 +1,886 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Linq;
+
+using h365_web.Models;
+using MvcPaging;
+using NPOI.SS.UserModel;
+using ClosedXML.Excel;
+
+namespace h365_web.Areas.newweb.Controllers
+{
+    public class NwMemberController : _BaseController
+    {
+
+        #region"會員列表"
+
+        public ActionResult List(int? page, string kw, DateTime? sD, DateTime? eD, bool isExport = false)
+        {
+
+
+            var linq = this._DB.member_data.Where(m => m.member_id > 0);
+
+            var set = (from a in linq
+                       join b in this._DB.drugstore_data on a.drugstore_id equals b.drugstore_id into mm
+                       select new
+                       {
+                           a = a,
+                           b = mm
+                       }).ToList().Select(m => new
+                       {
+                           a = m.a,
+                           b = m.b.Any() ? m.b.FirstOrDefault() : new drugstore_data() { }
+                       }).ToList().Select(m => new member_data()
+                       {
+                           member_id = m.a.member_id,
+                           name = m.a.name,
+                           phone = m.a.phone,
+                           change_user = m.b.name,
+                           create_datetime = m.a.create_datetime,
+                           create_user = m.a.create_user,
+                           visible = m.a.visible
+                       });
+
+            #region"搜尋"
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+
+                kw = kw.ToLower();
+                set = set.Where(m =>
+                    (!string.IsNullOrEmpty(m.name) ? m.name.ToLower().Contains(kw) : false)
+                    || (!string.IsNullOrEmpty(m.phone) ? m.phone.Contains(kw) : false)
+                    || (!string.IsNullOrEmpty(m.change_user) ? m.change_user.ToLower().Contains(kw) : false)
+                    );
+            }
+
+            if (sD.HasValue)
+            {
+                ViewBag.sD = NW.getDate(sD);
+                set = set.Where(m => m.create_datetime >= sD);
+            }
+
+            if (eD.HasValue)
+            {
+                ViewBag.eD = NW.getDate(eD);
+
+                eD = eD.Value.AddDays(1);
+
+                set = set.Where(m => m.create_datetime < eD);
+            }
+            #endregion
+
+            if (isExport)
+            {
+                return Export(set);
+            }
+
+            int currIndex = page > 0 ? (int)page - 1 : 0;
+            var data = set.OrderByDescending(m => m.visible).ThenByDescending(m => m.create_datetime).ToPagedList(currIndex, 50);
+
+            if (page.HasValue)
+            {
+                return PartialView("List_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        private ActionResult Export(IEnumerable<member_data> Get)
+        {
+
+            //string msg = "";
+            string T = "'";
+
+            XLWorkbook workbook = new XLWorkbook() { };
+            var sheet = workbook.Worksheets.Add("明細");
+            int colIdx = 1; //欄位
+            int rowIdx = 2; //行數
+
+            string[] cols = null;
+
+            //需組裝的資料
+            var data = Get.OrderByDescending(m => m.create_datetime).ToList();
+
+            #region"總"
+
+            colIdx = 8; //欄位
+            rowIdx = rowIdx + 1; //行數
+
+            cols = new string[] { "總數量" };
+            foreach (var item in cols)
+            {
+                sheet.Cell(rowIdx, colIdx).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                sheet.Cell(rowIdx, colIdx++).Value = item;
+            }
+
+            colIdx = 8; //欄位
+            rowIdx = rowIdx + 1; //行數
+
+
+            cols = new string[] 
+            {
+                data.Count().ToString(),
+                //data.Select(m => m.total).DefaultIfEmpty(0).Sum().ToString("N0")
+            };
+            foreach (string item in cols)
+            {
+                //置右
+                sheet.Cell(rowIdx, colIdx).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                sheet.Cell(rowIdx, colIdx++).Value = T + item;
+            }
+
+            #endregion
+
+            #region"訂單明細"
+
+            colIdx = 1;
+            rowIdx = rowIdx + 2;
+
+            cols = new string[] { "#", "會員姓名", "連絡電話", "註冊時間", "註冊方式", "綁定藥局", "啟用" };
+            foreach (var item in cols)
+            {
+                //置中
+                sheet.Cell(rowIdx, colIdx).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                sheet.Cell(rowIdx, colIdx++).Value = item;
+            }
+
+            foreach (var item in data)
+            {
+                string[] N = 
+                {
+
+                    (Array.IndexOf(data.Select(m => m.member_id).ToArray(), item.member_id) + 1).ToString(),
+                    item.name, 
+                    item.phone, 
+                    item.create_datetime.HasValue ? NW.getDate(item.create_datetime) : "",
+                    item.create_user,
+                    item.change_user,
+                    item.visible ? "啟用中" : "關閉",
+
+                };
+
+                int num = 1;
+                foreach (var item2 in N)
+                {
+                    sheet.Cell(rowIdx + 1, num).Value = T + item2;
+
+                    if (new int[] { }.Contains(num))
+                    {
+                        //置中
+                        sheet.Cell(rowIdx + 1, num).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    }
+                    else if (new int[] { 1, 8, 9, 10 }.Contains(num))
+                    {
+                        //置右
+                        sheet.Cell(rowIdx + 1, num).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    }
+
+                    num++;
+                }
+
+                rowIdx++;
+            }
+
+            #endregion
+
+            #region"增添色彩~"
+
+            //sheet.Rows("1").Style.Font.FontSize = 20;
+            sheet.Rows("3, 4").Style.Font.FontSize = 14;
+            sheet.Rows("3, 4, 6").Style.Font.Bold = true;
+
+            sheet.Rows("3, 6").Style.Fill.BackgroundColor = XLColor.Yellow;
+            ////sheet.Rows("3,5,8").Style.Fill.color = ConsoleColor.White;
+            //sheet.Rows("3,6").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            //sheet.Column(1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            #endregion
+
+            #region"自動伸縮欄寬"
+
+            for (int i = 1; i <= cols.Length + 10; i++)
+            {
+                sheet.Column(i).AdjustToContents();
+
+                //if (i != 3)
+                //{
+                //    sheet.Column(i).AdjustToContents();
+                //}
+
+            }
+
+            #endregion
+
+            string value = "";
+            value = Server.MapPath("~/Content/files/export/" + "會員-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx");
+
+
+            workbook.SaveAs(value);
+            workbook.Dispose();
+
+            return File(value, "application/vnd.ms-excel", Server.UrlPathEncode(DateTime.Now.ToString("order_yyyyMMdd-HHmmss") + ".xlsx"));
+        }
+
+
+        #region"列表"
+
+        public ActionResult xxList(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+            var Member = this._DB.member_data.Where(m => m.member_id > 0 && m.group_id != 0);
+
+            var Drug = this._DB.drugstore_data.Where(m => m.drugstore_id > 0).ToList();
+            ViewData["Drug"] = Drug;
+
+            var linq = Member.OrderByDescending(m => m.phone).Distinct();
+
+            if (!string.IsNullOrEmpty(kw))
+            {
+                ViewBag.kw = kw;
+                linq = linq.Where(m => m.name.Contains(kw));
+            }
+
+            var data = linq.OrderByDescending(m => m.drugstore_id).ThenByDescending(m => m.change_datetime).ToPagedList(currentPageIndex, 50);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            if (page.HasValue)
+            {
+                return PartialView(RouteData.Values["action"].ToString() + "_ajax", data);
+            }
+            else
+            {
+                return View(data);
+            }
+
+        }
+
+        #endregion
+
+        #region"新增修改"
+
+        public ActionResult AoE(int id)
+        {
+            var data = this._DB.member_data.Where(m => m.member_id == id).FirstOrDefault();
+            if (id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Eidt", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new member_data();
+                if (data.member_id == 0)
+                {
+                    data.visible = true;
+                }
+
+                #region"選單"
+                List<ListItem> ListItems = new List<ListItem> { };
+
+
+
+                //性別
+                string[] Sex = { "女", "男" };
+                ListItems.AddRange(NW.sList(Sex, data.sex));
+                ViewData["sex"] = ListItems;
+
+                //區號
+                ViewData["zip"] = NW.zipData(0, data.zip);
+                ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+                #endregion
+
+
+                ViewBag.jgrowl = TempData["jgrowl"];
+                return View(data);
+            }
+        }
+
+        public ActionResult Add(int id)
+        {
+            return AoE(id);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            return AoE(id);
+        }
+
+        #endregion
+
+        #region"儲存"
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult EditSave(member_data member_data)
+        {
+            var data = this._DB.member_data.Where(m => m.member_id == member_data.member_id).FirstOrDefault();
+            if (member_data.member_id != 0 && data == null) { return RedirectToAction(RouteData.Values["action"].ToString().Replace("Add", "").Replace("Eidt", "").Replace("Save", "") + "List"); }
+            else
+            {
+                data = data != null ? data : new member_data();
+                data.name = member_data.name; //姓名
+                data.password = member_data.password; //密碼
+                data.birthday = member_data.birthday; //生日
+                data.address = member_data.address; //地址
+                data.zip = member_data.zip; //區域
+                data.visible = member_data.visible; //啟用
+                data.sex = member_data.sex; //性別
+                data.mail = member_data.mail; //信箱
+                data.group_id = member_data.group_id; //分類
+                data.sn = member_data.sn;
+
+                if (data.member_id == 0)
+                {
+                    data.phone = member_data.phone; //手機(帳號)
+                    data.create_user = User.Identity.Name;
+                    data.create_datetime = DateTime.Now;
+                    this._DB.member_data.Add(data);
+
+                    TempData["jgrowl"] = "新增成功";
+                }
+                else
+                {
+                    data.change_user = User.Identity.Name;
+                    data.change_datetime = DateTime.Now;
+
+                    TempData["jgrowl"] = "修改成功";
+                }
+
+                this._DB.SaveChanges();
+
+                return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = data.member_id });
+            }
+
+        }
+
+        #endregion
+
+        #endregion
+
+
+        //#region "會員列表"
+
+        //public ActionResult List(int? gid, string kw)
+        //{
+
+        //    int currentPageIndex = 0;
+        //    var tmpData = (from m in _DB.member_data
+        //                   join m2 in _DB.member_group on m.group_id equals m2.group_id into mm
+        //                   orderby m.create_datetime descending
+        //                   select new data_list()
+        //                   {
+        //                       data_id = m.member_id,
+        //                       group_id = m.group_id,
+        //                       name = m.name,
+        //                       tel = m.phone,
+        //                       mail = m.mail,
+        //                       visible = m.visible,
+        //                       g_name = mm.FirstOrDefault().name
+        //                   });
+
+        //    if (!String.IsNullOrEmpty(kw))
+        //    {
+        //        tmpData = tmpData.Where(m => m.name.Contains(kw) || m.mail.Contains(kw) || m.tel.Contains(kw));
+        //    }
+
+        //    if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id.Equals(gid.Value)); }
+        //    ViewBag.gid = gid;
+
+        //    IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+        //    var data2 = this._DB.member_group.OrderBy(m => m.inx)
+        //                .Select(m => new data_group()
+        //                {
+        //                    group_id = m.group_id,
+        //                    name = m.name,
+        //                    counts = m.member_data.Count()
+        //                });
+
+        //    ViewData["member_group"] = data2;
+        //    ViewBag.kw = kw;
+        //    ViewBag.jgrowl = TempData["jgrowl"];
+
+        //    return View(data);
+        //}
+
+        //public ActionResult List_ajax(int? gid, int? page, string kw)
+        //{
+        //    int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+
+        //    var tmpData = (from m in _DB.member_data
+        //                   join m2 in _DB.member_group on m.group_id equals m2.group_id into mm
+        //                   orderby m.create_datetime descending
+        //                   select new data_list()
+        //                   {
+        //                       data_id = m.member_id,
+        //                       group_id = m.group_id,
+        //                       name = m.name,
+        //                       tel = m.phone,
+        //                       mail = m.mail,
+        //                       visible = m.visible,
+        //                       g_name = mm.FirstOrDefault().name
+        //                   });
+
+        //    if (!String.IsNullOrEmpty(kw))
+        //    {
+        //        tmpData = tmpData.Where(m => m.title.Contains(kw) || m.cont.Contains(kw));
+        //    }
+
+        //    if (gid.HasValue) { tmpData = tmpData.Where(m => m.group_id == gid.Value); }
+        //    ViewBag.gid = gid;
+        //    IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+
+        //    ViewBag.kw = kw;
+        //    return PartialView(RouteData.Values["action"].ToString(), data);
+        //}
+
+
+        //public ActionResult Edit(int id)
+        //{
+        //    var data = this._DB.member_data.Find(id);
+        //    int city_id = data.zip_data == null ? 0 : data.zip_data.city_id;
+
+        //    //下拉選單
+        //    var gData = (from m in _DB.member_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+        //    List<ListItem> ListItems = new List<ListItem> { };
+        //    ListItems.Add(new ListItem("", "請選擇", false));
+        //    foreach (var item in gData)
+        //    {
+        //        ListItems.Add(new ListItem(item.group_id.ToString(), item.name, item.group_id == data.group_id));
+        //    }
+        //    ViewData["group_id"] = ListItems;
+
+        //    //取性別(單選)
+        //    ListItems = new List<ListItem> { };
+        //    ListItems.Add(new ListItem("先生", "先生", data.sex == "先生"));
+        //    ListItems.Add(new ListItem("小姐", "小姐", data.sex == "小姐"));
+        //    ViewData["sex"] = ListItems;
+
+        //    //取縣市
+        //    ViewData["zip_chained"] = NW.zipData(1, data.zip);
+
+        //    //取鄉鎮區
+        //    ViewData["zip"] = NW.zipData(2, data.zip);
+
+
+        //    ViewBag.jgrowl = TempData["jgrowl"];
+
+        //    return View(data);
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult EditSave(member_data member_data, VmImage imgs)
+        //{
+        //    var data = this._DB.member_data.Find(member_data.member_id);
+
+        //    if (data == null)
+        //    {
+        //        ModelState.AddModelError("", "查無此筆資料");
+        //    }
+        //    else
+        //    {
+        //        // data.member_id = member_data.member_id;
+        //        data.group_id = member_data.group_id;
+        //        data.name = member_data.name;
+        //        data.password = member_data.password;
+        //        data.phone = member_data.phone;
+        //        //data.mail = member_data.mail;
+        //        data.birthday = member_data.birthday;
+        //        data.sex = member_data.sex;
+        //        data.zip = member_data.zip;
+        //        data.address = member_data.address;
+        //        data.visible = member_data.visible;
+
+        //        data.change_user = User.Identity.Name;
+        //        data.change_datetime = DateTime.Now;
+        //        //data.create_user = member_data.create_user;
+        //        //data.create_datetime = member_data.create_datetime;
+
+        //        this._DB.SaveChanges();
+        //    }
+
+        //    //更新
+        //    TempData["jgrowl"] = "資料更新成功";
+
+        //    return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = member_data.member_id });
+        //}
+
+        //public ActionResult Add(int id)
+        //{
+        //    member_data data = new member_data();
+
+        //    data.birthday = DateTime.Now;
+
+        //    //下拉選單
+        //    var gData = (from m in _DB.member_group where m.group_id > 0 orderby m.inx, m.create_datetime descending select new { m.group_id, m.name }).ToList();
+        //    List<ListItem> ListItems = new List<ListItem> { };
+        //    ListItems.Add(new ListItem("", "請選擇", false));
+        //    foreach (var item in gData)
+        //    {
+        //        ListItems.Add(new ListItem(item.group_id.ToString(), item.name, false));
+        //    }
+        //    ViewData["group_id"] = ListItems;
+
+        //    //取性別(單選)
+        //    ListItems = new List<ListItem> { };
+        //    ListItems.Add(new ListItem("先生", "先生", true));
+        //    ListItems.Add(new ListItem("小姐", "小姐", false));
+        //    ViewData["sex"] = ListItems;
+
+        //    //取縣市          
+        //    ViewData["zip_chained"] = NW.zipData(1, 0);
+
+        //    //取鄉鎮區           
+        //    ViewData["zip"] = NW.zipData(2, 0);
+
+
+        //    return View(data);
+        //}
+
+        //[HttpPost, ValidateInput(false)]
+        //public ActionResult AddSave(member_data member_data, VmImage imgs)
+        //{
+        //    var data = new member_data { };
+
+        //    if (data == null)
+        //    {
+        //        ModelState.AddModelError("", "查無此筆資料");
+        //    }
+        //    else
+        //    {
+        //        // data.member_id = member_data.member_id;
+        //        data.group_id = member_data.group_id;
+        //        data.name = member_data.name;
+        //        data.password = member_data.password;
+        //        data.phone = member_data.phone;
+        //        data.mail = member_data.mail;
+        //        data.birthday = member_data.birthday;
+        //        data.sex = member_data.sex;
+        //        data.zip = member_data.zip;
+        //        data.address = member_data.address;
+        //        data.visible = member_data.visible;
+
+        //        // data.change_user = User.Identity.Name;
+        //        // data.change_datetime = DateTime.Now;
+        //        data.create_user = User.Identity.Name;
+        //        data.create_datetime = DateTime.Now;
+
+        //        _DB.member_data.Add(data);
+        //        this._DB.SaveChanges();
+
+        //        member_data.member_id = data.member_id;
+        //    }
+
+        //    //更新
+        //    TempData["jgrowl"] = "資料新增成功!!";
+        //    return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = member_data.member_id });
+        //}
+
+        //[HttpPost]
+        //public ActionResult ListDel(int cb_flag, string cb_id)
+        //{
+        //    string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+
+        //    string sql = "";
+        //    switch (cb_flag)
+        //    {
+        //        case 1: //啟用
+        //            sql = "Update member_data set visible = 1 Where member_id in (" + cb_id + ")";
+        //            break;
+        //        case 2: //停用
+        //            sql = "Update member_data set visible = 0 Where member_id in (" + cb_id + ")";
+        //            break;
+        //        case 0: //刪除                 
+        //            sql = " Delete From member_data Where member_id in (" + cb_id + ")";
+        //            break;
+        //    }
+
+        //    if (sql != "")
+        //    {
+        //        _DB.Database.ExecuteSqlCommand(sql);
+        //    }
+
+        //    TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+        //    return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        //}
+
+        //#endregion
+
+        #region "分類列表"
+
+        public ActionResult GroupList(string kw)
+        {
+
+            int currentPageIndex = 0;
+            var tmpData = this._DB.member_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.member_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            ViewBag.jgrowl = TempData["jgrowl"];
+            return View(data);
+        }
+
+        public ActionResult GroupList_ajax(int? page, string kw)
+        {
+            int currentPageIndex = page.HasValue ? page.Value - 1 : 0;
+            var tmpData = this._DB.member_group.OrderBy(m => m.inx).ThenByDescending(m => m.create_datetime)
+                    .Select(m => new data_group()
+                    {
+                        group_id = m.group_id,
+                        name = m.name,
+                        inx = m.inx,
+                        visible = m.visible,
+                        counts = m.member_data.Count()
+                    });
+
+            if (!String.IsNullOrEmpty(kw))
+            {
+                tmpData = tmpData.Where(m => m.name.Contains(kw));
+            }
+
+            IPagedList data = tmpData.ToPagedList(currentPageIndex, NW.GetParam(RouteData.Values["controller"].ToString().Replace("Nw", "").ToLower()).Pages);
+
+            ViewBag.kw = kw;
+            return PartialView(RouteData.Values["action"].ToString(), data);
+        }
+
+
+        public ActionResult GroupEdit(int id)
+        {
+
+            var data = this._DB.member_group.Find(id);
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupEditSave(member_group member_group)
+        {
+            var data = this._DB.member_group.Find(member_group.group_id);
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = member_group.group_id;
+                data.name = member_group.name;
+                data.inx = member_group.inx;
+                data.visible = member_group.visible;
+
+                data.change_user = User.Identity.Name;
+                data.change_datetime = DateTime.Now;
+                //data.create_user = member_group.create_user;
+                //data.create_datetime = member_group.create_datetime;
+
+                this._DB.SaveChanges();
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料更新成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Save", ""), new { id = member_group.group_id });
+        }
+
+        public ActionResult GroupAdd(int id)
+        {
+            member_group data = new member_group();
+            data.inx = 0;
+            data.visible = true;
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult GroupAddSave(member_group member_group, VmImage imgs)
+        {
+            //var data = this._DB.member_group.Find(member_group.zz_id);
+            //var data1 = this._DB.member_group.Where(m => m.zz_id.Equals(member_group.zz_id)).Select(m => m).SingleOrDefault();
+            var data = new member_group { };
+
+            if (data == null)
+            {
+                ModelState.AddModelError("", "查無此筆資料");
+            }
+            else
+            {
+                // data.group_id = member_group.group_id;
+                data.name = member_group.name;
+                data.inx = member_group.inx;
+                data.visible = member_group.visible;
+
+                // data.change_user = User.Identity.Name;
+                // data.change_datetime = DateTime.Now;
+                data.create_user = User.Identity.Name;
+                data.create_datetime = DateTime.Now;
+
+                _DB.member_group.Add(data);
+                this._DB.SaveChanges();
+
+                member_group.group_id = data.group_id;
+            }
+
+            //更新
+            TempData["jgrowl"] = "資料新增成功!!";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("AddSave", "Edit"), new { id = member_group.group_id });
+        }
+
+        [HttpPost]
+        public ActionResult GroupListDel(int cb_flag, string cb_id)
+        {
+            string[] jgrowl_msg = new string[] { "刪除", "啟用", "停用" };
+            int[] strArray = Array.ConvertAll<string, int>(NW.Split(cb_id, ","), int.Parse);
+
+            string sql = "";
+
+            switch (cb_flag)
+            {
+                case 1: //啟用
+                    sql = " Update member_group Set visible = 1 Where group_id in (" + cb_id + ")";
+                    break;
+                case 2: //停用
+                    sql = " Update member_group Set visible = 0 Where group_id in (" + cb_id + ")";
+                    break;
+                case 0: //刪除
+                    sql = " Delete From member_group Where group_id in (" + cb_id + ")";
+                    break;
+            }
+
+            if (sql != "")
+            {
+                _DB.Database.ExecuteSqlCommand(sql);
+            }
+
+            TempData["jgrowl"] = jgrowl_msg[cb_flag] + "功能，設定成功";
+            return RedirectToAction(RouteData.Values["action"].ToString().Replace("Del", ""));
+        }
+
+        #endregion
+
+        #region"真實帳戶列表"
+        public ActionResult RealM()
+        {
+            var data = new member_real();
+
+            ViewBag.jgrowl = TempData["jgrowl"];
+
+            return View(data);
+        }
+
+        [HttpPost, ValidateInput(false)]
+        public ActionResult RealMAdd(product_price product_price, HttpPostedFileBase file_name)
+        {
+
+            if (file_name != null && file_name.ContentLength > 0 && NW.getFileType(file_name, 3))
+            {
+
+                try
+                {
+
+                    // 建立一個工作簿 Office 2007 flag = 0 訂單資料
+
+                    //辯別是2007還是2003
+                    IWorkbook excel = WorkbookFactory.Create(file_name.InputStream);
+
+                    NPOI.SS.UserModel.ISheet sheet = excel.GetSheetAt(0);
+
+                    for (int row = 1; row <= sheet.LastRowNum; row++) // 使用For 走訪所有的資料列
+                    {
+
+                        if (sheet.GetRow(row) != null) // 驗證是不是空白列
+                        {
+                            if (sheet.GetRow(row).GetCell(0) != null)
+                            {
+
+                                string card_no = sheet.GetRow(row).GetCell(0).ToString();//卡號
+                                string name = (sheet.GetRow(row).GetCell(1) != null ? sheet.GetRow(row).GetCell(1).ToString() : "");//姓名
+                                string phone = (sheet.GetRow(row).GetCell(2) != null ? sheet.GetRow(row).GetCell(2).ToString() : "");//電話
+                                string sn = (sheet.GetRow(row).GetCell(3) != null ? sheet.GetRow(row).GetCell(3).ToString() : "");//店別代碼
+                                string market = (sheet.GetRow(row).GetCell(4) != null ? sheet.GetRow(row).GetCell(4).ToString() : "");//店別名稱
+                                string mail = (sheet.GetRow(row).GetCell(5) != null ? sheet.GetRow(row).GetCell(5).ToString() : "");//信箱
+                                string new_sn = (sheet.GetRow(row).GetCell(6) != null ? sheet.GetRow(row).GetCell(6).ToString() : "");//新分店代碼
+                                string new_market = (sheet.GetRow(row).GetCell(7) != null ? sheet.GetRow(row).GetCell(7).ToString() : "");//新店別名稱
+
+                                var member = this._DB.member_real.Where(m => m.card_no == card_no).FirstOrDefault();
+                                if (member != null)
+                                {
+                                    member.name = name;
+                                    member.phone = phone;
+                                    member.sn = sn;
+                                    member.market = market;
+                                    member.mail = mail;
+                                    member.new_sn = new_sn;
+                                    member.new_market = new_market;
+
+                                    this._DB.SaveChanges();
+                                }
+                                else
+                                {
+                                    member_real data = new member_real { };
+                                    data.card_no = card_no;
+                                    data.name = name;
+                                    data.phone = phone;
+                                    data.sn = sn;
+                                    data.market = market;
+                                    data.mail = mail;
+                                    data.new_sn = new_sn;
+                                    data.new_market = new_market;
+
+                                    //this._DB.product_price.Add(data);
+                                    this._DB.member_real.Add(data);
+                                    this._DB.SaveChanges();
+                                }
+
+
+                            }
+
+                        }
+                    }
+
+                    TempData["jgrowl"] = "資料匯入成功！";
+
+                }
+                catch
+                {
+                    TempData["jgrowl"] = "資料匯入失敗-格式錯誤";
+                }
+
+            }
+            else
+            {
+                TempData["jgrowl"] = "資料匯入失敗--請選擇Execl檔案";
+            }
+
+
+            return RedirectToAction("RealM", "NwMember");
+        }
+        #endregion
+
+    }
+}

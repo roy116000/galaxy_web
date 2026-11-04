@@ -1,0 +1,75 @@
+﻿@model h365_web.Models.sys_admin_data
+@{
+    //string id = ViewContext.RouteData.Values["id"].ToString();
+    string controller = ViewContext.RouteData.Values["controller"].ToString();
+    string action = ViewContext.RouteData.Values["action"].ToString();
+}
+<div class="maincontent">
+    <div class="contentinner">
+
+        @using (Html.BeginForm(action + "Save", controller, FormMethod.Post, new { @class = "stdform", @id = "form1" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <div class="widgetcontent">
+                <h4 class="widgettitle">基本資料</h4>
+
+                <div class="control-group">
+                    @Html.LabelFor(model => model.uid, new { @class = "control-label" })
+                    <div class="field" style="padding:5px 5px;">
+                        @NW.admin(User.Identity.Name).uid
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="pwd">原始密碼</label>
+                    <div class="field">
+                        <input type="password" id="pwd" name="pwd" class="input-xlarge" value="">
+                    </div>
+                </div>
+
+
+                <div class="control-group">
+                    <label class="control-label" for="pwd_c">新密碼</label>
+                    <div class="field">
+                        <input type="password" id="pwd_c" name="pwd_c" class="input-xlarge" value="">
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    <label class="control-label" for="pwd_x">確認新密碼</label>
+                    <div class="field">
+                        <input type="password" id="pwd_x" name="pwd_x" class="input-xlarge" value="">
+                    </div>
+                </div>
+
+
+                <div class="control-group">
+                    <div class="stdformbutton">
+                        <button class="btn btn-primary">儲存</button>
+                        <button type="reset" class="btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        // With Form Validation
+        $("#form1").validate({
+            rules: {
+                pwd: "required",
+                pwd_c: { equalTo: "#pwd_x", required: true }
+            },
+            messages: {
+                pwd: "登入密碼，必需填寫",
+                pwd_c: "新密碼與確認新密碼，必需相同"
+            },
+            highlight: function (label) {
+                jQuery(label).closest('.control-group').addClass('error');
+            }
+        });
+
+    })
+</script>
